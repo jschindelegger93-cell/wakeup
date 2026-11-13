@@ -1,5 +1,6 @@
+# dist/ wird mit "npm run build" erzeugt und ist im Repo eingecheckt. Netlify liefert nur aus.
 [build]
-  publish = "."
+  publish = "dist"
 
 [[headers]]
   for = "/assets/*"

@@ -1,0 +1,6 @@
+{
+  "name": "wakeup-design",
+  "private": true,
+  "scripts": { "build": "node build/build.js" },
+  "devDependencies": { "jsdom": "^24.0.0" }
+}

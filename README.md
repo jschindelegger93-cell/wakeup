@@ -1,12 +1,12 @@
-# Wake Up Espresso – Design-Entwurf
+# Wake Up Espressomaschinen – Vorschau des neuen Shops
 
-Klickdummy für ein neues Shop-Design von wakeup-espresso.com. Statisches HTML, CSS und Vanilla-JS, kein Build-Schritt.
+Statische Seite mit denselben Adressen wie Shopify (`/products/…`, `/collections/…`, `/pages/…`, `/blogs/ratgeber/…`).
 
-- `index.html` – Grundgerüst (Header, Warenkorb, Footer)
-- `assets/js/data.js` – Produkte, Preise, Röstprofile aus dem Shopify-Shop (Stand 13.11.2026)
-- `assets/js/app.js` – Seiten: Start, Kaffee, Produkt, Maschinen, 5+1 Karton, Kaffee-Finder
-- `assets/css/styles.css` – Design
+- `data/shop/` – Abzug aus dem Shopify-Shop (Produkte, Seiten, Blog)
+- `build/build.js` – erzeugt `dist/`: Produktdaten, vorgerenderte Seiten, Meta-Angaben, JSON-LD, Sitemap
+- `src/` – Vorlage, Styles, Inhalte (`content.js`) und Shop-Logik (`app.js`)
+- `dist/` – fertige Seite, wird von Netlify ausgeliefert (kein Build auf Netlify nötig)
 
-"Zur Kassa" übergibt den Warenkorb an den echten Shop. Der 5+1-Abzug im Warenkorb ist eine Vorschau (günstigstes Kilo gratis).
+Bauen: `npm install && npm run build`
 
-Vor einem Go-live: `noindex` in `index.html`, `robots.txt` und `netlify.toml` entfernen.
+Die Vorschau steht auf noindex. Für eine indexierbare Version: `GO_LIVE=1 SITE_URL=https://… npm run build` und den Header `X-Robots-Tag` in `netlify.toml` entfernen.
