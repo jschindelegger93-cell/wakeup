@@ -197,23 +197,28 @@
   /* ---------- Kaffee-Übersicht ---------- */
   var filt = { vendor: '', taste: '', sort: 'top' };
   var TASTES = { kraeftig: ['Kräftig', function (c) { return c.intensity >= 7; }], ausgewogen: ['Ausgewogen', function (c) { return c.intensity >= 4 && c.intensity <= 6; }], fein: ['Fein und mild', function (c) { return c.intensity <= 3; }] };
+  var FORMATS = ['1 kg Bohnen', 'Kaffee 500 g', 'Kaffee 250 g', 'Moka gemahlen', 'Espresso gemahlen', 'E.S.E. Pads', 'Probierpakete'];
+  function formatOf(p) { return p.kind === 'kaffee' ? '1 kg Bohnen' : p.kind === 'paket' ? 'Probierpakete' : p.type; }
+  function allCoffee() { return WU.all.filter(function (p) { return FORMATS.indexOf(formatOf(p)) >= 0; }); }
   function coffeeList() {
-    var list = WU.coffees.filter(function (c) { return (!filt.vendor || c.vendor === filt.vendor) && (!filt.taste || TASTES[filt.taste][1](c)); });
+    var list = allCoffee().filter(function (c) {
+      return (!filt.format || formatOf(c) === filt.format) && (!filt.vendor || c.vendor === filt.vendor) && (!filt.taste || (c.kind === 'kaffee' && TASTES[filt.taste][1](c)));
+    });
     if (filt.sort === 'asc') list.sort(function (a, b) { return a.price - b.price; });
     if (filt.sort === 'desc') list.sort(function (a, b) { return b.price - a.price; });
-    if (filt.sort === 'int') list.sort(function (a, b) { return b.intensity - a.intensity; });
+    if (filt.sort === 'int') list.sort(function (a, b) { return (b.intensity || 0) - (a.intensity || 0); });
     return list;
   }
   function kaffee() {
-    var vendors = []; WU.coffees.forEach(function (c) { if (vendors.indexOf(c.vendor) < 0) vendors.push(c.vendor); });
+    var vendors = []; allCoffee().forEach(function (c) { if (vendors.indexOf(c.vendor) < 0) vendors.push(c.vendor); });
     var list = coffeeList();
     var tools = '<button class="tool' + (!filt.vendor ? ' on' : '') + '" data-act="f-vendor" data-v="">Alle Röstereien</button>' +
       vendors.map(function (v) { return '<button class="tool' + (filt.vendor === v ? ' on' : '') + '" data-act="f-vendor" data-v="' + esc(v) + '">' + esc(v) + '</button>'; }).join('');
     var tastes = Object.keys(TASTES).map(function (k) { return '<button class="tool' + (filt.taste === k ? ' on' : '') + '" data-act="f-taste" data-v="' + k + '">' + TASTES[k][0] + '</button>'; }).join('') +
       '<select class="tool" data-act="f-sort" aria-label="Sortieren"><option value="top"' + (filt.sort === 'top' ? ' selected' : '') + '>Empfohlen</option><option value="asc"' + (filt.sort === 'asc' ? ' selected' : '') + '>Preis aufsteigend</option><option value="desc"' + (filt.sort === 'desc' ? ' selected' : '') + '>Preis absteigend</option><option value="int"' + (filt.sort === 'int' ? ' selected' : '') + '>Kräftigste zuerst</option></select>';
-    return head('Kaffee', 'Espresso-Bohnen aus Italien', 'Dunkel geröstet und säurearm. Jede Röstung gibt es im 1-kg-Beutel und im Karton mit 5+1 Kilo.') +
-      '<div class="wrap" style="padding-bottom:64px"><div class="tools">' + tools + '</div><div class="tools">' + tastes + '</div>' +
-      '<p class="count">' + list.length + ' von ' + WU.coffees.length + ' Kaffees</p>' +
+    return head('Kaffee', 'Kaffee aus Italien', 'Dunkel geröstet und säurearm. Ganze Bohnen in 1 kg, 500 g und 250 g, gemahlen für Siebträger und Moka, als Pads und im Probierpaket.') +
+      '<div class="wrap" style="padding-bottom:64px"><div class="tools"><button class="tool' + (!filt.format ? ' on' : '') + '" data-act="f-format" data-v="">Alle Formate</button>' + FORMATS.map(function (f) { return '<button class="tool' + (filt.format === f ? ' on' : '') + '" data-act="f-format" data-v="' + f + '">' + f + '</button>'; }).join('') + '</div><div class="tools">' + tools + '</div><div class="tools">' + tastes + '</div>' +
+      '<p class="count">' + list.length + ' von ' + allCoffee().length + ' Kaffees</p>' +
       (list.length ? '<div class="grid">' + list.map(card).join('') + '</div>' : '<div class="empty">Zu dieser Auswahl gibt es keinen Kaffee.<br><br><button class="btn sm" data-act="f-reset">Filter zurücksetzen</button></div>') +
       '<p style="margin-top:32px"><a class="btn ghost" href="#/sortiment">500 g, 250 g, gemahlen, Pads und Zubehör ansehen</a></p></div>';
   }
@@ -323,8 +328,7 @@
       '<p class="dispatch">' + (p.kind === 'maschine' || p.kind === 'set' ? 'Geprüft in unserer Werkstatt, geliefert per Spedition' : 'Bis 13 Uhr bestellt, meist noch heute verschickt') + '</p>' +
       (isC ? '<button class="btn ghost block" style="margin-top:10px" data-act="to-builder" data-h="' + p.handle + '">In meinen 5+1 Karton legen</button>' : '') +
       '<ul class="facts">' + fact('truck', 'Lieferung in 1–3 Werktagen in Österreich') + (isC ? fact('box', 'Im 6-kg-Karton zahlst du nur 5 kg') : '') + fact('card', 'Sicher zahlen mit PayPal, Klarna, Karte, Apple Pay oder eps') + '</ul>' +
-      profile + '<div class="pdp-text rich" id="full"><p>' + esc(p.text) + '</p></div>' + service +
-      '<p style="margin-top:18px"><a class="link" href="' + WU.SHOP + '/products/' + p.handle + '" rel="noopener">Vollständige Beschreibung im Shop</a></p>' +
+      profile + '<div class="pdp-text rich" id="full">' + (p.text ? '<h2>Beschreibung</h2><p>' + esc(p.text) + '</p>' : '') + '</div>' + service +
       '</div></div>' + similar(p) +
       '<div class="sticky-buy"><span class="price">' + eur(v.price) + '</span><button class="btn" data-act="add-pdp">' + label + '</button></div>';
   }
@@ -600,7 +604,8 @@
     else if (act === 'f-vendor') { filt.vendor = d.v; route(); track('filter_use', 'Rösterei ' + (d.v || 'alle')); }
     else if (act === 'f-taste') { filt.taste = filt.taste === d.v ? '' : d.v; route(); track('filter_use', 'Geschmack ' + d.v); }
     else if (act === 'f-type') { filt.type = d.v; route(); }
-    else if (act === 'f-reset') { filt.vendor = ''; filt.taste = ''; route(); }
+    else if (act === 'f-format') { filt.format = d.v; route(); }
+    else if (act === 'f-reset') { filt.vendor = ''; filt.taste = ''; filt.format = ''; route(); }
     else if (act === 'b-vendor') { filt.bv = d.v; route(); }
     else if (act === 'pick') { if (picks.length < 6) { picks.push(WU.byHandle(d.h)); savePicks(); refreshBuilder(); track('bundle_slot_add', d.h); } }
     else if (act === 'unpick') { picks.splice(Number(d.i), 1); savePicks(); refreshBuilder(); }
