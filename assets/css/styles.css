@@ -373,3 +373,34 @@ body.cart-open{overflow:hidden}
 .cat img{object-position:center 30%;height:78%}
 .cat::after{background:linear-gradient(0deg,#fff 0,#fff 24%,rgba(255,255,255,0) 46%)}
 .cat:first-child img{object-position:center 88%}
+
+/* ===== Runde 4: Icons, Italien-Karte, Sortiment ===== */
+.ico{flex:none;width:20px;height:20px}
+.facts li.ic{align-items:flex-start;gap:10px}
+.facts li.ic::before,.hero-facts li.ic::before{display:none}
+.facts li.ic .ico{color:var(--rosso);margin-top:2px}
+.service .facts li.ic .ico{color:#fff}
+.hero-facts li.ic{gap:8px}
+.trust li{display:flex;gap:12px;align-items:flex-start}
+.trust li>.ico{width:40px;height:40px;padding:9px;border-radius:50%;background:var(--latte);color:var(--rosso)}
+.chip .ico{width:14px;height:14px;margin-right:6px;color:var(--rosso)}
+.italy{display:grid;gap:24px;align-items:center}
+@media (min-width:900px){.italy{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px}}
+.italy-map{max-width:440px;margin:0 auto;width:100%}
+.italy-map svg{display:block;width:100%;height:auto;overflow:visible}
+.land{fill:#fff;stroke:var(--espresso);stroke-width:2;stroke-linejoin:round}
+.pin{cursor:pointer;outline:none}
+.pin .dot{fill:var(--espresso);stroke:#fff;stroke-width:2;transition:fill .15s}
+.pin .halo{fill:var(--rosso);opacity:0;transition:opacity .15s}
+.pin text{font:700 13px var(--text);fill:var(--ink);paint-order:stroke;stroke:var(--latte);stroke-width:4px}
+.pin.on .dot,.pin:focus-visible .dot{fill:var(--rosso)}
+.pin.on .halo,.pin:focus-visible .halo{opacity:.25}
+.pin.on text{fill:var(--rosso)}
+@media (hover:hover){.pin:hover .dot{fill:var(--rosso)}.pin:hover .halo{opacity:.18}}
+.italy-panel{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:clamp(20px,3vw,32px);border-radius:24px;background:#fff;border:1px solid var(--line)}
+.italy-panel h3{font-size:clamp(1.6rem,1.2rem + 1.6vw,2.4rem)}
+.italy-panel .mood{font-style:italic;color:var(--rosso);font-weight:600}
+.map-beans{display:flex;gap:10px;margin:6px 0}
+.map-beans a{width:84px;height:84px;border-radius:14px;background:var(--latte);padding:6px}
+.map-beans img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
+.opt[disabled]{opacity:.5;cursor:not-allowed}

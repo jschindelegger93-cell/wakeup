@@ -29,7 +29,11 @@
       if (c.id === id) return { p: c, label: '1 kg Bohnen', price: c.price, kg: true };
       if (c.kartonId === id) return { p: c, label: 'Karton (5+1 kg gratis)', price: c.price * 5 };
     }
-    for (var j = 0; j < WU.others.length; j++) if (WU.others[j].id === id) return { p: WU.others[j], label: '', price: WU.others[j].price };
+    for (var j = 0; j < WU.others.length; j++) {
+      var o = WU.others[j];
+      if (o.variants) { for (var k = 0; k < o.variants.length; k++) if (o.variants[k].id === id) return { p: o, label: o.variants.length > 1 ? o.variants[k].title : '', price: o.variants[k].price }; }
+      else if (o.id === id) return { p: o, label: '', price: o.price };
+    }
     return null;
   }
   function addToCart(id, qty, silent) {
@@ -90,6 +94,22 @@
   function openCart() { document.body.classList.add('cart-open'); track('cart_open'); }
   function closeCart() { document.body.classList.remove('cart-open'); }
 
+  /* ---------- Icons ---------- */
+  var ICONS = {
+    truck: '<path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+    clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
+    tool: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+    chat: '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+    cup: '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/>',
+    card: '<rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/>',
+    box: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    pin: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'
+  };
+  function ico(n) { return '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[n] + '</svg>'; }
+  function fact(n, t) { return '<li class="ic">' + ico(n) + '<span>' + t + '</span></li>'; }
+
   /* ---------- Bausteine ---------- */
   function beans(n) { var h = ''; for (var i = 1; i <= 5; i++) h += '<i' + (i <= n ? ' class="on"' : '') + '></i>'; return '<span class="beans" aria-label="Röstung ' + n + ' von 5">' + h + '</span>'; }
   function href(p) { return '#/p/' + p.handle; }
@@ -126,26 +146,24 @@
       '<p class="hero-kicker">Dal 2010 a Vienna</p><h1>Espresso wie im Italien-Urlaub.</h1>' +
       '<p class="hero-sub">Der Caffè an der Bar in Neapel, der Cappuccino am Hafen in Kalabrien: genau diese Röstungen holen wir direkt aus Italien nach Wien. Such dir fünf Kilo aus, das sechste schenken wir dir.</p>' +
       '<div class="hero-cta"><a class="btn light" href="#/5plus1" data-track="hero_5plus1">Karton zusammenstellen</a><a class="btn line-light" href="#/kaffee" data-track="hero_kaffee">Alle Kaffees ansehen</a></div>' +
-      '<ul class="hero-facts"><li>Gratis Versand ab € 89</li><li>Lieferung in 1–3 Werktagen</li><li>Wiener Familienbetrieb seit 2010</li></ul></div>' +
+      '<ul class="hero-facts">' + fact('truck', 'Gratis Versand ab € 89') + fact('clock', 'Lieferung in 1–3 Werktagen') + fact('home', 'Wiener Familienbetrieb seit 2010') + '</ul></div>' +
       '<a class="karton" href="#/5plus1" aria-label="Zum 5+1 Konfigurator" style="text-decoration:none;color:#fff"><div class="karton-top"><span>Dein Karton</span><em>5 bezahlen, 6 bekommen</em></div>' + slotsHtml(top, false) + '</a>' +
       '</div></section>' +
 
       '<section class="trust"><div class="wrap"><ul>' +
-      '<li><b>Gratis Versand ab € 89</b><span>in Österreich, 1–3 Werktage</span></li>' +
-      '<li><b>Eigene Werkstatt in Wien</b><span>Jede Maschine vor Versand geprüft</span></li>' +
-      '<li><b>Persönliche Einschulung</b><span>Im Store, per Telefon oder Videocall</span></li>' +
-      '<li><b>Frisch aus Italien</b><span>Mehrmals im Jahr nachbestellt</span></li></ul></div></section>' +
+      '<li>' + ico('truck') + '<div><b>Gratis Versand ab € 89</b><span>in Österreich, 1–3 Werktage</span></div></li>' +
+      '<li>' + ico('tool') + '<div><b>Eigene Werkstatt in Wien</b><span>Jede Maschine vor Versand geprüft</span></div></li>' +
+      '<li>' + ico('chat') + '<div><b>Persönliche Einschulung</b><span>Im Store, per Telefon oder Videocall</span></div></li>' +
+      '<li>' + ico('cup') + '<div><b>Frisch aus Italien</b><span>Mehrmals im Jahr nachbestellt</span></div></li></ul></div></section>' +
 
-      '<section class="sec italia"><div class="wrap"><div class="sec-head"><div><h2>Wohin soll die Reise gehen?</h2><p>Jede Rösterei schmeckt nach ihrer Gegend. Such dir aus, wo dein Espresso heute herkommt.</p></div><a class="link" href="#/roestereien">Alle Röstereien</a></div><div class="regions">' + regions() + '</div></div></section>' +
+      '<section class="sec"><div class="wrap"><div class="sec-head"><div><h2>Die Bestseller</h2><p>Was unsere Kundinnen und Kunden am häufigsten nachbestellen.</p></div><a class="link" href="#/kaffee">Alle ' + WU.coffees.length + ' Kaffees</a></div>' +
+      '<div class="rail">' + WU.coffees.slice(0, 8).map(card).join('') + '</div></div></section>' +
 
       '<section class="sec" style="padding-top:0"><div class="wrap"><div class="cats">' +
       '<a class="cat dark" href="#/kaffee"><img src="' + WU.IMG('Kaffee.png') + '" alt=""><h3>Kaffee</h3><span>' + WU.coffees.length + ' Röstungen in der 1-kg-Packung</span></a>' +
       '<a class="cat" href="#/maschinen"><img src="' + WU.IMG('Kaffeemaschinen.png') + '" alt=""><h3>Espressomaschinen</h3><span>Einkreiser bis Hebelmaschine</span></a>' +
       '<a class="cat" href="#/maschinen"><img src="' + WU.IMG('Zubehoer.png') + '" alt=""><h3>Mühlen &amp; Sets</h3><span>Im Set 7 % sparen</span></a>' +
       '</div></div></section>' +
-
-      '<section class="sec" style="padding-top:0"><div class="wrap"><div class="sec-head"><div><h2>Die Bestseller</h2><p>Was unsere Kundinnen und Kunden am häufigsten nachbestellen.</p></div><a class="link" href="#/kaffee">Alle ' + WU.coffees.length + ' Kaffees</a></div>' +
-      '<div class="rail">' + WU.coffees.slice(0, 8).map(card).join('') + '</div></div></section>' +
 
       '<section class="sec band"><div class="wrap split"><div><h2>So funktioniert 5+1</h2><ol class="steps">' +
       '<li><div><b>Fünf Kilo frei wählen</b><span>Alle Kaffees mit 1-kg-Packung, auch gemischt.</span></div></li>' +
@@ -159,8 +177,10 @@
       '<section class="sec" style="padding-top:0"><div class="wrap"><div class="sec-head"><div><h2>Maschinen, die bleiben</h2><p>Profi-Technik für zu Hause. Geprüft in unserer Werkstatt, mit Einschulung geliefert.</p></div><a class="link" href="#/maschinen">Alle Maschinen und Mühlen</a></div>' +
       '<div class="rail">' + machines.map(card).join('') + '</div></div></section>' +
 
-      '<section class="sec band"><div class="wrap split"><div><h2>Ein Familienbetrieb, der selbst schraubt</h2><p style="margin-top:12px;color:#3d2e25">Seit 2010 dreht sich bei uns in Wien alles um Espresso. Gründer Mario Sciurti ist selbst Techniker. Deshalb verkaufen wir nur Maschinen, die wir auch reparieren können und wollen.</p>' +
-      '<ul class="facts"><li>Maschinenservice für alle bei uns gekauften Geräte</li><li>Mühle meist schon voreingestellt</li><li>Offizieller Vertreter von La San Marco</li></ul></div>' +
+      '<section class="sec italia"><div class="wrap"><div class="sec-head"><div><h2>Wohin soll die Reise gehen?</h2><p>Jede Rösterei schmeckt nach ihrer Gegend. Such dir aus, wo dein Espresso heute herkommt.</p></div><a class="link" href="#/roestereien">Alle Röstereien</a></div>' + italyMap() + '</div></section>' +
+
+      '<section class="sec"><div class="wrap split"><div><h2>Ein Familienbetrieb, der selbst schraubt</h2><p style="margin-top:12px;color:#3d2e25">Seit 2010 dreht sich bei uns in Wien alles um Espresso. Gründer Mario Sciurti ist selbst Techniker. Deshalb verkaufen wir nur Maschinen, die wir auch reparieren können und wollen.</p>' +
+      '<ul class="facts">' + fact('tool', 'Maschinenservice für alle bei uns gekauften Geräte') + fact('cup', 'Mühle meist schon voreingestellt') + fact('check', 'Offizieller Vertreter von La San Marco') + '</ul></div>' +
       '<div><h2>Häufige Fragen</h2><div style="margin-top:12px">' +
       faq('Ab wann ist der Versand gratis?', 'Ab € 89 Warenwert in Österreich und ab € 150 nach Deutschland.') +
       faq('Wie schnell wird geliefert?', 'Kaffee und Zubehör, die du bis 13 Uhr bestellst, gehen meist am selben Werktag raus. Die Lieferung dauert in der Regel 1–3 Werktage.') +
@@ -194,7 +214,40 @@
     return head('Kaffee', 'Espresso-Bohnen aus Italien', 'Dunkel geröstet und säurearm. Jede Röstung gibt es im 1-kg-Beutel und im Karton mit 5+1 Kilo.') +
       '<div class="wrap" style="padding-bottom:64px"><div class="tools">' + tools + '</div><div class="tools">' + tastes + '</div>' +
       '<p class="count">' + list.length + ' von ' + WU.coffees.length + ' Kaffees</p>' +
-      (list.length ? '<div class="grid">' + list.map(card).join('') + '</div>' : '<div class="empty">Zu dieser Auswahl gibt es keinen Kaffee.<br><br><button class="btn sm" data-act="f-reset">Filter zurücksetzen</button></div>') + '</div>';
+      (list.length ? '<div class="grid">' + list.map(card).join('') + '</div>' : '<div class="empty">Zu dieser Auswahl gibt es keinen Kaffee.<br><br><button class="btn sm" data-act="f-reset">Filter zurücksetzen</button></div>') +
+      '<p style="margin-top:32px"><a class="btn ghost" href="#/sortiment">500 g, 250 g, gemahlen, Pads und Zubehör ansehen</a></p></div>';
+  }
+
+  /* ---------- Gesamtes Sortiment (live aus dem Shop) ---------- */
+  var KIND_LABEL = { kaffee: 'Kaffee 1 kg', paket: 'Probierpakete', maschine: 'Espressomaschinen', muehle: 'Mühlen', set: 'Maschinensets' };
+  function typeOf(p) { return p.live ? (p.type || 'Weiteres') : KIND_LABEL[p.kind]; }
+  function mergeCatalog(list) {
+    var added = 0;
+    list.forEach(function (x) {
+      if (WU.byHandle(x.h) || !x.vs || !x.vs.length) return;
+      var vs = x.vs.map(function (v) { return { id: String(v[0]), title: v[1], price: Number(v[2]), compare: Number(v[3]) || 0, available: !!v[4] }; });
+      var v0 = vs.filter(function (v) { return v.available; })[0] || vs[0];
+      WU.others.push({ kind: 'live', live: true, type: x.ty || 'Weiteres', handle: x.h, title: x.t, vendor: x.v, img: x.img || WU.LOGO, id: v0.id, price: v0.price, compare: v0.compare > v0.price ? v0.compare : 0, preorder: false, text: '', variants: vs });
+      added++;
+    });
+    WU.all = WU.coffees.concat(WU.others); WU.catalog = 'ok';
+    if (added) route();
+  }
+  function loadCatalog() {
+    if (typeof fetch !== 'function') return;
+    WU.catalog = 'laden';
+    fetch('/.netlify/functions/shop?catalog=1').then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (x) { if (x && x.products) mergeCatalog(x.products); else { WU.catalog = 'fehler'; if (location.hash === '#/sortiment') route(); } })
+      .catch(function () { WU.catalog = 'fehler'; if (location.hash === '#/sortiment') route(); });
+  }
+  function sortiment() {
+    var types = []; WU.all.forEach(function (p) { var t = typeOf(p); if (types.indexOf(t) < 0) types.push(t); });
+    var list = WU.all.filter(function (p) { return !filt.type || typeOf(p) === filt.type; });
+    var note = WU.catalog === 'ok' ? '' : WU.catalog === 'fehler' ? '<p class="hint">Das vollständige Sortiment konnte gerade nicht aus dem Shop geladen werden. Du siehst die Auswahl aus der Vorschau.</p>' : '<p class="count">Das vollständige Sortiment wird aus dem Shop geladen …</p>';
+    return head('Sortiment', 'Das ganze Sortiment', 'Alle Produkte aus dem Shop, inklusive 250-g- und 500-g-Packungen, gemahlenem Kaffee, Pads und Zubehör.') +
+      '<div class="wrap" style="padding-bottom:64px">' + note + '<div class="tools"><button class="tool' + (!filt.type ? ' on' : '') + '" data-act="f-type" data-v="">Alles</button>' +
+      types.map(function (t) { return '<button class="tool' + (filt.type === t ? ' on' : '') + '" data-act="f-type" data-v="' + esc(t) + '">' + esc(t) + '</button>'; }).join('') + '</div>' +
+      '<p class="count">' + list.length + ' Produkte</p><div class="grid">' + list.map(card).join('') + '</div></div>';
   }
 
   /* ---------- Maschinen ---------- */
@@ -252,11 +305,11 @@
     var v = variant(pdp.id) || variant(p.id);
     var opts = isC ? '<div class="opts">' +
       '<button class="opt' + (pdp.id === p.id ? ' on' : '') + '" data-act="opt" data-id="' + p.id + '"><div><b>1 kg Bohnen</b><span>' + eur(p.price) + ' pro kg</span></div><strong>' + eur(p.price) + '</strong></button>' +
-      '<button class="opt' + (pdp.id === p.kartonId ? ' on' : '') + '" data-act="opt" data-id="' + p.kartonId + '"><div><b>Karton mit 6 kg</b><span>5+1 kg gratis, ' + eur(p.price * 5 / 6) + ' pro kg</span></div><strong>' + eur(p.price * 5) + '</strong></button></div>' : '';
+      '<button class="opt' + (pdp.id === p.kartonId ? ' on' : '') + '" data-act="opt" data-id="' + p.kartonId + '"><div><b>Karton mit 6 kg</b><span>5+1 kg gratis, ' + eur(p.price * 5 / 6) + ' pro kg</span></div><strong>' + eur(p.price * 5) + '</strong></button></div>' : (p.variants && p.variants.length > 1 ? '<div class="opts">' + p.variants.map(function (x) { return '<button class="opt' + (pdp.id === x.id ? ' on' : '') + '" data-act="opt" data-id="' + x.id + '"' + (x.available ? '' : ' disabled') + '><div><b>' + esc(x.title) + '</b>' + (x.available ? '' : '<span>Ausverkauft</span>') + '</div><strong>' + eur(x.price) + '</strong></button>'; }).join('') + '</div>' : '');
     var profile = isC ? '<div class="profile"><div><div class="blend-l"><span>' + p.arabica + ' % Arabica</span><span>' + (100 - p.arabica) + ' % Robusta</span></div><div class="blend"><b style="width:' + p.arabica + '%"></b></div></div>' +
       meter('Röstung', p.roast, 5) + meter('Intensität', p.intensity, 10) + meter('Körper', p.body, 5) + meter('Bitterkeit', p.bitter, 5) + meter('Säure', p.acid, 5) +
       '<div class="chips">' + p.aromas.map(function (a) { return '<span class="chip">' + esc(a.trim()) + '</span>'; }).join('') + '</div></div>' : '';
-    var service = (p.kind === 'maschine' || p.kind === 'set') ? '<div class="service"><h3>Bei jeder Maschine dabei</h3><ul class="facts"><li>Vor dem Versand in unserer Werkstatt geprüft</li><li>Persönliche Einschulung per Telefon oder WhatsApp-Videocall</li><li>Maschinenservice bei uns in Wien</li><li>Lieferung sicher auf Palette per Spedition</li></ul></div>' : '';
+    var service = (p.kind === 'maschine' || p.kind === 'set') ? '<div class="service"><h3>Bei jeder Maschine dabei</h3><ul class="facts">' + fact('check', 'Vor dem Versand in unserer Werkstatt geprüft') + fact('chat', 'Persönliche Einschulung per Telefon oder WhatsApp-Videocall') + fact('tool', 'Maschinenservice bei uns in Wien') + fact('truck', 'Lieferung sicher auf Palette per Spedition') + '</ul></div>' : '';
     var label = p.preorder ? 'Vorbestellen' : 'In den Warenkorb';
     var priceHtml = (p.compare ? '<del>' + eur(p.compare) + '</del>' : '') + eur(v.price);
     return '<div class="wrap page-head"><p class="crumbs"><a href="#/">Start</a> / <a href="#/' + (isC || p.kind === 'paket' ? 'kaffee' : 'maschinen') + '">' + (isC || p.kind === 'paket' ? 'Kaffee' : 'Maschinen & Mühlen') + '</a></p></div>' +
@@ -269,7 +322,7 @@
       '<button class="btn" data-act="add-pdp">' + label + '</button></div>' +
       '<p class="dispatch">' + (p.kind === 'maschine' || p.kind === 'set' ? 'Geprüft in unserer Werkstatt, geliefert per Spedition' : 'Bis 13 Uhr bestellt, meist noch heute verschickt') + '</p>' +
       (isC ? '<button class="btn ghost block" style="margin-top:10px" data-act="to-builder" data-h="' + p.handle + '">In meinen 5+1 Karton legen</button>' : '') +
-      '<ul class="facts"><li>Lieferung in 1–3 Werktagen in Österreich</li>' + (isC ? '<li>Im 6-kg-Karton zahlst du nur 5 kg</li>' : '') + '<li>Sicher zahlen mit PayPal, Klarna, Karte, Apple Pay oder eps</li></ul>' +
+      '<ul class="facts">' + fact('truck', 'Lieferung in 1–3 Werktagen in Österreich') + (isC ? fact('box', 'Im 6-kg-Karton zahlst du nur 5 kg') : '') + fact('card', 'Sicher zahlen mit PayPal, Klarna, Karte, Apple Pay oder eps') + '</ul>' +
       profile + '<div class="pdp-text rich" id="full"><p>' + esc(p.text) + '</p></div>' + service +
       '<p style="margin-top:18px"><a class="link" href="' + WU.SHOP + '/products/' + p.handle + '" rel="noopener">Vollständige Beschreibung im Shop</a></p>' +
       '</div></div>' + similar(p) +
@@ -357,6 +410,24 @@
       var r = WU.REGIONS[v], n = WU.coffees.filter(function (c) { return c.vendor === v; }).length;
       return '<a class="region" href="#/kaffee" data-act="region" data-v="' + esc(v) + '"><span>' + esc(r.region) + '</span><b>' + esc(v) + '</b><p>' + esc(r.mood) + '</p><em>' + n + ' Röstungen ansehen</em></a>';
     }).join('');
+  }
+  var MAP = { 'La Messicana': [100, 90], 'Trombetta': [148, 203], 'Kremoso': [192, 239], 'Escaffe': [244, 256], 'Guglielmo': [251, 316], 'Ionia': [216, 361] };
+  var mapSel = 'Guglielmo';
+  function mapPanel() {
+    var r = WU.REGIONS[mapSel], n = WU.coffees.filter(function (c) { return c.vendor === mapSel; });
+    return '<span class="chip">' + ico('pin') + esc(r.place) + '</span><h3>' + esc(mapSel) + '</h3><p class="mood">' + esc(r.mood) + '</p><p>' + esc(r.line) + '</p>' +
+      '<div class="map-beans">' + n.slice(0, 3).map(function (c) { return '<a href="' + href(c) + '" title="' + esc(c.title) + '"><img src="' + esc(c.img) + '" alt="' + esc(c.title) + '" loading="lazy" width="120" height="120"></a>'; }).join('') + '</div>' +
+      '<a class="btn" href="#/kaffee" data-act="region" data-v="' + esc(mapSel) + '">' + n.length + ' Röstungen aus ' + esc(r.region) + '</a>';
+  }
+  function italyMap() {
+    var pins = Object.keys(MAP).map(function (v) {
+      var c = MAP[v], r = WU.REGIONS[v], right = c[0] < 170;
+      return '<g class="pin' + (v === mapSel ? ' on' : '') + '" data-act="map" data-v="' + esc(v) + '" tabindex="0" role="button" aria-label="' + esc(r.region + ': ' + v) + '"><circle class="halo" cx="' + c[0] + '" cy="' + c[1] + '" r="15"/><circle class="dot" cx="' + c[0] + '" cy="' + c[1] + '" r="7"/><text x="' + (right ? c[0] - 14 : c[0] + 14) + '" y="' + (c[1] + 5) + '" text-anchor="' + (right ? 'end' : 'start') + '">' + esc(r.region) + '</text></g>';
+    }).join('');
+    return '<div class="italy"><div class="italy-map"><svg viewBox="0 0 340 400" role="group" aria-label="Italien-Karte mit unseren Röstereien">' +
+      '<polygon class="land" points="40,70 60,40 110,25 160,30 200,45 215,70 190,85 180,110 205,150 225,185 245,205 262,200 258,214 270,235 300,255 318,275 305,285 285,268 262,262 255,285 270,305 262,330 245,350 232,340 240,310 228,285 210,262 190,245 165,222 140,198 118,170 100,140 92,115 70,105 45,112 35,95"/>' +
+      '<polygon class="land" points="160,355 200,345 232,352 225,375 195,385 165,372"/><polygon class="land" points="70,225 92,220 98,255 88,285 70,280 64,250"/>' + pins + '</svg></div>' +
+      '<div class="italy-panel" id="map-panel" aria-live="polite">' + mapPanel() + '</div></div>';
   }
   function roestereien() {
     return head('Röstereien', 'Sechs Röstereien, einmal quer durch Italien', 'Wir importieren direkt von Familienbetrieben, die wir selbst kennen und trinken.') +
@@ -488,6 +559,7 @@
     else if (view === '5plus1') { html = builder(); document.body.classList.add('has-builder'); }
     else if (view === 'finder') html = finder();
     else if (view === 'maschinen-finder') html = maschinenFinder();
+    else if (view === 'sortiment') html = sortiment();
     else if (view === 'faq') html = faqPage();
     else if (view === 'ratgeber') html = ratgeber(parts[1]);
     else if (view === 'roestereien') html = roestereien();
@@ -525,6 +597,7 @@
     else if (act === 'checkout') track('begin_checkout', totals().count + ' Artikel');
     else if (act === 'f-vendor') { filt.vendor = d.v; route(); track('filter_use', 'Rösterei ' + (d.v || 'alle')); }
     else if (act === 'f-taste') { filt.taste = filt.taste === d.v ? '' : d.v; route(); track('filter_use', 'Geschmack ' + d.v); }
+    else if (act === 'f-type') { filt.type = d.v; route(); }
     else if (act === 'f-reset') { filt.vendor = ''; filt.taste = ''; route(); }
     else if (act === 'b-vendor') { filt.bv = d.v; route(); }
     else if (act === 'pick') { if (picks.length < 6) { picks.push(WU.byHandle(d.h)); savePicks(); refreshBuilder(); track('bundle_slot_add', d.h); } }
@@ -541,13 +614,14 @@
     else if (act === 'region') { filt.vendor = d.v; filt.taste = ''; if (location.hash === '#/kaffee') { ev.preventDefault(); route(); window.scrollTo(0, 0); } }
     else if (act === 'm-answer') { mf.ans[mf.step] = d.v; mf.step++; route(); window.scrollTo(0, 0); }
     else if (act === 'm-reset') { mf = { step: 0, ans: [] }; route(); }
+    else if (act === 'map') { mapSel = d.v; var mp = document.getElementById('map-panel'); if (mp) mp.innerHTML = mapPanel(); document.querySelectorAll('.pin').forEach(function (g) { g.classList.toggle('on', g === el); }); track('map_select', d.v); }
     else if (act === 'thumb') { var im = document.getElementById('pdp-img'); if (im) im.src = d.src; document.querySelectorAll('.thumb').forEach(function (t) { t.classList.toggle('on', t === el); }); }
     else if (act === 'tlog') document.getElementById('tlog').classList.toggle('open');
   });
   document.addEventListener('change', function (ev) {
     if (ev.target.matches('[data-act="f-sort"]')) { filt.sort = ev.target.value; route(); }
   });
-  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeCart(); });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeCart(); if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.closest && ev.target.closest('.pin')) { ev.preventDefault(); ev.target.closest('.pin').dispatchEvent(new MouseEvent('click', { bubbles: true })); } });
 
-  renderCart(); route(); lastPath = location.hash;
+  renderCart(); route(); lastPath = location.hash; loadCatalog();
 })();
