@@ -238,7 +238,7 @@
       vendors.map(function (v) { return '<button class="tool' + (filt.vendor === v ? ' on' : '') + '" data-act="f-vendor" data-v="' + esc(v) + '">' + esc(v) + '</button>'; }).join('');
     var tastes = Object.keys(TASTES).map(function (k) { return '<button class="tool' + (filt.taste === k ? ' on' : '') + '" data-act="f-taste" data-v="' + k + '">' + TASTES[k][0] + '</button>'; }).join('') +
       '<select class="tool" data-act="f-sort" aria-label="Sortieren"><option value="top"' + (filt.sort === 'top' ? ' selected' : '') + '>Empfohlen</option><option value="asc"' + (filt.sort === 'asc' ? ' selected' : '') + '>Preis aufsteigend</option><option value="desc"' + (filt.sort === 'desc' ? ' selected' : '') + '>Preis absteigend</option><option value="int"' + (filt.sort === 'int' ? ' selected' : '') + '>Kräftigste zuerst</option></select>';
-    return head('Kaffee', 'Kaffee aus Italien', 'Dunkel geröstet und säurearm. Ganze Bohnen in 1 kg, 500 g und 250 g, gemahlen für Siebträger und Moka, als Pads und im Probierpaket.') +
+    return head('Kaffee', 'Italienische Kaffeebohnen und Espresso', 'Italienischer Kaffee direkt von sechs Röstereien: dunkel geröstet und säurearm. Ganze Bohnen in 1 kg, 500 g und 250 g, gemahlen für Siebträger und Moka, als Pads und im Probierpaket.') +
       '<div class="wrap" style="padding-bottom:64px"><div class="tools"><button class="tool' + (!filt.format ? ' on' : '') + '" data-act="f-format" data-v="">Alle Formate</button>' + FORMATS.map(function (f) { return '<button class="tool' + (filt.format === f ? ' on' : '') + '" data-act="f-format" data-v="' + f + '">' + f + '</button>'; }).join('') + '</div><div class="tools">' + tools + '</div><div class="tools">' + tastes + '</div>' +
       '<p class="count">' + list.length + ' von ' + allCoffee().length + ' Kaffees</p>' +
       (list.length ? '<div class="grid">' + list.map(card).join('') + '</div>' : '<div class="empty">Zu dieser Auswahl gibt es keinen Kaffee.<br><br><button class="btn sm" data-act="f-reset">Filter zurücksetzen</button></div>') +
@@ -271,7 +271,7 @@
     var types = []; WU.all.forEach(function (p) { var t = typeOf(p); if (types.indexOf(t) < 0) types.push(t); });
     var list = WU.all.filter(function (p) { return !filt.type || typeOf(p) === filt.type; });
     var note = WU.catalog === 'ok' || WU.staticCatalog ? '' : WU.catalog === 'fehler' ? '<p class="hint">Das vollständige Sortiment konnte gerade nicht aus dem Shop geladen werden. Du siehst die Auswahl aus der Vorschau.</p>' : '<p class="count">Das vollständige Sortiment wird aus dem Shop geladen …</p>';
-    return head('Sortiment', 'Das ganze Sortiment', 'Alle ' + WU.all.length + ' Produkte: Kaffee in 1 kg, 500 g und 250 g, gemahlen, Pads, Maschinen, Mühlen, Zubehör und Ersatzteile.') +
+    return head('Sortiment', 'Kaffee, Maschinen und Kaffeezubehör', 'Alle ' + WU.all.length + ' Produkte aus unserem Geschäft in Wien: italienische Kaffeebohnen, Siebträgermaschinen, Mühlen, Kaffeezubehör für Baristas, Reinigung und Ersatzteile.') +
       '<div class="wrap" style="padding-bottom:64px">' + note + '<div class="tools"><button class="tool' + (!filt.type ? ' on' : '') + '" data-act="f-type" data-v="">Alles</button>' +
       types.map(function (t) { return '<button class="tool' + (filt.type === t ? ' on' : '') + '" data-act="f-type" data-v="' + esc(t) + '">' + esc(t) + '</button>'; }).join('') + '</div>' +
       '<p class="count">' + list.length + ' Produkte</p><div class="grid">' + list.map(card).join('') + '</div></div>';
@@ -283,7 +283,7 @@
       var l = WU.others.filter(function (p) { return p.kind === kind; });
       return '<section style="padding:0 0 48px"><div class="sec-head"><div><h2>' + title + '</h2><p>' + text + '</p></div></div><div class="grid">' + l.map(card).join('') + '</div></section>';
     }
-    return head('Maschinen & Mühlen', 'Espressomaschinen und Mühlen', 'Bewährte Profi-Technik für zu Hause. Jede Maschine prüfen wir vor dem Versand in unserer Wiener Werkstatt.') +
+    return head('Maschinen & Mühlen', 'Siebträgermaschinen und Espressomaschinen', 'Kaffeemaschinen mit Siebträger für Barista-Espresso zu Hause, dazu die passende Mühle. Jede Espressomaschine prüfen wir vor dem Versand in unserer Wiener Werkstatt. Im Geschäft kannst du alle Maschinen ausprobieren.') +
       '<div class="wrap">' + group('maschine', 'Espressomaschinen', 'Vom kompakten Einkreiser bis zur Hebelmaschine.') +
       group('set', 'Maschine und Mühle im Set', 'Im Set sparst du 7 % beim Checkout.') +
       group('muehle', 'Kaffeemühlen', 'Die Maschine ist nur so gut wie die Mühle daneben.') + '<p style="padding-bottom:64px"><a class="btn ghost" href="#/maschinen-finder">Unsicher? Zum Maschinen-Finder</a></p></div>';
@@ -629,7 +629,7 @@
       var hr = a.getAttribute('href'), on = hr === '#/' + (view === 'home' ? '' : view) || hr === toPath('#/' + (view === 'home' ? '' : view));
       if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
-    var t = document.querySelector('#app h1'); document.title = (t ? t.textContent + ' | ' : '') + 'Wake Up Espressomaschinen';
+    var t = document.querySelector('#app h1'); if (!(first && app.hasAttribute('data-pre'))) document.title = (t ? t.textContent + ' | ' : '') + 'Wake Up Espressomaschinen';
     track('page_view', view + (parts[1] ? ':' + parts[1] : ''));
     ld(view, parts);
   }

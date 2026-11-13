@@ -130,6 +130,18 @@ const routes = ['/', '/collections/kaffee/', '/collections/maschinen/', '/collec
   .concat(Object.keys(probe.WU.PAGES).map(s => '/pages/' + s + '/'), probe.WU.GUIDES.map(g => '/blogs/ratgeber/' + g.slug + '/'), probe.WU.all.map(p => '/products/' + p.handle + '/'));
 const slugify = s => s.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const HOME = { title: 'Italienischer Espresso & Siebträgermaschinen | Wake Up Wien', desc: 'Espresso wie im Italien-Urlaub: säurearme Röstungen aus Süditalien, Siebträgermaschinen mit Einschulung und der 5+1 Karton. Gratis Versand ab € 89.' };
+// Titel und Beschreibungen nach Keyword-Planer (Österreich, Nov. 2025 bis Okt. 2026)
+const SEO = {
+  '/collections/maschinen/': ['Siebträgermaschinen & Espressomaschinen kaufen | Wake Up Wien', 'Siebträger-Kaffeemaschinen und Espressomaschinen von 969.coffee, Quick Mill, La Marzocco und La San Marco. In Wien testen, mit Einschulung und eigener Werkstatt.'],
+  '/collections/kaffee/': ['Italienische Kaffeebohnen & Espresso kaufen | Wake Up Wien', 'Italienischer Kaffee von Guglielmo, Kremoso, Ionia und Co.: säurearme Bohnen in 1 kg, 500 g und 250 g, gemahlen und als Pads. 5+1 Kilo gratis, Versand ab € 89 frei.'],
+  '/collections/alle/': ['Kaffeezubehör, Kaffee & Espressomaschinen | Wake Up Wien', 'Kaffeezubehör aus Wien: Tamper, Milchkännchen, Reiniger, Ersatzteile, dazu italienische Kaffeebohnen, Siebträgermaschinen und Mühlen. Gratis Versand ab € 89.'],
+  '/pages/maschinen-finder/': ['Welche Siebträgermaschine passt zu mir? Maschinen-Finder', 'Zwei Fragen, eine Empfehlung: So findest du die Siebträger-Kaffeemaschine, die zu deinem Alltag passt. Danach beraten wir dich persönlich in Wien.'],
+  '/pages/einschulungen/': ['Barista-Einschulung für deine Siebträgermaschine | Wake Up Wien', null],
+  '/blogs/ratgeber/erste-siebtraegermaschine/': ['Erste Siebträgermaschine kaufen und testen: Kaufberatung', 'Welche Siebträgermaschine für Einsteiger? Bauarten, Mühle, Zubehör und typische Fehler. Mit Tipp, wie du Maschinen in Wien vor dem Kauf testen kannst.'],
+  '/blogs/ratgeber/roesterei-guglielmo/': ['Guglielmo Kaffee aus Kalabrien: Rösterei & alle Sorten', null]
+};
+HOME.title = 'Wake Up Espressomaschinen Wien | Siebträger & Kaffee';
+HOME.desc = 'Siebträgermaschinen, Mühlen und italienische Kaffeebohnen aus Wien. Säurearme Röstungen aus Süditalien, Einschulung, eigene Werkstatt und 5+1 Kilo gratis.';
 const sitemap = [];
 routes.forEach(route => {
   const d = new JSDOM(template, { url: SITE + route, runScripts: 'outside-only', pretendToBeVisual: true }), w = d.window, doc = w.document;
@@ -153,6 +165,7 @@ routes.forEach(route => {
   const lead = doc.querySelector('.page-head > p:not(.crumbs):not(.byline)') || doc.querySelector('.hero-sub');
   let desc = route === '/' ? HOME.desc : prod ? cut((prod.text || h1) + (prod.kind === 'kaffee' ? ' Jetzt im 1-kg-Beutel oder im Karton mit 5+1 Kilo bestellen.' : ' Gratis Versand ab € 89.'), 158) : cut(lead ? lead.textContent : h1, 158);
   if (desc.length < 110) { const fp = [...doc.querySelectorAll('.prose > p, .rich p, .page-body p')].map(p => p.textContent.trim()).find(x => x.length > 60); if (fp) desc = cut(desc + ' ' + fp, 158); }
+  if (SEO[route]) { title = SEO[route][0]; if (SEO[route][1]) desc = SEO[route][1]; }
   const img = prod ? prod.img : (doc.querySelector('.lead-img') || {}).src || CDN + 'banner-red-desktop-1.jpg?width=1200';
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
   const fixUrls = v => typeof v === 'string' ? (v.includes('/#/') ? (m => SITE + w.WU.toPath('#/' + m[1]) + (m[2] || ''))(/\/#\/([^#]*)(#.*)?$/.exec(v)) : v) : Array.isArray(v) ? v.map(fixUrls) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, fixUrls(x)])) : v;
