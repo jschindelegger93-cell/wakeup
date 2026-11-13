@@ -243,8 +243,8 @@
   function sortiment() {
     var types = []; WU.all.forEach(function (p) { var t = typeOf(p); if (types.indexOf(t) < 0) types.push(t); });
     var list = WU.all.filter(function (p) { return !filt.type || typeOf(p) === filt.type; });
-    var note = WU.catalog === 'ok' ? '' : WU.catalog === 'fehler' ? '<p class="hint">Das vollständige Sortiment konnte gerade nicht aus dem Shop geladen werden. Du siehst die Auswahl aus der Vorschau.</p>' : '<p class="count">Das vollständige Sortiment wird aus dem Shop geladen …</p>';
-    return head('Sortiment', 'Das ganze Sortiment', 'Alle Produkte aus dem Shop, inklusive 250-g- und 500-g-Packungen, gemahlenem Kaffee, Pads und Zubehör.') +
+    var note = WU.catalog === 'ok' || WU.staticCatalog ? '' : WU.catalog === 'fehler' ? '<p class="hint">Das vollständige Sortiment konnte gerade nicht aus dem Shop geladen werden. Du siehst die Auswahl aus der Vorschau.</p>' : '<p class="count">Das vollständige Sortiment wird aus dem Shop geladen …</p>';
+    return head('Sortiment', 'Das ganze Sortiment', 'Alle ' + WU.all.length + ' Produkte: Kaffee in 1 kg, 500 g und 250 g, gemahlen, Pads, Maschinen, Mühlen, Zubehör und Ersatzteile.') +
       '<div class="wrap" style="padding-bottom:64px">' + note + '<div class="tools"><button class="tool' + (!filt.type ? ' on' : '') + '" data-act="f-type" data-v="">Alles</button>' +
       types.map(function (t) { return '<button class="tool' + (filt.type === t ? ' on' : '') + '" data-act="f-type" data-v="' + esc(t) + '">' + esc(t) + '</button>'; }).join('') + '</div>' +
       '<p class="count">' + list.length + ' Produkte</p><div class="grid">' + list.map(card).join('') + '</div></div>';
@@ -472,6 +472,7 @@
     var rel = g.related.map(WU.byHandle).filter(Boolean);
     return '<div class="wrap page-head"><p class="crumbs"><a href="#/">Start</a> / <a href="#/ratgeber">Ratgeber</a></p><h1>' + esc(g.title) + '</h1><p>' + esc(g.teaser) + ' Lesezeit ' + g.min + ' Minuten.</p></div>' +
       '<div class="wrap with-aside"><article class="prose">' + (g.img ? '<img class="lead-img" src="' + WU.IMG(g.img) + '" alt="" width="1200" height="675">' : '') + g.sections.map(function (x) { return '<h2>' + esc(x[0]) + '</h2><p>' + esc(x[1]) + '</p>'; }).join('') +
+      (g.faq ? '<h2>Häufige Fragen</h2>' + g.faq.map(function (x) { return faq(x[0], x[1]); }).join('') : '') + '<p class="toc-end"><a class="btn sm ghost" href="#/ratgeber">Alle Ratgeber</a> <a class="btn sm" href="#/finder">Kaffee-Finder starten</a></p>' +
       (g.shop ? '<p><a class="link" href="' + WU.SHOP + '/blogs/news/' + g.shop + '" rel="noopener">Der ausführliche Artikel im Shop-Blog</a></p>' : '') + '</article>' + contactBox() + '</div>' +
       (rel.length ? '<div class="wrap" style="padding-bottom:64px"><h2 style="margin-bottom:20px">Passend dazu</h2><div class="grid">' + rel.map(card).join('') + '</div></div>' : '<div style="height:48px"></div>');
   }
@@ -542,6 +543,7 @@
       var g = WU.GUIDES.filter(function (x) { return x.slug === parts[1]; })[0];
       if (g) {
         out.push({ '@context': 'https://schema.org', '@type': 'Article', headline: g.title, description: g.teaser, image: g.img ? WU.IMG(g.img) : WU.LOGO, mainEntityOfPage: here + '#/ratgeber/' + g.slug, inLanguage: 'de-AT', timeRequired: 'PT' + g.min + 'M', articleBody: g.sections.map(function (x) { return x[0] + ': ' + x[1]; }).join(' '), author: { '@type': 'Organization', name: o.name }, publisher: { '@id': WU.SHOP + '/#store' }, dateModified: '2026-11-13' });
+        if (g.faq) out.push({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: g.faq.map(function (x) { return { '@type': 'Question', name: x[0], acceptedAnswer: { '@type': 'Answer', text: x[1] } }; }) });
         crumbs.push([g.title, here + '#/ratgeber/' + g.slug]);
       }
     }

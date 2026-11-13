@@ -143,3 +143,75 @@ WU.GUIDES.push(
     ['Die Einschulung', 'Zu jeder Maschine gehört bei uns eine persönliche Einschulung, im Geschäft oder per Videocall. Danach weißt du, wie du Mahlgrad und Menge einstellst.'],
     ['Wenn du unsicher bist', 'Der Maschinen-Finder gibt dir in zwei Fragen eine erste Richtung. Oder du rufst uns einfach an.']] }
 );
+
+/* Ratgeber-Ausbau: zusätzliche Abschnitte (s) und Fragen (f) je Artikel.
+   Themen abgeleitet aus dem, was Mitbewerber-Ratgeber abdecken (Mahlgrad, Milchschaum, Siebträger oder Vollautomat, Zubereitung, Rezepte). */
+WU.EXTRA = {
+  'siebtraeger-typen': { s: [
+    ['Aufheizzeit und Platzbedarf', 'Kleine Einkreiser sind am schnellsten betriebsbereit und brauchen am wenigsten Stellfläche. Maschinen mit großer Brühgruppe und Kessel brauchen länger, halten die Temperatur dafür sehr stabil. Miss vor dem Kauf die Höhe unter dem Oberschrank, denn der Wassertank wird meist von oben befüllt.'],
+    ['Wassertank oder Festwasser', 'Für zu Hause reicht fast immer ein Tank. Ein Festwasseranschluss lohnt sich, wenn sehr viele Getränke pro Tag gemacht werden, etwa im Büro.'],
+    ['Vibrations- oder Rotationspumpe', 'Vibrationspumpen sind kompakt und günstiger, Rotationspumpen laufen leiser und gleichmäßiger. Im Geschmack ist der Unterschied klein, im Geräusch deutlich.'],
+    ['Unsere Faustregel', 'Fast nur Espresso: Einkreiser. Täglich Cappuccino: Zweikreiser. Mehrere Milchgetränke hintereinander und exakte Temperatur: Dualboiler. Freude am Handwerk: Hebelmaschine.']],
+    f: [['Reicht ein Einkreiser für Cappuccino?', 'Ja, für gelegentliche Milchgetränke. Du musst zwischen Brühen und Dampf umschalten und kurz warten.'], ['Welche Maschine ist am leisesten?', 'Hebelmaschinen arbeiten ohne Pumpe und sind am leisesten. Bei Pumpenmaschinen sind Modelle mit Rotationspumpe ruhiger.']] },
+  'mahlgrad-einstellen': { s: [
+    ['Schritt für Schritt', 'Erstens die Menge festlegen und beibehalten. Zweitens gleichmäßig und gerade tampern. Drittens Bezug starten und die Zeit stoppen. Viertens den Mahlgrad um eine kleine Stufe verändern und wiederholen, bis Zeit und Geschmack passen.'],
+    ['Woran du es schmeckst', 'Sauer, dünn, helle Crema: zu grob. Bitter, verbrannt, dunkle fleckige Crema: zu fein. Süß, rund, haselnussbraune Crema: getroffen.'],
+    ['Wenn sich plötzlich alles ändert', 'Neue Packung, anderes Wetter oder ältere Bohnen verändern den Durchlauf. Kleine Korrekturen am Mahlgrad sind normal und kein Zeichen für einen Defekt.'],
+    ['Dunkle Röstungen', 'Süditalienische Röstungen verzeihen mehr als helle. Sie brauchen meist einen etwas gröberen Mahlgrad und laufen trotzdem cremig durch.']],
+    f: [['Wie viel Kaffee kommt ins Sieb?', 'Als Startwert etwa 16–18 g für das Doppelsieb. Wichtig ist, dass die Menge bei jedem Bezug gleich bleibt.'], ['Muss ich bei jeder neuen Sorte neu einstellen?', 'Ja, fast immer. Jede Röstung verhält sich in der Mühle etwas anders.']] },
+  'reinigung-wartung': { s: [
+    ['Der Wochenplan', 'Täglich: Siebträger und Dampflanze reinigen, Abtropfschale leeren. Wöchentlich: rückspülen, Siebe einlegen, Duschensieb abbürsten. Alle paar Monate: Dichtung und Duschensieb prüfen.'],
+    ['Die Mühle nicht vergessen', 'Kaffeeöle setzen sich auch im Mahlwerk ab und werden ranzig. Auswurf regelmäßig auspinseln und den Bohnenbehälter mit einem trockenen Tuch auswischen.'],
+    ['Was du dafür brauchst', 'Blindsieb, Kaffeefettlöser, eine Bürste für die Brühgruppe und ein Tuch nur für die Dampflanze. Im Service-Set ist das Wichtigste beisammen.'],
+    ['Wann zum Service', 'Wenn Wasser neben dem Siebträger austritt, der Druck schwankt oder die Maschine ungewohnte Geräusche macht.']],
+    f: [['Wie oft soll ich rückspülen?', 'Bei täglicher Nutzung etwa einmal pro Woche mit Kaffeefettlöser.'], ['Kann ich selbst entkalken?', 'Das hängt von der Maschine ab. Frag im Zweifel vorher unseren Maschinenservice.']] },
+  'arabica-robusta': { s: [
+    ['Warum Robusta zu Unrecht einen schlechten Ruf hat', 'Billiger Robusta schmeckt hart und erdig. Sorgfältig ausgewählter und dunkel gerösteter Robusta bringt dagegen Schokolade, Nuss und eine Crema, die stehen bleibt.'],
+    ['Mischungen im Überblick', '100 % Arabica: fein, mild, aromatisch. 70–90 % Arabica: rund, mit mehr Crema. Um 50 %: klassischer Barkaffee. Unter 30 % und reiner Robusta: sehr kräftig, viel Koffein, ideal mit Milch.'],
+    ['Koffein', 'Robusta enthält deutlich mehr Koffein als Arabica. Wer es stark mag, greift zu Mischungen mit hohem Robusta-Anteil.'],
+    ['So findest du deine Mischung', 'Mit einem Probierpaket testest du vier oder sechs Röstungen nebeneinander. Oder du mischst dir im 5+1 Karton selbst eine Auswahl.']],
+    f: [['Ist 100 % Arabica besser?', 'Nein, nur anders. Es kommt darauf an, ob du es fein und mild oder kräftig mit viel Crema magst.'], ['Welche Mischung hat die meiste Crema?', 'Mischungen mit hohem Robusta-Anteil.']] },
+  'moka-kanne': { s: [
+    ['Häufige Fehler', 'Zu heiße Platte, angedrücktes Kaffeemehl und zu fein gemahlener Kaffee. Alle drei machen den Moka bitter.'],
+    ['Pflege', 'Nur mit warmem Wasser ausspülen und offen trocknen lassen. Dichtung und Sieb hin und wieder prüfen.'],
+    ['Moka ist kein Espresso', 'Die Kanne arbeitet mit viel weniger Druck als eine Siebträgermaschine. Das Ergebnis ist kräftig und aromatisch, hat aber keine Crema.']],
+    f: [['Welcher Mahlgrad für die Moka-Kanne?', 'Etwas gröber als für Espresso aus dem Siebträger. Fertig gemahlenen Moka-Kaffee gibt es bei uns in 250 g.']] },
+  'bestellen-wie-in-italien': { s: [
+    ['Kleines Wörterbuch', 'Ristretto: noch kürzer und dichter. Lungo: mit mehr Wasser. Doppio: doppelte Menge. Freddo: kalt. Al vetro: im Glas serviert.'],
+    ['Die Regeln an der Bar', 'Oft zahlst du zuerst an der Kassa und legst den Bon auf den Tresen. Getrunken wird im Stehen. Wer sich setzt, zahlt meist mehr.'],
+    ['Affogato und Shakerato', 'Affogato ist eine Kugel Vanilleeis mit heißem Espresso übergossen. Der Shakerato wird mit Eis und etwas Zucker kalt geschüttelt. Beides gelingt zu Hause mit jeder kräftigen Röstung.']],
+    f: [['Was ist der Unterschied zwischen Caffè und Espresso?', 'Keiner. In Italien bestellt man einen Caffè und bekommt einen Espresso.']] },
+  'milchschaum': { s: [
+    ['Welche Milch', 'Vollmilch schäumt am cremigsten. Pflanzliche Alternativen funktionieren am besten in der Barista-Variante.'],
+    ['Typische Fehler', 'Grobe Blasen: Düse zu weit oben. Kein Volumen: Düse zu tief. Schaum trennt sich von der Milch: zu lange gewartet, vor dem Eingießen noch einmal schwenken.'],
+    ['Nach dem Schäumen', 'Kännchen kurz auf die Arbeitsfläche klopfen, schwenken, bis die Oberfläche glänzt, und sofort eingießen. Dampflanze abwischen und ausblasen.']],
+    f: [['Wie heiß soll die Milch werden?', 'Etwa 60–65 °C. Dann ist sie am süßesten.'], ['Brauche ich dafür einen Zweikreiser?', 'Nein, aber er macht es bequemer, weil du gleichzeitig Espresso beziehen kannst.']] },
+  'espresso-fehler': { s: [
+    ['Die fünf Stellschrauben', 'In Italien spricht man von den fünf M: die Mischung, die Mühle, die Maschine, die Menge und der Mensch, der sie bedient. Geh sie der Reihe nach durch, wenn etwas nicht schmeckt.'],
+    ['Maschine nicht heiß genug', 'Ist die Maschine noch nicht vollständig aufgeheizt, schmeckt der Espresso flach oder sauer. Siebträger immer eingespannt mit aufheizen.'],
+    ['Wasser läuft am Rand vorbei', 'Dann ist schief getampert oder das Sieb zu wenig gefüllt. Gleichmäßig verteilen und gerade andrücken.']],
+    f: [['Warum schmeckt mein Espresso plötzlich anders?', 'Meist wegen einer neuen Packung oder älterer Bohnen. Stell den Mahlgrad leicht nach.']] },
+  'muehle-wichtiger': { s: [
+    ['On-Demand statt Vorratsmahlen', 'Eine On-Demand-Mühle mahlt jede Portion frisch direkt in den Siebträger. Es bleibt kein altes Kaffeemehl im Dosierer liegen.'],
+    ['Lautstärke', 'Wer morgens mahlt, während andere schlafen, merkt den Unterschied. Die Mignon Silenzio trägt ihren Namen nicht zufällig.'],
+    ['Im Set sparen', 'Maschine und Mühle gemeinsam: minus 7 % beim Checkout. Außerdem ist die Mühle dann meist schon auf deinen Kaffee eingestellt.']],
+    f: [['Kann ich fertig gemahlenen Kaffee im Siebträger verwenden?', 'Ja, es gibt bei uns gemahlenen Espresso. Den Mahlgrad kannst du dann aber nicht mehr an deine Maschine anpassen.']] },
+  'wasser': { s: [
+    ['Leitungswasser in Wien', 'Wiener Hochquellwasser ist vergleichsweise weich. In vielen anderen Regionen ist das Wasser deutlich härter. Die Wasserhärte erfährst du bei deinem Wasserversorger.'],
+    ['Kein destilliertes Wasser', 'Ganz ohne Mineralien schmeckt Espresso leer, und manche Füllstandssensoren arbeiten damit nicht zuverlässig.']],
+    f: [['Wie oft muss ich den Wasserfilter wechseln?', 'Halte dich an die Angabe des Herstellers, sie hängt von Wasserhärte und Verbrauch ab.']] },
+  'bohnen-lagern': { s: [
+    ['Wie lange halten Bohnen?', 'Ungeöffnet viele Monate. Nach dem Öffnen schmecken sie in den ersten Wochen am besten.'],
+    ['Nur so viel in die Mühle, wie du brauchst', 'Im Bohnenbehälter stehen die Bohnen warm und im Licht. Fülle lieber öfter kleine Mengen nach.']],
+    f: [['Kann ich Bohnen einfrieren?', 'Das geht in luftdichten Portionen. Für den Alltag ist kühl, trocken und gut verschlossen einfacher.']] },
+  'erste-siebtraegermaschine': { s: [
+    ['Siebträger oder Vollautomat?', 'Der Vollautomat ist bequem, der Siebträger macht den besseren Espresso und hält bei guter Pflege viele Jahre. Wer Freude am Zubereiten hat, wird mit dem Siebträger glücklicher.'],
+    ['Was es am Anfang kostet', 'Rechne mit einer Maschine, einer Mühle und etwas Zubehör. Bei den Maschinensets ist das Wichtigste schon kombiniert.'],
+    ['Die ersten Tage', 'Plane ein paar Bezüge zum Einstellen ein. Nach der Einschulung gelingt der Espresso meist schon am ersten Abend.']],
+    f: [['Ist ein Siebträger kompliziert?', 'Nein. Nach der Einschulung sind es vier Handgriffe: mahlen, tampern, einspannen, beziehen.'], ['Welcher Kaffee für den Anfang?', 'Eine verzeihende, dunkle Barmischung. Der Kaffee-Finder schlägt dir eine vor.']] }
+};
+WU.GUIDES.forEach(function (g) {
+  var x = WU.EXTRA[g.slug]; if (!x) return;
+  g.sections = g.sections.concat(x.s); g.faq = x.f;
+  g.min = Math.max(g.min, Math.round(g.sections.reduce(function (n, s) { return n + s[1].split(' ').length; }, 0) / 180) + 1);
+});

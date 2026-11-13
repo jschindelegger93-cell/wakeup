@@ -64,3 +64,71 @@ WU.others = WU.OTHER_ROWS.map(function (r) {
 });
 WU.all = WU.coffees.concat(WU.others);
 WU.byHandle = function (h) { return WU.all.filter(function (p) { return p.handle === h; })[0]; };
+
+/* Restliches Sortiment aus dem Shop (Stand 13.11.2026): 250 g, 500 g, gemahlen, Pads, Zubehör, Ersatzteile.
+   [handle, titel, marke, produktart, bild, varianten "id|titel|preis" mit ";" getrennt, "!" davor = nicht lagernd]
+   Hinweis: je Produkt sind die ersten vier Varianten enthalten. */
+WU.MORE_ROWS = [
+['guglielmo-espresso-bar-500g-bohnen','Guglielmo Espresso Bar 500g Bohnen','Guglielmo','Kaffee','Gug_Es_BAR_500g_02_800x.png?v=1732049765','!50060062982472|500g|15.5;!50060063080776|Karton (10+2x500g gratis)|155'],
+['guglielmo-bar-5-stelle-500g-bohnen','Guglielmo Bar 5 Stelle 500g Bohnen','Guglielmo','Kaffee','Produktbild_freistehend_67822961-d908-4b3d-96ff-6e8bd97ddefb_800x.png?v=1790243300','50060109021512|500g|17;50060109119816|Karton (10+2x500g gratis)|170'],
+['guglielmo-extra-bar-500g-bohnen','Guglielmo Extra Bar 500g Bohnen','Guglielmo','Kaffee','Produktfotofreigestellt_37267915-1f08-4d1f-afec-53454a765d4a_800x.png?v=1790241887','50060126978376|500g|16.5;50060127076680|Karton (10+2x500g gratis)|165'],
+['guglielmo-caffetteria-500g-bohnen','Guglielmo Caffetteria 500g Bohnen','Guglielmo','Kaffee','Produktbild_freistehend_183d9736-5873-4f70-a020-2227151d9870_800x.png?v=1790243568','50060133040456|500g|13;50060133138760|Karton (10+2x500g gratis)|130'],
+['guglielmo-espresso-classico-500g-bohnen','Guglielmo Espresso Classico 500g Bohnen','Guglielmo','Kaffee','Produktbildfreistehend_4210b7cf-95ab-4eb3-93a3-70b481287acf_800x.png?v=1790244185','50060144345416|500g|14;50060144443720|Karton (10+2x500g gratis)|140'],
+['ionia-oro','Ionia Oro Superior 250g Bohnen','Ionia','Kaffee','Oro_Bohnen_fca0ce3b-91ed-4c68-93eb-3e34292184e2_800x.png?v=1744975625','48204165972296|250g|7;48204166005064|1 Karton (20x250g) -16.7% Rabatt|116.66'],
+['guglielmo','Probierset Guglielmo 5x1kg Bohnen','Guglielmo','Kaffee','GUG_TESTSET_800x.png?v=1717671788','48356109746504||144'],
+['probierset-viel-arabica','Probierset Arabica 5x1kg Bohnen','Wake Up','Kaffee','Arabica_TESTSET_800x.png?v=1717671591','48356193075528||157'],
+['guglielmo-caffetteria','Guglielmo Caffetteria MOKA 2x250g gemahlen','Guglielmo','Kaffee','Caffetteria_2x250g_gem_800x.png?v=1744966541','48207831695688|2x250g|11.3;48207953658184|Steige (10x2x250g) -10% Rabatt|101.7'],
+['guglielmo-classico-moka','Guglielmo Classico MOKA 250g gemahlen','Guglielmo','Kaffee','Produktbildfreiegstellt_800x.png?v=1790241304','48208071917896|250g|6;48208071950664|Steige (20x250g) -10% Rabatt|108'],
+['guglielmo-oro-moka','Guglielmo Oro MOKA 250g gemahlen','Guglielmo','Kaffee','Oro_250g_gem_800x.png?v=1744966661','48208285466952|250g|6.5;48208285499720|Steige (20x250g) -10% Rabatt|117'],
+['guglielmo-extra-bar-moka','Guglielmo Extra Bar MOKA 250g gemahlen','Guglielmo','Kaffee','Extra_Bar_250g_800x.png?v=1744966511','48208376922440|250g|6.7;48208376955208|Steige (20x250g) -10% Rabatt|120.6'],
+['guglielmo-bar-5-stelle-moka','Guglielmo Bar 5 Stelle MOKA 250g gemahlen','Guglielmo','Kaffee','5Stelle_Moka_250g_gem_800x.png?v=1744976526','48208456614216|250g|8.5;48208456646984|Karton (12x250g) -10% Rabatt|91.8'],
+['guglielmo-bar-5-stelle-oro-moka','Guglielmo Bar 5 Stelle Oro MOKA 250g gemahlen','Guglielmo','Kaffee','5Stelle_Oro_250g_gem_800x.png?v=1744976526','48208484499784|250g|9;48208484532552|Karton (12x250g) -10% Rabatt|97.2'],
+['guglielmo-decaffeinato-moka','Guglielmo Decaffeinato MOKA 250g gemahlen','Guglielmo','Kaffee','Guglielmo-piu-aroma-decaf-250g_800x.png?v=1744977869','48208517005640|250g|9.5'],
+['guglielmo-cub-99-moka','Guglielmo Club 99 MOKA 250g gemahlen','Guglielmo','Kaffee','Club99_250g_gem_800x.png?v=1744976647','48208591847752|250g|9;48607942574408|Karton (12x250g) -10% Rabatt|97.2'],
+['ionia-argento-moka','Ionia Argento MOKA 250g gemahlen','Ionia','Kaffee','Argento_250gem_800x.png?v=1777989788','48352768524616|250g|4.7;48352768557384|Steige (20x250g) -10% Rabatt|84.6'],
+['ionia-oro-moka','Ionia Oro MOKA 250g gemahlen','Ionia','Kaffee','Oro_250gem_800x.png?v=1777989788','48352781730120|250g|5.5;48352781762888|Steige (20x250g) -10% Rabatt|99'],
+['trombetta-pieno-moka','Trombetta Pieno MOKA 250g gemahlen','Trombetta','Kaffee','Pieno_gem_800x.png?v=1744974836','48352902349128|250g|5.8;48352902381896|Steige (20x250g) -10% Rabatt|104.4'],
+['trombetta-oro-moka','Trombetta Oro MOKA 250g gemahlen','Trombetta','Kaffee','Oro_gem_716ce361-62f0-4676-b2d0-7bea84a826e9_800x.png?v=1744975222','48352933642568|250g|7.3;48352933675336|Steige (20x250g) -10% Rabatt|131.4'],
+['trombetta-gusto-forte-moka','Trombetta Gusto Forte MOKA 250g gemahlen','Trombetta','Kaffee','Gusto_Forte_gem_800x.png?v=1744974835','48352943571272|250g|5.4;48352943604040|Steige (20x250g) -10% Rabatt|97.2'],
+['kremoso-arabica-top-selection-moka','Kremoso Arabica Top Selection MOKA 250g gemahlen','Kremoso','Kaffee','Arabica_Top_250g_800x.png?v=1744968767','49492458701128|250g|6.5;49492458733896|Steige (12x250g) -10% Rabatt|70.2'],
+['kremoso-elite-gran-riserva-moka','Kremoso Elite Gran Riserva MOKA 250g gemahlen','Kremoso','Kaffee','Elite_250g_800x.png?v=1744968767','49493158297928|250g|8;49493158330696|Steige (12x250g) -10% Rabatt|86.4'],
+['escaffe-prestige-moka-250g-gemahlen','Escaffe Prestige MOKA 250g gemahlen','Escaffe','Kaffee','Esc_Prestige250gMoka_b28343eb-a65d-4d17-b829-5401b6b2ecde_800x.png?v=1744963291','50063368814920|250g|8;50063368847688|Karton (24x250g) -10% Rabatt|172.8'],
+['escaffe-crema-moka-250g-gemahlen','Escaffe Crema MOKA 250g gemahlen','Escaffe','Kaffee','Esc_Crema250gMokapng_40b5c4a0-796b-448a-888d-da586f1482ec_800x.png?v=1744963373','50063370453320|250g|5.7;50063370486088|Karton (24x250g) -10% Rabatt|123.1'],
+['escaffe-sublime-moka-250g-gemahlen','Escaffe Sublime MOKA 250g gemahlen','Escaffe','Kaffee','Esc_Sublime250gMoka_800x.png?v=1744963197','50063621521736|250g|6.3;50063621554504|Karton (24x250g) -10% Rabatt|136.08'],
+['guglielmo-bar-5-stelle-espresso','Guglielmo Bar 5 Stelle ESPRESSO 250g gemahlen','Guglielmo','Kaffee','5Stelle_Espr_250g_gem_800x.png?v=1744976526','49494747873608|250g|8.5;49494747906376|Karton (12x250g) -10% Rabatt|91.8'],
+['trombetta-espresso-bar','Trombetta Espresso Bar 250g gemahlen','Trombetta','Kaffee','E_Bar_gem_800x.png?v=1744975137','49494956343624|250g|7.8;49494956376392|Karton (20x250g) -10% Rabatt|140.4'],
+['ionia-don-giovanni-cialde','Ionia Don Giovanni Cialde E.S.E. Pads 100 Stück','Ionia','Kaffee','Don_Giovanni_100_800x.png?v=1777990790','49501409345864|100 Stk. Box|30;49501409378632|5+1 Box gratis|150'],
+['guglielmo-pronto-espresso-cialde-150-stueck','Guglielmo Pronto Espresso Cialde E.S.E. Pads 150 Stück','Guglielmo','Kaffee','GUG_CIALDE_EINZEL_800x.png?v=1733818643','49501448700232|150 Stk. Box|48;49501448733000|5+1 Box gratis|240'],
+['guglielmo-dek-cialde-100-stuck','Guglielmo Dek Cialde E.S.E. Pads 100 Stück','Guglielmo','Kaffee','GUG_CIALD_DECAF_EINZEL_800x.png?v=1733818896','49501516366152|100 Stk. Box|38;49501516398920|5+1 Box gratis|190'],
+['escaffe-crema-cialde-e-s-e-pads-50-stuck','Escaffe Crema Cialde E.S.E. Pads 50 Stück','Escaffe','Kaffee','Esc_CremaPods_800x.png?v=1744964263','50063686795592|50 Stk. Box|15;50063686828360|10+2 Boxes gratis|150'],
+['tamper-dvg','Tamper DVG','DVG','Tamper','DVG_olive_Inox_800x.png?v=1713185772','48315981627720|Walnuss / 54 mm / INOX|35;48315981660488|Walnuss / 54 mm / SCHWARZ|39;48315981693256|Walnuss / 58 mm / INOX|35;48315981726024|Walnuss / 58 mm / SCHWARZ|39'],
+['tamper-joe-frex-holz','Tamper Joe Frex','Joe Frex','Tamper','JF_TAMPER_WALN_800x.png?v=1733390336','48462991589704|Walnuss / 54mm|39;48463005188424|Walnuss / 58mm|39;48463005221192|Walnuss / 58.5mm|39;48462991622472|Olive / 54mm|39'],
+['tampermatte-joe-frex','Tampermatte Joe Frex','Joe Frex','Tampermatte','JF_Matte_gerade_800x.png?v=1713179010','48325202477384|Klassik|10;48325202510152|Mit Kante|15'],
+['tamperstation-joe-frex-classic','Tamperstation Joe Frex Classic','Joe Frex','Tamperstation','JF_Tamperstation_Klassik_800x.png?v=1732098250','48316045295944||39'],
+['tamperstation-joe-frex-premium','Tamperstation Joe Frex Premium','Joe Frex','Tamperstation','JF_TAMPERST_PREM_BLACK_800x.png?v=1733395844','49495993712968|Rot|83;49495993745736|Schwarz|83'],
+['knockbox-joe-frex-edelstahl','Knock Box Joe Frex Edelstahl','Joe Frex','Knockbox','JF_Knockbox_Medium_a707c2f3-a72a-4815-ade0-2e46b884cedb_800x.png?v=1732098239','48324525654344|Medium|99;48324525687112|Large|149'],
+['sudlade-grounds-cub','Sudlade Grounds Cub EM 140/200','The Knock Drawer Company','Sudlade','Sudlade_INOX_140_800x.png?v=1732127097','48316117057864|Edelstahl / EM 140|105;48316117090632|Schwarz / EM 140|115;48316203434312|Edelstahl / EM 200|135;48316203467080|Schwarz / EM 200|145'],
+['sudlade-pro-cub','Sudlade Pro Cub EM 140/200','The Knock Drawer Company','Sudlade','Sudlade_INOX_PRO_140_800x.png?v=1732127106','48316125282632|Edelstahl / EM 140|130;48316125315400|Schwarz / EM 140|140;48316181479752|Edelstahl / EM 200|150;48316181512520|Schwarz / EM 200|160'],
+['milchkanne-motta-europa','Milchkanne Motta Europa 350/500/750 ml','Motta','Milchkanne','Motta_Europa_Inox_35_800x.png?v=1732108504','48325337088328|INOX / 350 ml|30;48325337121096|INOX / 500 ml|35;48325337153864|INOX / 750 ml|40;48325337219400|BLACK / 350 ml|35'],
+['milchkanne-joe-frex','Milchkanne Joe Frex','Joe Frex','Milchkanne','JF_MILCHK_WHITE_800x.png?v=1733395127','49495629201736|INOX / 350 ml|18;49495629234504|INOX / 590 ml|22;49495643324744|SCHWARZ / 350 ml|22;49495643357512|SCHWARZ / 590 ml|28'],
+['espresso-tassen','Espresso Tassen 6 Stück Box','Wake Up','Tassen','GUG_E_TASSE_800x.png?v=1713468363','48328348172616|Trombetta|30;48328348205384|Kremoso|35;48328348238152|Ionia|30;54113569243464|Guglielmo|30'],
+['cappuccino-tassen','Cappuccino Tassen 6 Stück Box','Wake Up','Tassen','Tasse_CAP_TROMB_800x.png?v=1732127136','48328350204232|Trombetta|42;48328350237000|Kremoso|47;48328350302536|Ionia|42;54113590051144|Guglielmo|42'],
+['siebtrager-holz','Siebträger Faema E-61 Holz','Wake Up','Siebträger','SIEB_1er_olive_800x.png?v=1732108639','48335432909128|Olive / Einfach|49;48335432941896|Olive / Doppelt|49;48335432974664|Walnuss / Einfach|45;48335433007432|Walnuss / Doppelt|45'],
+['einfuelltrichter-eureka-58','Einfülltrichter Tidaka Eureka 58+','Tidaka','Einfülltrichter','Einfuelltrichter_Eureka_Mig_800x.png?v=1717668580','48416504021320||39'],
+['puly-caff','Kaffeefettlöser Puly Caff','Puly Caff','Reinigung','PulyCaff_900g_800x.png?v=1732108536','48315203912008|10 x 20g|10;48315203944776|370 g|12;48315203977544|510 g|15;48315204010312|900 g|18'],
+['service-set','Service Set: Reinigen und Rückspülen','Wake Up','Reinigung','Service_SET_800x.png?v=1732108610','48315550269768|10 x 20g / 8 mm / 1|29;48315554103624|10 x 20g / 8 mm / 2|53;48315554136392|10 x 20g / 8 mm / 3|65;48315554169160|10 x 20g / 8 mm / 4|77'],
+['teflonburste','Teflonbürste schwarz','Wake Up','Reinigung','TeflonB_800x.png?v=1733419447','48315333017928||5'],
+['omega-pinsel','Omega Reinigungspinsel für Siebträgermaschinen','Omega','Reinigung','OMEGA_PINSEL_800x.png?v=1732108511','48315340685640||9'],
+['bilt-oscar-90','Wasserfilter Bilt Oscar 90','Bilt','Wasserfilter','Oscar90_800x.png?v=1732108516','48315221573960||12'],
+['faema-siebtraeger-dichtung','Faema E-61 Siebträger Dichtung','Wake Up','Ersatzteile','Dichtung_E61_800x.png?v=1717667666','48315316896072|8 mm|5;48315316928840|8.5 mm|5'],
+['bruehgruppen-dusche','Duschensieb Faema E-61','Wake Up','Ersatzteile','Dusche_e61_Normal_800x.png?v=1732044355','48324670030152|Klassik|5;48324670062920|IMS Competition Dusche|18'],
+['blindsieb-faema-e61','Blindsieb Faema E-61','Wake Up','Ersatzteile','BLINDSIEB_FAEMA_800x.png?v=1717405786','48324885578056||5']
+];
+WU.MORE_ROWS.forEach(function (r) {
+  var vs = r[5].split(';').map(function (x) { var off = x.charAt(0) === '!', a = (off ? x.slice(1) : x).split('|'); return { id: a[0], title: a[1] || 'Standard', price: Number(a[2]), available: !off }; });
+  var v0 = vs.filter(function (v) { return v.available; })[0] || vs[0], t = r[1], type = r[3];
+  if (type === 'Kaffee') type = /Probier/.test(t) ? 'Probierpakete' : /Cialde|Pads/.test(t) ? 'E.S.E. Pads' : /MOKA/.test(t) ? 'Moka gemahlen' : /gemahlen/.test(t) ? 'Espresso gemahlen' : /500g/.test(t) ? 'Kaffee 500 g' : 'Kaffee 250 g';
+  WU.others.push({ kind: 'live', live: true, type: type, handle: r[0], title: t, vendor: r[2], img: WU.CDN + r[4], id: v0.id, price: v0.price, compare: 0, preorder: false, soldout: !v0.available, text: '', variants: vs });
+});
+WU.all = WU.coffees.concat(WU.others);
+WU.staticCatalog = true;
