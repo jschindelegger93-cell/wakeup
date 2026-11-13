@@ -120,8 +120,8 @@
     var machines = WU.others.filter(function (p) { return p.kind === 'maschine' || p.kind === 'set'; });
     var m = WU.byHandle('elba-quattro'), z = WU.byHandle('eureka-mignon-kupfer'), k = WU.coffees[1];
     return '<section class="hero"><div class="wrap hero-in"><div>' +
-      '<h1>Fünf Kilo aussuchen. Das sechste schenken wir dir.</h1>' +
-      '<p class="hero-sub">Dunkel geröstet, säurearm und direkt aus Süditalien. Misch dir deinen Karton quer über alle sechs Röstereien.</p>' +
+      '<p class="hero-kicker">Dal 2010 a Vienna</p><h1>Espresso wie im Italien-Urlaub.</h1>' +
+      '<p class="hero-sub">Der Caffè an der Bar in Neapel, der Cappuccino am Hafen in Kalabrien: genau diese Röstungen holen wir direkt aus Italien nach Wien. Such dir fünf Kilo aus, das sechste schenken wir dir.</p>' +
       '<div class="hero-cta"><a class="btn light" href="#/5plus1" data-track="hero_5plus1">Karton zusammenstellen</a><a class="btn line-light" href="#/kaffee" data-track="hero_kaffee">Alle Kaffees ansehen</a></div>' +
       '<ul class="hero-facts"><li>Gratis Versand ab € 89</li><li>Lieferung in 1–3 Werktagen</li><li>Wiener Familienbetrieb seit 2010</li></ul></div>' +
       '<a class="karton" href="#/5plus1" aria-label="Zum 5+1 Konfigurator" style="text-decoration:none;color:#fff"><div class="karton-top"><span>Dein Karton</span><em>5 bezahlen, 6 bekommen</em></div>' + slotsHtml(top, false) + '</a>' +
@@ -133,7 +133,9 @@
       '<li><b>Persönliche Einschulung</b><span>Im Store, per Telefon oder Videocall</span></li>' +
       '<li><b>Frisch aus Italien</b><span>Mehrmals im Jahr nachbestellt</span></li></ul></div></section>' +
 
-      '<section class="sec"><div class="wrap"><div class="cats">' +
+      '<section class="sec italia"><div class="wrap"><div class="sec-head"><div><h2>Wohin soll die Reise gehen?</h2><p>Jede Rösterei schmeckt nach ihrer Gegend. Such dir aus, wo dein Espresso heute herkommt.</p></div><a class="link" href="#/roestereien">Alle Röstereien</a></div><div class="regions">' + regions() + '</div></div></section>' +
+
+      '<section class="sec" style="padding-top:0"><div class="wrap"><div class="cats">' +
       '<a class="cat dark" href="#/kaffee"><img src="' + esc(k.img) + '" alt=""><h3>Kaffee</h3><span>' + WU.coffees.length + ' Röstungen in der 1-kg-Packung</span></a>' +
       '<a class="cat" href="#/maschinen"><img src="' + esc(m.img) + '" alt=""><h3>Espressomaschinen</h3><span>Einkreiser bis Hebelmaschine</span></a>' +
       '<a class="cat" href="#/maschinen"><img src="' + esc(z.img) + '" alt=""><h3>Mühlen &amp; Sets</h3><span>Im Set 7 % sparen</span></a>' +
@@ -161,7 +163,9 @@
       faq('Wie schnell wird geliefert?', 'Kaffee und Zubehör, die du bis 13 Uhr bestellst, gehen meist am selben Werktag raus. Die Lieferung dauert in der Regel 1–3 Werktage.') +
       faq('Wie kommt eine Espressomaschine zu mir?', 'Sicher auf Palette per Spedition. Vorher prüfen wir sie in unserer Werkstatt.') +
       faq('Wie kann ich bezahlen?', 'Mit PayPal, Klarna, Kreditkarte, Apple Pay oder eps.') +
-      '</div></div></div></section>';
+      '</div><p style="margin-top:16px"><a class="link" href="#/faq">Alle Fragen und Antworten</a></p></div></div></section>' +
+
+      '<section class="sec"><div class="wrap"><div class="sec-head"><div><h2>Ratgeber</h2><p>Damit der Espresso zu Hause so schmeckt wie an der Bar.</p></div><a class="link" href="#/ratgeber">Alle Artikel</a></div><div class="guides">' + WU.GUIDES.slice(0, 3).map(guideCard).join('') + '</div></div></section>';
   }
   function faq(q, a) { return '<details><summary>' + esc(q) + '</summary><p>' + esc(a) + '</p></details>'; }
 
@@ -197,7 +201,7 @@
     return head('Maschinen & Mühlen', 'Espressomaschinen und Mühlen', 'Bewährte Profi-Technik für zu Hause. Jede Maschine prüfen wir vor dem Versand in unserer Wiener Werkstatt.') +
       '<div class="wrap">' + group('maschine', 'Espressomaschinen', 'Vom kompakten Einkreiser bis zur Hebelmaschine.') +
       group('set', 'Maschine und Mühle im Set', 'Im Set sparst du 7 % beim Checkout.') +
-      group('muehle', 'Kaffeemühlen', 'Die Maschine ist nur so gut wie die Mühle daneben.') + '</div>';
+      group('muehle', 'Kaffeemühlen', 'Die Maschine ist nur so gut wie die Mühle daneben.') + '<p style="padding-bottom:64px"><a class="btn ghost" href="#/maschinen-finder">Unsicher? Zum Maschinen-Finder</a></p></div>';
   }
 
   /* ---------- Produktseite ---------- */
@@ -221,7 +225,7 @@
     return '<div class="wrap page-head"><p class="crumbs"><a href="#/">Start</a> / <a href="#/' + (isC || p.kind === 'paket' ? 'kaffee' : 'maschinen') + '">' + (isC || p.kind === 'paket' ? 'Kaffee' : 'Maschinen & Mühlen') + '</a></p></div>' +
       '<div class="wrap pdp"><div class="pdp-media"><img src="' + esc(p.img) + '" alt="' + esc(p.title) + '" width="800" height="800" fetchpriority="high"></div><div>' +
       '<span class="vendor">' + esc(p.vendor) + '</span><h1>' + esc(p.title) + '</h1>' +
-      (isC ? '<p class="roast" style="margin-top:10px">Röstung ' + beans(p.roast) + '</p>' : '') +
+      (isC ? '<p class="roast" style="margin-top:10px">Röstung ' + beans(p.roast) + '</p>' + (WU.REGIONS[p.vendor] ? '<p class="origin">Geröstet in ' + esc(WU.REGIONS[p.vendor].place) + '. ' + esc(WU.REGIONS[p.vendor].line) + '</p>' : '') : '') +
       '<div class="pdp-price"><span class="price">' + priceHtml + '</span>' + (p.compare ? '<span class="chip" style="background:var(--rosso);color:#fff">Spare ' + eur(p.compare - p.price) + '</span>' : '') + (p.preorder ? '<span class="chip">Vorbestellung</span>' : '') + '</div>' +
       '<p class="pdp-note">Preis inkl. MwSt., zzgl. Versand. Kostenloser Versand ab € 89 Warenwert.</p>' + opts +
       '<div class="buy"><div class="qty"><button data-act="qty" data-d="-1" aria-label="Weniger">−</button><output>' + pdp.qty + '</output><button data-act="qty" data-d="1" aria-label="Mehr">+</button></div>' +
@@ -292,7 +296,7 @@
     return { list: list.slice(0, 3), why: why };
   }
   function finder() {
-    var top = head('Kaffee-Finder', 'Welcher Kaffee passt zu dir?', 'Drei Fragen, eine Empfehlung mit Begründung.');
+    var top = head('Kaffee-Finder', 'Welcher Kaffee passt zu dir?', 'Drei Fragen, eine Empfehlung mit Begründung.') + '<div class="wrap"><p class="finder" style="padding-bottom:0"><a class="link" href="#/maschinen-finder">Du suchst eine Maschine? Zum Maschinen-Finder</a></p></div>';
     if (fin.step < QUESTIONS.length) {
       var q = QUESTIONS[fin.step];
       return top + '<div class="wrap"><div class="finder"><p class="count">Frage ' + (fin.step + 1) + ' von ' + QUESTIONS.length + '</p><div class="prog"><b style="width:' + Math.round(fin.step / QUESTIONS.length * 100) + '%"></b></div>' +
@@ -309,6 +313,128 @@
       '<p style="margin-top:24px"><button class="tool" data-act="finder-reset">Neu starten</button></p></div></div>';
   }
 
+  /* ---------- Italien: Röstereien als Reiseziele ---------- */
+  function regions() {
+    return Object.keys(WU.REGIONS).map(function (v) {
+      var r = WU.REGIONS[v], n = WU.coffees.filter(function (c) { return c.vendor === v; }).length;
+      return '<a class="region" href="#/kaffee" data-act="region" data-v="' + esc(v) + '"><span>' + esc(r.region) + '</span><b>' + esc(v) + '</b><p>' + esc(r.mood) + '</p><em>' + n + ' Röstungen ansehen</em></a>';
+    }).join('');
+  }
+  function roestereien() {
+    return head('Röstereien', 'Sechs Röstereien, einmal quer durch Italien', 'Wir importieren direkt von Familienbetrieben, die wir selbst kennen und trinken.') +
+      '<div class="wrap" style="padding-bottom:64px"><div class="places">' + Object.keys(WU.REGIONS).map(function (v) {
+        var r = WU.REGIONS[v];
+        return '<article class="place"><span class="chip">' + esc(r.place) + '</span><h2>' + esc(v) + '</h2><p>' + esc(r.line) + '</p><a class="btn sm ghost" href="#/kaffee" data-act="region" data-v="' + esc(v) + '">Kaffees von ' + esc(v) + '</a></article>';
+      }).join('') + '</div></div>';
+  }
+
+  /* ---------- Service-Seiten ---------- */
+  function contactBox() {
+    var o = WU.ORG;
+    return '<aside class="aside"><h3>Persönlich für dich da</h3><p>' + esc(o.street) + '<br>' + o.zip + ' ' + esc(o.city) + '</p>' +
+      '<a class="btn sm block" href="tel:' + o.phone.replace(/\s/g, '') + '" data-track="phone_click">' + esc(o.phone) + '</a>' +
+      '<a class="btn sm ghost block" href="mailto:' + o.email + '" data-track="mail_click">E-Mail schreiben</a></aside>';
+  }
+  function seite(slug) {
+    var p = WU.PAGES[slug];
+    if (!p) return head('Nicht gefunden', 'Diese Seite gibt es hier nicht') + '<div class="wrap" style="padding-bottom:64px"><a class="btn" href="#/">Zur Startseite</a></div>';
+    return head(p.title, p.title, p.intro) + '<div class="wrap with-aside"><div class="prose">' +
+      p.blocks.map(function (b) { return '<h2>' + esc(b[0]) + '</h2><p>' + esc(b[1]) + '</p>'; }).join('') +
+      '<p><a class="link" href="' + WU.SHOP + '/pages/' + p.shop + '" rel="noopener">Diese Seite im bestehenden Shop</a></p></div>' + contactBox() + '</div>';
+  }
+
+  /* ---------- FAQ ---------- */
+  function faqPage() {
+    return head('FAQ', 'Fragen und Antworten', 'Alles zu Bestellung, 5+1, Kaffee und Maschinen. Deine Frage fehlt? Ruf uns an.') +
+      '<div class="wrap with-aside"><div class="prose">' + WU.FAQ.map(function (g) {
+        return '<h2>' + esc(g[0]) + '</h2>' + g[1].map(function (x) { return faq(x[0], x[1]); }).join('');
+      }).join('') + '</div>' + contactBox() + '</div>';
+  }
+
+  /* ---------- Ratgeber ---------- */
+  function guideCard(g) {
+    return '<a class="guide" href="#/ratgeber/' + g.slug + '"><span class="chip">' + g.min + ' Min. Lesezeit</span><h3>' + esc(g.title) + '</h3><p>' + esc(g.teaser) + '</p><em>Weiterlesen</em></a>';
+  }
+  function ratgeber(slug) {
+    if (!slug) return head('Ratgeber', 'Ratgeber für besseren Espresso', 'Kurz erklärt, von Leuten, die täglich an Maschinen schrauben.') +
+      '<div class="wrap" style="padding-bottom:64px"><div class="guides">' + WU.GUIDES.map(guideCard).join('') + '</div></div>';
+    var g = WU.GUIDES.filter(function (x) { return x.slug === slug; })[0];
+    if (!g) return ratgeber();
+    var rel = g.related.map(WU.byHandle).filter(Boolean);
+    return '<div class="wrap page-head"><p class="crumbs"><a href="#/">Start</a> / <a href="#/ratgeber">Ratgeber</a></p><h1>' + esc(g.title) + '</h1><p>' + esc(g.teaser) + ' Lesezeit ' + g.min + ' Minuten.</p></div>' +
+      '<div class="wrap with-aside"><article class="prose">' + g.sections.map(function (x) { return '<h2>' + esc(x[0]) + '</h2><p>' + esc(x[1]) + '</p>'; }).join('') +
+      (g.shop ? '<p><a class="link" href="' + WU.SHOP + '/blogs/news/' + g.shop + '" rel="noopener">Der ausführliche Artikel im Shop-Blog</a></p>' : '') + '</article>' + contactBox() + '</div>' +
+      (rel.length ? '<div class="wrap" style="padding-bottom:64px"><h2 style="margin-bottom:20px">Passend dazu</h2><div class="grid">' + rel.map(card).join('') + '</div></div>' : '<div style="height:48px"></div>');
+  }
+
+  /* ---------- Maschinen-Finder ---------- */
+  var MQ = [
+    { q: 'Wie oft machst du Milchschaum?', a: [['selten', 'Selten bis nie', 'Ich trinke vor allem Espresso'], ['oft', 'Regelmäßig', 'Cappuccino gehört dazu'], ['hebel', 'Egal, ich will das Handwerk', 'Hebel ziehen statt Knopf drücken']] },
+    { q: 'Was darf die Maschine kosten?', a: [['1300', 'Bis rund € 1.300', 'Solider Einstieg'], ['2000', 'Bis rund € 2.000', 'Mehr Komfort'], ['max', 'Preis ist zweitrangig', 'Einmal kaufen, lange behalten']] }
+  ];
+  var mf = { step: 0, ans: [] };
+  function mfResult() {
+    var a = mf.ans;
+    if (a[0] === 'hebel') return ['la-san-marco-20-20-leva', 'du das Handwerk suchst. Bei der Hebelmaschine baust du den Druck selbst auf'];
+    if (a[0] === 'selten') return [a[1] === '1300' ? 'quickmill-carola-evo' : '969-coffee-elba-mini-lux', 'du vor allem Espresso trinkst. Ein Einkreiser ist dafür kompakt und unkompliziert'];
+    if (a[1] === 'max') return ['lamarzocco-linea-mini-r', 'du regelmäßig Milch schäumst. Ein Dualboiler hält Brühtemperatur und Dampf getrennt stabil'];
+    return ['elba-quattro', 'du regelmäßig Milch schäumst. Mit einem Zweikreiser beziehst du Espresso und schäumst gleichzeitig'];
+  }
+  function maschinenFinder() {
+    var top = head('Maschinen-Finder', 'Welche Maschine passt zu dir?', 'Zwei Fragen, eine Empfehlung. Danach beraten wir dich gern persönlich.');
+    if (mf.step < MQ.length) {
+      var q = MQ[mf.step];
+      return top + '<div class="wrap"><div class="finder"><p class="count">Frage ' + (mf.step + 1) + ' von ' + MQ.length + '</p><div class="prog"><b style="width:' + Math.round(mf.step / MQ.length * 100) + '%"></b></div><h2>' + q.q + '</h2><div class="answers">' +
+        q.a.map(function (x) { return '<button class="answer" data-act="m-answer" data-v="' + x[0] + '"><b>' + x[1] + '</b><span>' + x[2] + '</span></button>'; }).join('') + '</div></div></div>';
+    }
+    var r = mfResult(), p = WU.byHandle(r[0]), over = mf.ans[1] !== 'max' && p.price > Number(mf.ans[1]) + 300;
+    return top + '<div class="wrap"><div class="finder"><div class="prog"><b style="width:100%"></b></div><h2>Unsere Empfehlung</h2><div class="result"><img src="' + esc(p.img) + '" alt="" width="400" height="400"><div><span class="vendor">' + esc(p.vendor) + '</span><h3 style="font-size:1.6rem">' + esc(p.title) + '</h3>' +
+      '<p class="why">Weil ' + esc(r[1]) + '. ' + esc(p.text) + (over ? ' Sie liegt über deinem Rahmen, ruf uns an, dann suchen wir gemeinsam eine Alternative.' : '') + '</p><p class="price" style="margin-bottom:14px">' + eur(p.price) + '</p>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn sm" href="' + href(p) + '">Maschine ansehen</a><a class="btn sm ghost" href="#/seite/kontakt">Beratung anfragen</a></div></div></div>' +
+      '<p style="margin-top:24px"><button class="tool" data-act="m-reset">Neu starten</button></p></div></div>';
+  }
+
+  /* ---------- Strukturierte Daten (schema.org) ---------- */
+  function ld(view, parts) {
+    var o = WU.ORG, here = location.origin + location.pathname, out = [], crumbs = [['Start', here]];
+    out.push({ '@context': 'https://schema.org', '@type': 'Store', '@id': WU.SHOP + '/#store', name: o.name, url: WU.SHOP, logo: WU.LOGO, image: WU.LOGO, telephone: o.phone, email: o.email, foundingDate: String(o.since), priceRange: '€€',
+      address: { '@type': 'PostalAddress', streetAddress: o.street, postalCode: o.zip, addressLocality: o.city, addressCountry: o.country },
+      areaServed: ['AT', 'DE'], paymentAccepted: 'PayPal, Klarna, Kreditkarte, Apple Pay, eps', sameAs: ['https://www.instagram.com/wakeupespresso_wien/'] });
+    if (view === 'p') {
+      var p = WU.byHandle(parts[1]);
+      if (p) {
+        var url = WU.SHOP + '/products/' + p.handle, avail = 'https://schema.org/' + (p.preorder ? 'PreOrder' : 'InStock');
+        var prod = { '@context': 'https://schema.org', '@type': 'Product', name: p.title, image: p.img, description: p.text, sku: p.id, brand: { '@type': 'Brand', name: p.vendor }, category: p.kind === 'kaffee' ? 'Espresso-Bohnen' : 'Espressomaschinen und Mühlen' };
+        if (p.kind === 'kaffee') {
+          prod.offers = { '@type': 'AggregateOffer', priceCurrency: 'EUR', lowPrice: p.price.toFixed(2), highPrice: (p.price * 5).toFixed(2), offerCount: 2, availability: avail, url: url, seller: { '@id': WU.SHOP + '/#store' } };
+          prod.countryOfOrigin = { '@type': 'Country', name: 'Italien' };
+          prod.additionalProperty = [['Röstung (1–5)', p.roast], ['Intensität (1–10)', p.intensity], ['Körper (1–5)', p.body], ['Bitterkeit (1–5)', p.bitter], ['Säure (1–5)', p.acid], ['Arabica-Anteil (%)', p.arabica], ['Aromen', p.aromas.join(', ')], ['Herkunft der Rösterei', (WU.REGIONS[p.vendor] || {}).place || 'Italien']]
+            .map(function (x) { return { '@type': 'PropertyValue', name: x[0], value: x[1] }; });
+        } else {
+          prod.offers = { '@type': 'Offer', priceCurrency: 'EUR', price: p.price.toFixed(2), availability: avail, url: url, itemCondition: 'https://schema.org/NewCondition', seller: { '@id': WU.SHOP + '/#store' } };
+        }
+        out.push(prod); crumbs.push([p.kind === 'kaffee' || p.kind === 'paket' ? 'Kaffee' : 'Maschinen & Mühlen', here + '#/' + (p.kind === 'kaffee' || p.kind === 'paket' ? 'kaffee' : 'maschinen')], [p.title, here + '#/p/' + p.handle]);
+      }
+    } else if (view === 'kaffee') {
+      out.push({ '@context': 'https://schema.org', '@type': 'ItemList', name: 'Espresso-Bohnen aus Italien', numberOfItems: WU.coffees.length, itemListElement: WU.coffees.map(function (c, i) { return { '@type': 'ListItem', position: i + 1, name: c.title, url: WU.SHOP + '/products/' + c.handle }; }) });
+      crumbs.push(['Kaffee', here + '#/kaffee']);
+    } else if (view === 'faq' || view === 'home') {
+      var qs = []; WU.FAQ.forEach(function (g) { g[1].forEach(function (x) { qs.push({ '@type': 'Question', name: x[0], acceptedAnswer: { '@type': 'Answer', text: x[1] } }); }); });
+      out.push({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: view === 'faq' ? qs : qs.slice(0, 4) });
+      if (view === 'faq') crumbs.push(['FAQ', here + '#/faq']);
+      if (view === 'home') out.push({ '@context': 'https://schema.org', '@type': 'WebSite', name: o.name, url: WU.SHOP });
+    } else if (view === 'ratgeber') {
+      crumbs.push(['Ratgeber', here + '#/ratgeber']);
+      var g = WU.GUIDES.filter(function (x) { return x.slug === parts[1]; })[0];
+      if (g) {
+        out.push({ '@context': 'https://schema.org', '@type': 'Article', headline: g.title, description: g.teaser, inLanguage: 'de-AT', timeRequired: 'PT' + g.min + 'M', articleBody: g.sections.map(function (x) { return x[0] + ': ' + x[1]; }).join(' '), author: { '@type': 'Organization', name: o.name }, publisher: { '@id': WU.SHOP + '/#store' }, dateModified: '2026-11-13' });
+        crumbs.push([g.title, here + '#/ratgeber/' + g.slug]);
+      }
+    }
+    out.push({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: crumbs.map(function (c, i) { return { '@type': 'ListItem', position: i + 1, name: c[0], item: c[1] }; }) });
+    var el = document.getElementById('ld'); if (el) el.textContent = JSON.stringify(out);
+  }
+
   /* ---------- Router ---------- */
   function route() {
     var h = location.hash.replace(/^#\/?/, ''), parts = h.split('/'), view = parts[0] || 'home', html;
@@ -318,6 +444,11 @@
     else if (view === 'p') { html = produkt(parts[1]); document.body.classList.add('has-sticky'); }
     else if (view === '5plus1') { html = builder(); document.body.classList.add('has-builder'); }
     else if (view === 'finder') html = finder();
+    else if (view === 'maschinen-finder') html = maschinenFinder();
+    else if (view === 'faq') html = faqPage();
+    else if (view === 'ratgeber') html = ratgeber(parts[1]);
+    else if (view === 'roestereien') html = roestereien();
+    else if (view === 'seite') html = seite(parts[1]);
     else { view = 'home'; html = home(); }
     app.innerHTML = html;
     document.querySelectorAll('.nav a').forEach(function (a) {
@@ -326,6 +457,7 @@
     });
     var t = document.querySelector('#app h1'); document.title = (t ? t.textContent + ' | ' : '') + 'Wake Up Espressomaschinen';
     track('page_view', view + (parts[1] ? ':' + parts[1] : ''));
+    ld(view, parts);
   }
   var lastPath = '';
   window.addEventListener('hashchange', function () {
@@ -362,6 +494,9 @@
     else if (act === 'answer') { fin.ans[fin.step] = d.v; fin.step++; if (fin.step === 1) track('finder_start'); if (fin.step === QUESTIONS.length) track('finder_complete'); route(); window.scrollTo(0, 0); }
     else if (act === 'finder-back') { fin.step = Math.max(0, fin.step - 1); route(); }
     else if (act === 'finder-reset') { fin = { step: 0, ans: [] }; route(); }
+    else if (act === 'region') { filt.vendor = d.v; filt.taste = ''; if (location.hash === '#/kaffee') { ev.preventDefault(); route(); window.scrollTo(0, 0); } }
+    else if (act === 'm-answer') { mf.ans[mf.step] = d.v; mf.step++; route(); window.scrollTo(0, 0); }
+    else if (act === 'm-reset') { mf = { step: 0, ans: [] }; route(); }
     else if (act === 'tlog') document.getElementById('tlog').classList.toggle('open');
   });
   document.addEventListener('change', function (ev) {
