@@ -76,8 +76,11 @@
     }).join('');
     var toNext = t.kilos % 6 === 0 ? 0 : 6 - (t.kilos % 6);
     var hint = t.kilos > 0 && toNext > 0 ? '<p class="hint">Noch ' + toNext + ' Kilo bis zu deinem nächsten Gratis-Kilo. <a href="#/5plus1" data-act="cart-close">Paket zusammenstellen</a></p>' : '';
+    var inCart = cart.map(function (l) { return l.id; });
+    var upsell = rest > 0 ? '<div class="upsell"><b>Damit bist du über € ' + FREE + '</b>' + WU.coffees.filter(function (c) { return inCart.indexOf(c.id) < 0 && c.price >= rest; }).slice(0, 2).map(function (c) {
+      return '<div class="up"><img src="' + esc(c.img) + '" alt="" loading="lazy"><span>' + esc(c.title) + '<br><strong>' + eur(c.price) + '</strong></span><button class="btn sm ghost" data-act="add" data-id="' + c.id + '">Dazu</button></div>'; }).join('') + '</div>' : '';
     var checkout = WU.SHOP + '/cart/' + cart.map(function (l) { return l.id + ':' + l.qty; }).join(',');
-    body.innerHTML = ship + '<div class="lines">' + lines + hint + '</div><div class="drawer-foot">' +
+    body.innerHTML = ship + '<div class="lines">' + lines + hint + upsell + '</div><div class="drawer-foot">' +
       '<div class="tot"><span>Zwischensumme</span><span>' + eur(t.sub) + '</span></div>' +
       (t.free ? '<div class="tot save"><span>5+1: ' + t.free + ' Kilo gratis</span><span>− ' + eur(t.save) + '</span></div>' : '') +
       '<div class="tot big"><span>Summe</span><span>' + eur(t.total) + '</span></div>' +
@@ -92,7 +95,7 @@
   function href(p) { return '#/p/' + p.handle; }
   function card(p) {
     var badge = p.compare ? '<span class="badge">Spare ' + eur(p.compare - p.price) + '</span>' : (p.preorder ? '<span class="badge dark">Vorbestellen</span>' : '');
-    var meta = p.kind === 'kaffee' ? '<span class="roast">Röstung ' + beans(p.roast) + '</span>' : '';
+    var meta = p.kind === 'kaffee' ? '<span class="roast">Röstung ' + beans(p.roast) + '</span><span class="notes">' + esc(p.aromas.slice(0, 3).join(' · ')) + '</span>' : '';
     var price = (p.compare ? '<del>' + eur(p.compare) + '</del>' : '') + eur(p.price) + (p.kind === 'kaffee' ? ' <small>/ kg</small>' : '');
     var cheap = p.price < 500;
     return '<article class="card">' + badge + '<a class="card-media" href="' + href(p) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(p.img) + '" alt="" loading="lazy" width="400" height="400"></a>' +
@@ -136,9 +139,9 @@
       '<section class="sec italia"><div class="wrap"><div class="sec-head"><div><h2>Wohin soll die Reise gehen?</h2><p>Jede Rösterei schmeckt nach ihrer Gegend. Such dir aus, wo dein Espresso heute herkommt.</p></div><a class="link" href="#/roestereien">Alle Röstereien</a></div><div class="regions">' + regions() + '</div></div></section>' +
 
       '<section class="sec" style="padding-top:0"><div class="wrap"><div class="cats">' +
-      '<a class="cat dark" href="#/kaffee"><img src="' + esc(k.img) + '" alt=""><h3>Kaffee</h3><span>' + WU.coffees.length + ' Röstungen in der 1-kg-Packung</span></a>' +
-      '<a class="cat" href="#/maschinen"><img src="' + esc(m.img) + '" alt=""><h3>Espressomaschinen</h3><span>Einkreiser bis Hebelmaschine</span></a>' +
-      '<a class="cat" href="#/maschinen"><img src="' + esc(z.img) + '" alt=""><h3>Mühlen &amp; Sets</h3><span>Im Set 7 % sparen</span></a>' +
+      '<a class="cat dark" href="#/kaffee"><img src="' + WU.IMG('Kaffee.png') + '" alt=""><h3>Kaffee</h3><span>' + WU.coffees.length + ' Röstungen in der 1-kg-Packung</span></a>' +
+      '<a class="cat" href="#/maschinen"><img src="' + WU.IMG('Kaffeemaschinen.png') + '" alt=""><h3>Espressomaschinen</h3><span>Einkreiser bis Hebelmaschine</span></a>' +
+      '<a class="cat" href="#/maschinen"><img src="' + WU.IMG('Zubehoer.png') + '" alt=""><h3>Mühlen &amp; Sets</h3><span>Im Set 7 % sparen</span></a>' +
       '</div></div></section>' +
 
       '<section class="sec" style="padding-top:0"><div class="wrap"><div class="sec-head"><div><h2>Die Bestseller</h2><p>Was unsere Kundinnen und Kunden am häufigsten nachbestellen.</p></div><a class="link" href="#/kaffee">Alle ' + WU.coffees.length + ' Kaffees</a></div>' +
@@ -165,7 +168,9 @@
       faq('Wie kann ich bezahlen?', 'Mit PayPal, Klarna, Kreditkarte, Apple Pay oder eps.') +
       '</div><p style="margin-top:16px"><a class="link" href="#/faq">Alle Fragen und Antworten</a></p></div></div></section>' +
 
-      '<section class="sec"><div class="wrap"><div class="sec-head"><div><h2>Ratgeber</h2><p>Damit der Espresso zu Hause so schmeckt wie an der Bar.</p></div><a class="link" href="#/ratgeber">Alle Artikel</a></div><div class="guides">' + WU.GUIDES.slice(0, 3).map(guideCard).join('') + '</div></div></section>';
+      '<section class="sec"><div class="wrap"><div class="sec-head"><div><h2>Ratgeber</h2><p>Damit der Espresso zu Hause so schmeckt wie an der Bar.</p></div><a class="link" href="#/ratgeber">Alle Artikel</a></div><div class="guides">' + WU.GUIDES.slice(0, 3).map(guideCard).join('') + '</div></div></section>' +
+
+      '<section class="strip" aria-label="Eindrücke aus Geschäft und Werkstatt">' + ['ScrollingBoxes3.png', 'ScrollingBoxes1.png', 'duotone_26.png', 'ScrollingBoxes2.png', 'duotone_30.png'].map(function (n) { return '<img src="' + WU.IMG(n) + '" alt="" loading="lazy" width="600" height="600">'; }).join('') + '</section>';
   }
   function faq(q, a) { return '<details><summary>' + esc(q) + '</summary><p>' + esc(a) + '</p></details>'; }
 
@@ -207,6 +212,38 @@
   /* ---------- Produktseite ---------- */
   var pdp = { id: '', qty: 1 };
   function meter(label, v, max) { return '<div class="meter"><span>' + label + '</span><i><b style="width:' + Math.round(v / max * 100) + '%"></b></i><em>' + v + '/' + max + '</em></div>'; }
+  function similar(p) {
+    var list = p.kind === 'kaffee'
+      ? WU.coffees.filter(function (c) { return c.handle !== p.handle; }).sort(function (a, b) { return Math.abs(a.intensity - p.intensity) - Math.abs(b.intensity - p.intensity); }).slice(0, 4)
+      : WU.others.filter(function (o) { return o.handle !== p.handle && (p.kind === 'maschine' ? o.kind === 'muehle' || o.kind === 'set' : o.kind === p.kind || o.kind === 'maschine'); }).slice(0, 4);
+    if (!list.length) return '';
+    return '<div class="wrap" style="padding-bottom:64px"><h2 style="margin-bottom:20px">' + (p.kind === 'kaffee' ? 'Schmeckt ähnlich' : 'Passt dazu') + '</h2><div class="grid">' + list.map(card).join('') + '</div></div>';
+  }
+  /* Vollständige Beschreibung und alle Bilder live aus dem Shop (Netlify Function) */
+  var fullCache = {};
+  function clean(html) {
+    var d = new DOMParser().parseFromString(html, 'text/html');
+    d.querySelectorAll('script,style,iframe,link,meta,form,object,embed').forEach(function (n) { n.remove(); });
+    d.querySelectorAll('*').forEach(function (n) {
+      Array.prototype.slice.call(n.attributes).forEach(function (a) {
+        if (/^on/i.test(a.name) || a.name === 'style' || a.name === 'class' || a.name === 'id') n.removeAttribute(a.name);
+        else if ((a.name === 'href' || a.name === 'src') && /^\s*javascript:/i.test(a.value)) n.removeAttribute(a.name);
+      });
+    });
+    return d.body.innerHTML;
+  }
+  function showFull(h, x) {
+    if (location.hash.indexOf('#/p/' + h) !== 0 || !x) return;
+    var box = document.getElementById('full'), th = document.getElementById('thumbs');
+    if (box && x.html) box.innerHTML = '<h2>Beschreibung</h2>' + clean(x.html);
+    if (th && x.images && x.images.length > 1) th.innerHTML = x.images.map(function (src, i) { return '<button class="thumb' + (i === 0 ? ' on' : '') + '" data-act="thumb" data-src="' + esc(src) + '" aria-label="Bild ' + (i + 1) + '"><img src="' + esc(src) + '" alt="" loading="lazy"></button>'; }).join('');
+  }
+  function loadFull(h) {
+    if (fullCache[h]) return showFull(h, fullCache[h]);
+    if (typeof fetch !== 'function') return;
+    fetch('/.netlify/functions/shop?product=' + encodeURIComponent(h)).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (x) { if (x && !x.error) { fullCache[h] = x; showFull(h, x); } }).catch(function () {});
+  }
   function produkt(h) {
     var p = WU.byHandle(h);
     if (!p) return head('Nicht gefunden', 'Dieses Produkt gibt es hier nicht') + '<div class="wrap" style="padding-bottom:64px"><a class="btn" href="#/kaffee">Zu den Kaffees</a></div>';
@@ -223,18 +260,19 @@
     var label = p.preorder ? 'Vorbestellen' : 'In den Warenkorb';
     var priceHtml = (p.compare ? '<del>' + eur(p.compare) + '</del>' : '') + eur(v.price);
     return '<div class="wrap page-head"><p class="crumbs"><a href="#/">Start</a> / <a href="#/' + (isC || p.kind === 'paket' ? 'kaffee' : 'maschinen') + '">' + (isC || p.kind === 'paket' ? 'Kaffee' : 'Maschinen & Mühlen') + '</a></p></div>' +
-      '<div class="wrap pdp"><div class="pdp-media"><img src="' + esc(p.img) + '" alt="' + esc(p.title) + '" width="800" height="800" fetchpriority="high"></div><div>' +
+      '<div class="wrap pdp"><div class="pdp-left"><div class="pdp-media"><img id="pdp-img" src="' + esc(p.img) + '" alt="' + esc(p.title) + '" width="800" height="800" fetchpriority="high"></div><div class="thumbs" id="thumbs"></div></div><div>' +
       '<span class="vendor">' + esc(p.vendor) + '</span><h1>' + esc(p.title) + '</h1>' +
       (isC ? '<p class="roast" style="margin-top:10px">Röstung ' + beans(p.roast) + '</p>' + (WU.REGIONS[p.vendor] ? '<p class="origin">Geröstet in ' + esc(WU.REGIONS[p.vendor].place) + '. ' + esc(WU.REGIONS[p.vendor].line) + '</p>' : '') : '') +
       '<div class="pdp-price"><span class="price">' + priceHtml + '</span>' + (p.compare ? '<span class="chip" style="background:var(--rosso);color:#fff">Spare ' + eur(p.compare - p.price) + '</span>' : '') + (p.preorder ? '<span class="chip">Vorbestellung</span>' : '') + '</div>' +
       '<p class="pdp-note">Preis inkl. MwSt., zzgl. Versand. Kostenloser Versand ab € 89 Warenwert.</p>' + opts +
       '<div class="buy"><div class="qty"><button data-act="qty" data-d="-1" aria-label="Weniger">−</button><output>' + pdp.qty + '</output><button data-act="qty" data-d="1" aria-label="Mehr">+</button></div>' +
       '<button class="btn" data-act="add-pdp">' + label + '</button></div>' +
+      '<p class="dispatch">' + (p.kind === 'maschine' || p.kind === 'set' ? 'Geprüft in unserer Werkstatt, geliefert per Spedition' : 'Bis 13 Uhr bestellt, meist noch heute verschickt') + '</p>' +
       (isC ? '<button class="btn ghost block" style="margin-top:10px" data-act="to-builder" data-h="' + p.handle + '">In meinen 5+1 Karton legen</button>' : '') +
       '<ul class="facts"><li>Lieferung in 1–3 Werktagen in Österreich</li>' + (isC ? '<li>Im 6-kg-Karton zahlst du nur 5 kg</li>' : '') + '<li>Sicher zahlen mit PayPal, Klarna, Karte, Apple Pay oder eps</li></ul>' +
-      profile + '<p class="pdp-text">' + esc(p.text) + '</p>' + service +
+      profile + '<div class="pdp-text rich" id="full"><p>' + esc(p.text) + '</p></div>' + service +
       '<p style="margin-top:18px"><a class="link" href="' + WU.SHOP + '/products/' + p.handle + '" rel="noopener">Vollständige Beschreibung im Shop</a></p>' +
-      '</div></div>' +
+      '</div></div>' + similar(p) +
       '<div class="sticky-buy"><span class="price">' + eur(v.price) + '</span><button class="btn" data-act="add-pdp">' + label + '</button></div>';
   }
 
@@ -338,7 +376,7 @@
   function seite(slug) {
     var p = WU.PAGES[slug];
     if (!p) return head('Nicht gefunden', 'Diese Seite gibt es hier nicht') + '<div class="wrap" style="padding-bottom:64px"><a class="btn" href="#/">Zur Startseite</a></div>';
-    return head(p.title, p.title, p.intro) + '<div class="wrap with-aside"><div class="prose">' +
+    return head(p.title, p.title, p.intro) + '<div class="wrap with-aside"><div class="prose">' + (p.img ? '<img class="lead-img" src="' + WU.IMG(p.img) + '" alt="" width="1200" height="675">' : '') +
       p.blocks.map(function (b) { return '<h2>' + esc(b[0]) + '</h2><p>' + esc(b[1]) + '</p>'; }).join('') +
       '<p><a class="link" href="' + WU.SHOP + '/pages/' + p.shop + '" rel="noopener">Diese Seite im bestehenden Shop</a></p></div>' + contactBox() + '</div>';
   }
@@ -353,7 +391,7 @@
 
   /* ---------- Ratgeber ---------- */
   function guideCard(g) {
-    return '<a class="guide" href="#/ratgeber/' + g.slug + '"><span class="chip">' + g.min + ' Min. Lesezeit</span><h3>' + esc(g.title) + '</h3><p>' + esc(g.teaser) + '</p><em>Weiterlesen</em></a>';
+    return '<a class="guide" href="#/ratgeber/' + g.slug + '">' + (g.img ? '<img src="' + WU.IMG(g.img) + '" alt="" loading="lazy" width="600" height="360">' : '') + '<span class="chip">' + g.min + ' Min. Lesezeit</span><h3>' + esc(g.title) + '</h3><p>' + esc(g.teaser) + '</p><em>Weiterlesen</em></a>';
   }
   function ratgeber(slug) {
     if (!slug) return head('Ratgeber', 'Ratgeber für besseren Espresso', 'Kurz erklärt, von Leuten, die täglich an Maschinen schrauben.') +
@@ -362,7 +400,7 @@
     if (!g) return ratgeber();
     var rel = g.related.map(WU.byHandle).filter(Boolean);
     return '<div class="wrap page-head"><p class="crumbs"><a href="#/">Start</a> / <a href="#/ratgeber">Ratgeber</a></p><h1>' + esc(g.title) + '</h1><p>' + esc(g.teaser) + ' Lesezeit ' + g.min + ' Minuten.</p></div>' +
-      '<div class="wrap with-aside"><article class="prose">' + g.sections.map(function (x) { return '<h2>' + esc(x[0]) + '</h2><p>' + esc(x[1]) + '</p>'; }).join('') +
+      '<div class="wrap with-aside"><article class="prose">' + (g.img ? '<img class="lead-img" src="' + WU.IMG(g.img) + '" alt="" width="1200" height="675">' : '') + g.sections.map(function (x) { return '<h2>' + esc(x[0]) + '</h2><p>' + esc(x[1]) + '</p>'; }).join('') +
       (g.shop ? '<p><a class="link" href="' + WU.SHOP + '/blogs/news/' + g.shop + '" rel="noopener">Der ausführliche Artikel im Shop-Blog</a></p>' : '') + '</article>' + contactBox() + '</div>' +
       (rel.length ? '<div class="wrap" style="padding-bottom:64px"><h2 style="margin-bottom:20px">Passend dazu</h2><div class="grid">' + rel.map(card).join('') + '</div></div>' : '<div style="height:48px"></div>');
   }
@@ -415,6 +453,10 @@
         }
         out.push(prod); crumbs.push([p.kind === 'kaffee' || p.kind === 'paket' ? 'Kaffee' : 'Maschinen & Mühlen', here + '#/' + (p.kind === 'kaffee' || p.kind === 'paket' ? 'kaffee' : 'maschinen')], [p.title, here + '#/p/' + p.handle]);
       }
+    } else if (view === 'maschinen') {
+      var ms = WU.others.filter(function (x) { return x.kind !== 'paket'; });
+      out.push({ '@context': 'https://schema.org', '@type': 'ItemList', name: 'Espressomaschinen und Mühlen', numberOfItems: ms.length, itemListElement: ms.map(function (c, i) { return { '@type': 'ListItem', position: i + 1, name: c.title, url: WU.SHOP + '/products/' + c.handle }; }) });
+      crumbs.push(['Maschinen & Mühlen', here + '#/maschinen']);
     } else if (view === 'kaffee') {
       out.push({ '@context': 'https://schema.org', '@type': 'ItemList', name: 'Espresso-Bohnen aus Italien', numberOfItems: WU.coffees.length, itemListElement: WU.coffees.map(function (c, i) { return { '@type': 'ListItem', position: i + 1, name: c.title, url: WU.SHOP + '/products/' + c.handle }; }) });
       crumbs.push(['Kaffee', here + '#/kaffee']);
@@ -425,9 +467,10 @@
       if (view === 'home') out.push({ '@context': 'https://schema.org', '@type': 'WebSite', name: o.name, url: WU.SHOP });
     } else if (view === 'ratgeber') {
       crumbs.push(['Ratgeber', here + '#/ratgeber']);
+      if (!parts[1]) out.push({ '@context': 'https://schema.org', '@type': 'Blog', name: 'Wake Up Ratgeber', inLanguage: 'de-AT', blogPost: WU.GUIDES.map(function (x) { return { '@type': 'BlogPosting', headline: x.title, description: x.teaser, image: x.img ? WU.IMG(x.img) : WU.LOGO, url: here + '#/ratgeber/' + x.slug }; }) });
       var g = WU.GUIDES.filter(function (x) { return x.slug === parts[1]; })[0];
       if (g) {
-        out.push({ '@context': 'https://schema.org', '@type': 'Article', headline: g.title, description: g.teaser, inLanguage: 'de-AT', timeRequired: 'PT' + g.min + 'M', articleBody: g.sections.map(function (x) { return x[0] + ': ' + x[1]; }).join(' '), author: { '@type': 'Organization', name: o.name }, publisher: { '@id': WU.SHOP + '/#store' }, dateModified: '2026-11-13' });
+        out.push({ '@context': 'https://schema.org', '@type': 'Article', headline: g.title, description: g.teaser, image: g.img ? WU.IMG(g.img) : WU.LOGO, mainEntityOfPage: here + '#/ratgeber/' + g.slug, inLanguage: 'de-AT', timeRequired: 'PT' + g.min + 'M', articleBody: g.sections.map(function (x) { return x[0] + ': ' + x[1]; }).join(' '), author: { '@type': 'Organization', name: o.name }, publisher: { '@id': WU.SHOP + '/#store' }, dateModified: '2026-11-13' });
         crumbs.push([g.title, here + '#/ratgeber/' + g.slug]);
       }
     }
@@ -458,6 +501,7 @@
     var t = document.querySelector('#app h1'); document.title = (t ? t.textContent + ' | ' : '') + 'Wake Up Espressomaschinen';
     track('page_view', view + (parts[1] ? ':' + parts[1] : ''));
     ld(view, parts);
+    if (view === 'p' && parts[1]) loadFull(parts[1]);
   }
   var lastPath = '';
   window.addEventListener('hashchange', function () {
@@ -497,6 +541,7 @@
     else if (act === 'region') { filt.vendor = d.v; filt.taste = ''; if (location.hash === '#/kaffee') { ev.preventDefault(); route(); window.scrollTo(0, 0); } }
     else if (act === 'm-answer') { mf.ans[mf.step] = d.v; mf.step++; route(); window.scrollTo(0, 0); }
     else if (act === 'm-reset') { mf = { step: 0, ans: [] }; route(); }
+    else if (act === 'thumb') { var im = document.getElementById('pdp-img'); if (im) im.src = d.src; document.querySelectorAll('.thumb').forEach(function (t) { t.classList.toggle('on', t === el); }); }
     else if (act === 'tlog') document.getElementById('tlog').classList.toggle('open');
   });
   document.addEventListener('change', function (ev) {

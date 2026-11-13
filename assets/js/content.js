@@ -97,3 +97,49 @@ WU.GUIDES = [
     ['Der richtige Moment', 'Sobald der Kaffee hörbar zu blubbern beginnt, die Kanne vom Herd nehmen. So wird er nicht bitter.'],
     ['Der richtige Kaffee', 'Moka-Kaffee ist etwas gröber gemahlen als Espresso für den Siebträger. Im Shop gibt es ihn fertig gemahlen in der 250-g-Packung.']] }
 ];
+
+/* Bilder aus dem Shop für Seiten und Ratgeber */
+WU.IMG = function (name) { return WU.CDN + name + (name.indexOf('?') < 0 ? '?width=1200' : ''); };
+WU.PAGES['ueber-uns'].img = 'ScrollingBoxes3.png';
+WU.PAGES['kontakt'].img = 'duotone_30.png';
+WU.PAGES['maschinenservice'].img = 'ScrollingBoxes2.png';
+WU.PAGES['einschulungen'].img = 'duotone_26.png';
+WU.PAGES['gastro-buero'].img = 'Untitled-216.jpg';
+(function () {
+  var imgs = { 'siebtraeger-typen': 'Kaffeemaschinen.png', 'mahlgrad-einstellen': '04_Artboard_11.jpg', 'reinigung-wartung': 'ScrollingBoxes2.png', 'arabica-robusta': 'banner-red-desktop-1.jpg', 'moka-kanne': 'banner-orange-desktop-1.jpg' };
+  WU.GUIDES.forEach(function (g) { g.img = imgs[g.slug]; });
+})();
+WU.GUIDES.push(
+  { slug: 'bestellen-wie-in-italien', img: 'ScrollingBoxes4.png', title: 'Bestellen wie in Italien: Caffè, Macchiato, Corretto', teaser: 'Wer in Italien einen Espresso will, bestellt einfach „un caffè“.', min: 3, related: ['guglielmo-espresso-bar', 'kremoso-armonia', 'ionia-special-bar'], sections: [
+    ['Un caffè', 'Der Espresso heißt in Italien schlicht Caffè. Getrunken wird er im Stehen an der Bar, in zwei, drei Schlucken, oft mit einem Glas Wasser davor.'],
+    ['Macchiato und Cappuccino', 'Caffè macchiato ist ein Espresso mit einem Klecks Milchschaum. Cappuccino trinkt man in Italien traditionell am Vormittag.'],
+    ['Corretto', 'Der „korrigierte“ Espresso bekommt einen Schuss Hochprozentiges, meist Grappa.'],
+    ['Das Gefühl nach Hause holen', 'Dunkle Röstung, Robusta-Anteil, dichte Crema: Genau das macht den Geschmack aus, den du aus dem Urlaub kennst. Unsere Röstungen aus Kalabrien, Neapel und Sizilien bringen ihn in deine Küche.']] },
+  { slug: 'milchschaum', img: '08_006.jpg', title: 'Der perfekte Milchschaum für Cappuccino', teaser: 'Feinporig, glänzend und süß. Mit drei Handgriffen klappt es.', min: 3, related: ['elba-quattro', 'lamarzocco-linea-mini-r', 'guglielmo-caffeteria'], sections: [
+    ['Kalte Milch, saubere Lanze', 'Starte mit kalter Milch aus dem Kühlschrank und einem Kännchen, das höchstens zur Hälfte gefüllt ist. Die Dampflanze vorher kurz ausblasen.'],
+    ['Erst ziehen, dann rollen', 'Die Düse knapp unter die Oberfläche halten, bis die Milch leise zischt und etwas an Volumen gewinnt. Dann tiefer eintauchen und die Milch im Kännchen kreisen lassen.'],
+    ['Rechtzeitig aufhören', 'Sobald du das Kännchen kaum noch anfassen kannst, ist die Milch warm genug, das sind etwa 60–65 °C. Heißer wird sie nicht besser, sondern verliert ihre Süße.'],
+    ['Welcher Kaffee dazu', 'Für Milchgetränke eignen sich kräftige Mischungen mit Robusta-Anteil. Sie setzen sich in der Milch durch.']] },
+  { slug: 'espresso-fehler', img: 'Kaffee.png', title: 'Sauer, bitter, wässrig: Espresso-Fehler schnell beheben', teaser: 'Die häufigsten Probleme und was du als Erstes änderst.', min: 3, related: ['eureka-mignon-15bl', 'guglielmo-espresso-classico-aus-kalabrien'], sections: [
+    ['Sauer und dünn', 'Der Espresso läuft zu schnell durch. Mahlgrad feiner stellen oder etwas mehr Kaffee ins Sieb geben.'],
+    ['Bitter und verbrannt', 'Der Espresso läuft zu langsam. Mahlgrad gröber stellen. Prüfe auch, ob die Maschine sauber ist: alte Kaffeefette schmecken bitter.'],
+    ['Keine Crema', 'Oft sind die Bohnen zu alt oder zu grob gemahlen. Mischungen mit Robusta-Anteil bilden von Natur aus mehr Crema.'],
+    ['Jeder Bezug anders', 'Dann stimmt meist die Menge nicht. Wiege das Kaffeemehl ein paar Mal ab, bis du ein Gefühl dafür hast.']] },
+  { slug: 'muehle-wichtiger', img: 'ScrollingBoxes1.png', title: 'Warum die Mühle wichtiger ist als die Maschine', teaser: 'Eine Espressomaschine ist nur so gut wie die Mühle daneben.', min: 2, shop: 'muhlen-im-vergleich', related: ['eureka-mignon-15bl', 'eureka-mignon-16cr', 'eureka-mignon-kupfer', 'mazzer-mini-g'], sections: [
+    ['Frisch gemahlen', 'Gemahlener Kaffee verliert sein Aroma innerhalb von Minuten. Wer direkt vor dem Bezug mahlt, schmeckt den Unterschied sofort.'],
+    ['Stufenlos einstellbar', 'Für Espresso reichen grobe Rasterstufen nicht. Erst eine stufenlose Verstellung erlaubt es, den Mahlgrad genau auf die Bohne abzustimmen.'],
+    ['Unsere Empfehlung', 'Für zu Hause empfehlen wir seit über zehn Jahren die Eureka Mignon Silenzio: stufenlos, sehr leise und passend zu jeder Maschine. Wer aufs Gramm genau dosieren will, nimmt die Mazzer Mini g mit integrierter Waage.']] },
+  { slug: 'wasser', img: 'duotone_26.png', title: 'Das richtige Wasser für deine Espressomaschine', teaser: 'Kalk ist der häufigste Grund für Reparaturen.', min: 2, related: ['quickmill-carola-evo', '969-coffee-elba-mini-lux'], sections: [
+    ['Warum Wasser wichtig ist', 'Espresso besteht fast nur aus Wasser. Hartes Wasser schmeckt flach und lagert Kalk in Kessel und Leitungen ab.'],
+    ['Was du tun kannst', 'Verwende weiches oder gefiltertes Wasser. Wasserfilter für den Tank gibt es bei uns im Shop.'],
+    ['Entkalken', 'Wie oft das nötig ist, hängt von deiner Wasserhärte und der Maschine ab. Im Zweifel fragst du unseren Maschinenservice, bevor du selbst entkalkst.']] },
+  { slug: 'bohnen-lagern', img: 'Produktbild.png', title: 'Kaffeebohnen richtig lagern', teaser: 'So bleibt das Kilo bis zur letzten Tasse frisch.', min: 2, related: ['probierpaket-6x1kg-bohnen', 'wake-up-bestseller-4x1kg-bohnen'], sections: [
+    ['Kühl, trocken, dunkel, dicht', 'Luft, Licht, Wärme und Feuchtigkeit sind die Feinde des Aromas. Lass die Bohnen in der Originalverpackung und verschließe sie gut.'],
+    ['Nicht in den Kühlschrank', 'Dort ziehen die Bohnen Feuchtigkeit und fremde Gerüche an.'],
+    ['Karton auf Vorrat', 'Ungeöffnete Packungen halten ihr Aroma deutlich länger als angebrochene. Deshalb lohnt sich der Karton mit 5+1 Kilo auch für kleinere Haushalte.']] },
+  { slug: 'erste-siebtraegermaschine', img: 'Untitled-216.jpg', title: 'Die erste Siebträgermaschine: Was du wirklich brauchst', teaser: 'Maschine, Mühle, guter Kaffee. Mehr ist es am Anfang nicht.', min: 3, related: ['maschinenset-quickmill-carola-evo', 'maschinenset-elba-mini-lux', 'maschinenset-elba-quattro'], sections: [
+    ['Maschine und Mühle gemeinsam denken', 'Plane die Mühle von Anfang an mit ein. Im Set aus Maschine und Mühle sparst du bei uns 7 % beim Checkout.'],
+    ['Das Zubehör', 'Ein Tamper, der zum Sieb passt, ein Abschlagbehälter und ein Milchkännchen. Alles andere kann warten.'],
+    ['Die Einschulung', 'Zu jeder Maschine gehört bei uns eine persönliche Einschulung, im Geschäft oder per Videocall. Danach weißt du, wie du Mahlgrad und Menge einstellst.'],
+    ['Wenn du unsicher bist', 'Der Maschinen-Finder gibt dir in zwei Fragen eine erste Richtung. Oder du rufst uns einfach an.']] }
+);
