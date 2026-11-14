@@ -160,6 +160,16 @@
   }
 
   /* ---------- Startseite ---------- */
+  /* Markenleiste im Hero: nur Marken, die im Sortiment sind */
+  function brands() {
+    function n(v, kinds) { return WU.all.filter(function (p) { return p.vendor === v && (!kinds || kinds.indexOf(p.kind) >= 0); }).length; }
+    var ro = Object.keys(WU.REGIONS).filter(function (v) { return n(v); }).map(function (v) {
+      return '<a href="#/ratgeber/roesterei-' + v.toLowerCase().replace(/\s+/g, '-') + '" data-track="hero_marke"><b>' + esc(v) + '</b><span>' + esc(WU.REGIONS[v].region) + '</span></a>'; });
+    var MA = [['969.coffee', 'Siebträger', '#/maschinen'], ['La Marzocco', 'Siebträger', '#/p/lamarzocco-linea-mini-r'], ['La San Marco', 'Hebelmaschinen', '#/maschinen'], ['Eureka', 'Mühlen', '#/seite/eureka'], ['Mazzer', 'Mühlen', '#/seite/mazzer'], ['Joe Frex', 'Zubehör', '#/sortiment'], ['Motta', 'Zubehör', '#/sortiment'], ['Puly Caff', 'Reinigung', '#/sortiment']]
+      .filter(function (m) { return n(m[0]); }).map(function (m) { return '<a href="' + m[2] + '" data-track="hero_marke"><b>' + esc(m[0]) + '</b><span>' + esc(m[1]) + '</span></a>'; });
+    return '<div class="wrap brands"><p>' + (ro.length + MA.length) + ' Marken führen wir. Kaffee verkosten und Maschinen ausprobieren kannst du bei uns im Geschäft in Wien.</p>' +
+      '<div class="brand-row"><em>Röstereien</em><div>' + ro.join('') + '</div></div><div class="brand-row"><em>Maschinen, Mühlen, Zubehör</em><div>' + MA.join('') + '</div></div></div>';
+  }
   function home() {
     var top = WU.coffees.slice(0, 5), pakete = WU.others.filter(function (p) { return p.kind === 'paket'; });
     var machines = WU.others.filter(function (p) { return p.kind === 'maschine' || p.kind === 'set'; });
@@ -170,7 +180,7 @@
       '<div class="hero-cta"><a class="btn light" href="#/5plus1" data-track="hero_5plus1">Karton zusammenstellen</a><a class="btn line-light" href="#/kaffee" data-track="hero_kaffee">Alle Kaffees ansehen</a></div>' +
       '<ul class="hero-facts">' + fact('truck', 'Gratis Versand ab € 89') + fact('clock', 'Lieferung in 1–3 Werktagen') + fact('home', 'Wiener Familienbetrieb seit 2010') + '</ul></div>' +
       '<a class="karton" href="#/5plus1" aria-label="Zum 5+1 Konfigurator" style="text-decoration:none;color:#fff"><div class="karton-top"><span>Dein Karton</span><em>5 bezahlen, 6 bekommen</em></div>' + slotsHtml(top, false) + '</a>' +
-      '</div></section>' +
+      '</div>' + brands() + '</section>' +
 
       '<section class="trust"><div class="wrap"><ul>' +
       '<li>' + ico('truck') + '<div><b>Gratis Versand ab € 89</b><span>in Österreich, 1–3 Werktage</span></div></li>' +
