@@ -160,12 +160,11 @@
   }
 
   /* ---------- Startseite ---------- */
-  /* Markenleiste im Hero: die Röstereien mit ihren Logos aus dem Shop, eine Zeile */
+  /* Top Marken: die Röstereien mit gleich großen Logos, seitlich wischbar */
   function brands() {
-    var LOGO = { 'Guglielmo': 'Gug_LOGO.jpg', 'Kremoso': 'Kremoso_logo.jpg', 'Ionia': 'ionia_logo.jpg', 'Trombetta': 'Trombetta_logo.jpg', 'La Messicana': 'Lamessicana_logo.png' };
-    return '<div class="wrap brands"><em>Unsere Röstereien</em><div>' + Object.keys(WU.REGIONS).filter(function (v) { return WU.coffees.some(function (c) { return c.vendor === v; }); }).map(function (v) {
-      return '<a href="#/ratgeber/roesterei-' + v.toLowerCase().replace(/\s+/g, '-') + '" data-track="hero_marke" aria-label="' + esc(v) + ', Rösterei aus ' + esc(WU.REGIONS[v].region) + '">' +
-        (LOGO[v] ? '<img src="' + WU.CDN + LOGO[v] + '?height=120" alt="' + esc(v) + '" width="108" height="60"' + (v === 'Ionia' || v === 'Trombetta' ? ' class="big"' : '') + '>' : '<b>' + esc(v) + '</b>') + '</a>'; }).join('') + '</div></div>';
+    return '<section class="marken"><div class="wrap"><div class="marken-h"><h2>Top Marken</h2><a href="#/roestereien">Alle Marken</a></div><ul>' +
+      Object.keys(WU.REGIONS).filter(function (v) { return WU.coffees.some(function (c) { return c.vendor === v; }); }).map(function (v) { var s = v.toLowerCase().replace(/\s+/g, '-');
+        return '<li><a href="#/ratgeber/roesterei-' + s + '" data-track="marke_' + s + '"><img src="/assets/img/marken/' + s + '.png" alt="' + esc(v) + ', Rösterei aus ' + esc(WU.REGIONS[v].region) + '" width="480" height="480" loading="lazy"></a></li>'; }).join('') + '</ul></div></section>';
   }
   function home() {
     var top = WU.coffees.slice(0, 5), pakete = WU.others.filter(function (p) { return p.kind === 'paket'; });
@@ -177,13 +176,13 @@
       '<div class="hero-cta"><a class="btn light" href="#/5plus1" data-track="hero_5plus1">Karton zusammenstellen</a><a class="btn line-light" href="#/kaffee" data-track="hero_kaffee">Alle Kaffees ansehen</a></div>' +
       '<ul class="hero-facts">' + fact('truck', 'Gratis Versand ab € 89') + fact('clock', 'Lieferung in 1–3 Werktagen') + fact('home', 'Wiener Familienbetrieb seit 2010') + '</ul></div>' +
       '<a class="karton" href="#/5plus1" aria-label="Zum 5+1 Konfigurator" style="text-decoration:none;color:#fff"><div class="karton-top"><span>Dein Karton</span><em>5 bezahlen, 6 bekommen</em></div>' + slotsHtml(top, false) + '</a>' +
-      '</div>' + brands() + '</section>' +
+      '</div></section>' +
 
       '<section class="trust"><div class="wrap"><ul>' +
       '<li>' + ico('truck') + '<div><b>Gratis Versand ab € 89</b><span>in Österreich, 1–3 Werktage</span></div></li>' +
       '<li>' + ico('tool') + '<div><b>Eigene Werkstatt in Wien</b><span>Jede Maschine vor Versand geprüft</span></div></li>' +
       '<li>' + ico('chat') + '<div><b>Persönliche Einschulung</b><span>Im Store, per Telefon oder Videocall</span></div></li>' +
-      '<li>' + ico('cup') + '<div><b>Frisch aus Italien</b><span>Mehrmals im Jahr nachbestellt</span></div></li></ul></div></section>' +
+      '<li>' + ico('cup') + '<div><b>Frisch aus Italien</b><span>Mehrmals im Jahr nachbestellt</span></div></li></ul></div></section>' + brands() +
 
       '<section class="sec"><div class="wrap"><div class="sec-head"><div><h2>Die Bestseller</h2><p>Was unsere Kundinnen und Kunden am häufigsten nachbestellen.</p></div><a class="link" href="#/kaffee">Alle ' + WU.coffees.length + ' Kaffees</a></div>' +
       '<div class="rail">' + WU.coffees.slice(0, 8).map(card).join('') + '</div></div></section>' +

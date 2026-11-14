@@ -497,15 +497,16 @@ body{background:#fffdfa}
 .rich h2{margin-top:30px}.rich h3{margin:22px 0 6px}
 .tbl tr:first-child th{position:static}
 
-/* Markenleiste im Hero: eine Zeile mit Logos */
-.brands{position:relative;display:flex;align-items:center;gap:16px;padding-bottom:clamp(38px,5vw,56px);color:#fff}
-.brands em{flex:none;font-style:normal;font-size:.875rem;font-weight:700}
-.brands > div{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding:2px 16px 2px 0}
-.brands > div::-webkit-scrollbar{display:none}
-.brands a{flex:none;display:grid;place-items:center;overflow:hidden;width:120px;height:56px;padding:0;border-radius:10px;background:#fff;color:var(--espresso);text-decoration:none}
-.brands img{width:100%;height:100%;object-fit:contain;padding:3px 6px}.brands img.big{padding:0;transform:scale(1.4)}
-.brands b{font-family:var(--display);font-weight:800;font-size:1rem}
-.brands a:focus-visible{outline:3px solid var(--limone);outline-offset:2px}
-@media (max-width:640px){.brands{flex-direction:column;align-items:flex-start;gap:8px}.brands > div{max-width:calc(100% + 16px)}.brands a{width:100px;height:48px}}
-@media (min-width:900px){.brands > div{margin:0;padding:0;overflow:visible}}
-.hero .hero-in{padding-bottom:clamp(22px,3vw,36px)}
+/* Top Marken */
+.marken{padding:clamp(28px,4vw,48px) 0 clamp(8px,2vw,20px)}
+.marken-h{display:flex;align-items:baseline;gap:22px;margin-bottom:16px}
+.marken-h h2{font-size:clamp(1.25rem,1.1rem + .6vw,1.5rem);margin:0}
+.marken-h a{color:var(--ink);font-size:1rem;text-underline-offset:4px}
+.marken ul{list-style:none;margin:0 -16px;padding:2px 16px 8px;display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:16px;scrollbar-width:none}
+.marken ul::-webkit-scrollbar{display:none}
+.marken li{flex:0 0 38%;max-width:170px;scroll-snap-align:start}
+.marken li a{display:block;aspect-ratio:1;border:1px solid #b9aea5;border-radius:12px;background:#fff;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.marken li img{display:block;width:100%;height:100%;object-fit:contain}
+@media (hover:hover){.marken li a:hover{border-color:var(--rosso);box-shadow:var(--shadow)}}
+.marken li a:focus-visible{outline:3px solid var(--rosso);outline-offset:2px}
+@media (min-width:900px){.marken ul{margin:0;padding:2px 0 8px;display:grid;grid-template-columns:repeat(6,1fr);gap:12px;overflow:visible}.marken li{max-width:none}}
