@@ -497,17 +497,15 @@ body{background:#fffdfa}
 .rich h2{margin-top:30px}.rich h3{margin:22px 0 6px}
 .tbl tr:first-child th{position:static}
 
-/* Markenleiste im Hero */
-.brands{position:relative;padding-top:6px;padding-bottom:clamp(44px,6vw,72px);color:#fff}
-.brands > p{font-family:var(--display);font-weight:800;font-size:clamp(1.0625rem,1rem + .5vw,1.375rem);line-height:1.3;max-width:44ch;margin:0 0 18px}
-.brand-row{display:grid;gap:8px;margin-top:14px}
-.brand-row em{font-style:normal;font-size:.875rem;font-weight:600;opacity:.8}
-.brand-row > div{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px 4px;scroll-padding-left:16px;scroll-snap-type:x proximity}
-.brand-row > div::-webkit-scrollbar{display:none}
-.brand-row a{flex:none;scroll-snap-align:start;display:grid;gap:1px;min-height:58px;align-content:center;padding:8px 18px;border-radius:14px;background:#fff;color:var(--espresso);text-decoration:none;transition:transform .15s}
-.brand-row b{font-family:var(--display);font-weight:800;font-size:1.0625rem;line-height:1.15;white-space:nowrap}
-.brand-row span{font-size:.75rem;color:var(--mut);white-space:nowrap}
-@media (hover:hover){.brand-row a:hover{transform:translateY(-2px)}}
-.brand-row a:focus-visible{outline:3px solid var(--limone);outline-offset:2px}
-@media (min-width:900px){.brand-row{grid-template-columns:230px 1fr;align-items:center}.brand-row > div{flex-wrap:wrap;overflow:visible;margin:0;padding:0}}
-.hero .hero-in{padding-bottom:clamp(28px,4vw,48px)}
+/* Markenleiste im Hero: eine Zeile mit Logos */
+.brands{position:relative;display:flex;align-items:center;gap:16px;padding-bottom:clamp(38px,5vw,56px);color:#fff}
+.brands em{flex:none;font-style:normal;font-size:.875rem;font-weight:700}
+.brands > div{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding:2px 16px 2px 0}
+.brands > div::-webkit-scrollbar{display:none}
+.brands a{flex:none;display:grid;place-items:center;overflow:hidden;width:120px;height:56px;padding:0;border-radius:10px;background:#fff;color:var(--espresso);text-decoration:none}
+.brands img{width:100%;height:100%;object-fit:contain;padding:3px 6px}.brands img.big{padding:0;transform:scale(1.4)}
+.brands b{font-family:var(--display);font-weight:800;font-size:1rem}
+.brands a:focus-visible{outline:3px solid var(--limone);outline-offset:2px}
+@media (max-width:640px){.brands{flex-direction:column;align-items:flex-start;gap:8px}.brands > div{max-width:calc(100% + 16px)}.brands a{width:100px;height:48px}}
+@media (min-width:900px){.brands > div{margin:0;padding:0;overflow:visible}}
+.hero .hero-in{padding-bottom:clamp(22px,3vw,36px)}

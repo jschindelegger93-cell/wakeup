@@ -160,15 +160,12 @@
   }
 
   /* ---------- Startseite ---------- */
-  /* Markenleiste im Hero: nur Marken, die im Sortiment sind */
+  /* Markenleiste im Hero: die Röstereien mit ihren Logos aus dem Shop, eine Zeile */
   function brands() {
-    function n(v, kinds) { return WU.all.filter(function (p) { return p.vendor === v && (!kinds || kinds.indexOf(p.kind) >= 0); }).length; }
-    var ro = Object.keys(WU.REGIONS).filter(function (v) { return n(v); }).map(function (v) {
-      return '<a href="#/ratgeber/roesterei-' + v.toLowerCase().replace(/\s+/g, '-') + '" data-track="hero_marke"><b>' + esc(v) + '</b><span>' + esc(WU.REGIONS[v].region) + '</span></a>'; });
-    var MA = [['969.coffee', 'Siebträger', '#/maschinen'], ['La Marzocco', 'Siebträger', '#/p/lamarzocco-linea-mini-r'], ['La San Marco', 'Hebelmaschinen', '#/maschinen'], ['Eureka', 'Mühlen', '#/seite/eureka'], ['Mazzer', 'Mühlen', '#/seite/mazzer'], ['Joe Frex', 'Zubehör', '#/sortiment'], ['Motta', 'Zubehör', '#/sortiment'], ['Puly Caff', 'Reinigung', '#/sortiment']]
-      .filter(function (m) { return n(m[0]); }).map(function (m) { return '<a href="' + m[2] + '" data-track="hero_marke"><b>' + esc(m[0]) + '</b><span>' + esc(m[1]) + '</span></a>'; });
-    return '<div class="wrap brands"><p>' + (ro.length + MA.length) + ' Marken führen wir. Kaffee verkosten und Maschinen ausprobieren kannst du bei uns im Geschäft in Wien.</p>' +
-      '<div class="brand-row"><em>Röstereien</em><div>' + ro.join('') + '</div></div><div class="brand-row"><em>Maschinen, Mühlen, Zubehör</em><div>' + MA.join('') + '</div></div></div>';
+    var LOGO = { 'Guglielmo': 'Gug_LOGO.jpg', 'Kremoso': 'Kremoso_logo.jpg', 'Ionia': 'ionia_logo.jpg', 'Trombetta': 'Trombetta_logo.jpg', 'La Messicana': 'Lamessicana_logo.png' };
+    return '<div class="wrap brands"><em>Unsere Röstereien</em><div>' + Object.keys(WU.REGIONS).filter(function (v) { return WU.coffees.some(function (c) { return c.vendor === v; }); }).map(function (v) {
+      return '<a href="#/ratgeber/roesterei-' + v.toLowerCase().replace(/\s+/g, '-') + '" data-track="hero_marke" aria-label="' + esc(v) + ', Rösterei aus ' + esc(WU.REGIONS[v].region) + '">' +
+        (LOGO[v] ? '<img src="' + WU.CDN + LOGO[v] + '?height=120" alt="' + esc(v) + '" width="108" height="60"' + (v === 'Ionia' || v === 'Trombetta' ? ' class="big"' : '') + '>' : '<b>' + esc(v) + '</b>') + '</a>'; }).join('') + '</div></div>';
   }
   function home() {
     var top = WU.coffees.slice(0, 5), pakete = WU.others.filter(function (p) { return p.kind === 'paket'; });
