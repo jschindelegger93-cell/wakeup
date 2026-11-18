@@ -246,8 +246,8 @@
   /* ---------- Kaffee-Übersicht ---------- */
   var filt = { vendor: '', taste: '', sort: 'top' };
   var TASTES = { kraeftig: ['Kräftig', function (c) { return c.intensity >= 7; }], ausgewogen: ['Ausgewogen', function (c) { return c.intensity >= 4 && c.intensity <= 6; }], fein: ['Fein und mild', function (c) { return c.intensity <= 3; }] };
-  var FORMATS = ['1 kg Bohnen', '0,5 kg Bohnen', '0,25 kg Bohnen', 'Moka gemahlen', 'Espresso gemahlen', 'E.S.E. Pads', 'Probierpakete'];
-  function formatOf(p) { return p.kind === 'kaffee' ? '1 kg Bohnen' : p.kind === 'paket' ? 'Probierpakete' : p.type === 'Kaffee 500 g' ? '0,5 kg Bohnen' : p.type === 'Kaffee 250 g' ? '0,25 kg Bohnen' : p.type; }
+  var FORMATS = ['1 kg Bohnen', '500 g Bohnen', '250 g Bohnen', 'Moka gemahlen', 'Espresso gemahlen', 'E.S.E. Pads', 'Probierpakete'];
+  function formatOf(p) { return p.kind === 'kaffee' ? '1 kg Bohnen' : p.kind === 'paket' ? 'Probierpakete' : p.type === 'Kaffee 500 g' ? '500 g Bohnen' : p.type === 'Kaffee 250 g' ? '250 g Bohnen' : p.type; }
   function allCoffee() { return WU.all.filter(function (p) { return FORMATS.indexOf(formatOf(p)) >= 0; }); }
   function coffeeList() {
     var list = allCoffee().filter(function (c) {
