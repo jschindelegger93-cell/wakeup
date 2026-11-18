@@ -808,3 +808,21 @@ a.rate{margin-top:10px;min-height:32px}a.rate span:last-child{text-decoration:un
 .foot-end{display:flex;flex-wrap:wrap;gap:6px 24px;justify-content:space-between;color:rgba(255,255,255,.6)}
 @media (min-width:860px){.foot-news{grid-template-columns:1fr 1fr;align-items:center;gap:40px}.news{justify-self:end;width:100%}.foot-in{grid-template-columns:repeat(4,1fr);gap:40px}}
 .rich table{width:100%}
+
+/* Startseite: SEO-Text zweispaltig, mobil eingeklappt */
+.seo-home .seo-text{max-width:none}
+.seo-more{display:none;margin-top:16px}
+@media (min-width:900px){
+  .seo-cols{column-count:2;column-gap:56px}
+  .seo-cols > *{break-inside:avoid}
+  .seo-cols h2,.seo-cols h3{break-after:avoid;column-span:none}
+  .seo-cols > h2:first-child{column-span:all;margin-bottom:20px}
+  .seo-cols h3:first-of-type{margin-top:0}
+}
+@media (max-width:899px){
+  .seo-home .seo-text{position:relative;max-height:340px;overflow:hidden}
+  .seo-home .seo-text::after{content:"";position:absolute;left:0;right:0;bottom:0;height:90px;background:linear-gradient(rgba(247,239,226,0),var(--sabbia));pointer-events:none}
+  .seo-home.open .seo-text{max-height:none}
+  .seo-home.open .seo-text::after{display:none}
+  .seo-more{display:inline-flex}
+}
