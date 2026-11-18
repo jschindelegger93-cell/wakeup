@@ -848,3 +848,8 @@ a.rate{margin-top:10px;min-height:32px}a.rate span:last-child{text-decoration:un
 .bar-btn svg{width:18px;height:18px}
 .bar-prev{left:max(0px,calc(50% - 640px))}
 .bar-next{right:max(0px,calc(50% - 640px))}
+
+.top-sell.sec{padding-top:12px;padding-bottom:20px}
+.top-sell .sec-head{margin-bottom:14px}
+.top-sell h2{font-size:clamp(1.3rem,1.1rem + .9vw,1.75rem)}
+.ph-list .byline{margin-top:8px}

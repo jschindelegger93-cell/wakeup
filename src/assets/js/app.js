@@ -573,6 +573,12 @@
     return html.replace(/\[\[p:([a-z0-9-]+)\]\]/g, function (m, h) { var p = WU.byHandle(h); if (!p) return '';
       return '<figure class="pfig"><a href="#/p/' + p.handle + '"><img src="' + esc(p.img) + '" alt="' + esc(p.title) + '" loading="lazy" width="900" height="900"></a><figcaption><a href="#/p/' + p.handle + '">' + esc(p.title) + '</a> · ' + eur(p.price) + '</figcaption></figure>'; });
   }
+  /* Röstereiseiten: oben die meistverkauften Kaffees dieser Rösterei */
+  function topSellers(slug) {
+    var v = Object.keys(WU.REGIONS).filter(function (x) { return slug === 'roesterei-' + x.toLowerCase().replace(/\s+/g, '-'); })[0]; if (!v) return '';
+    var cs = WU.coffees.filter(function (c) { return c.vendor === v; }).slice(0, 4); if (!cs.length) return '';
+    return '<section class="sec top-sell"><div class="wrap"><div class="sec-head"><div><h2>Die Bestseller von ' + esc(v) + '</h2></div><a class="link" href="#/c/' + v.toLowerCase().replace(/\s+/g, '-') + '">Alle Kaffees von ' + esc(v) + '</a></div><div class="rail">' + cs.map(card).join('') + '</div></div></section>';
+  }
   function ratgeber(slug) {
     if (!slug) {
       var cats = []; WU.GUIDES.forEach(function (g) { var c = g.cat || 'Ratgeber'; if (cats.indexOf(c) < 0) cats.push(c); });
@@ -583,8 +589,8 @@
     if (!g) return ratgeber();
     var rel = (g.related || []).map(WU.byHandle).filter(Boolean), sc = WU.SC && WU.SC.guides[slug];
     var next = (g.rel || []).map(function (s2) { return WU.GUIDES.filter(function (x) { return x.slug === s2; })[0]; }).filter(Boolean);
-    return '<div class="wrap page-head"><p class="crumbs"><a href="#/">Start</a> / <a href="#/ratgeber">Ratgeber</a> / ' + esc(g.cat || 'Ratgeber') + '</p><h1>' + esc(g.title) + '</h1><p>' + esc(g.teaser) + '</p>' +
-      '<p class="byline">Von Wake Up Espressomaschinen, Wien' + (g.date ? ' · ' + esc(g.date) : '') + ' · Lesezeit ' + g.min + ' Minuten</p></div>' +
+    return '<div class="wrap page-head' + (/^roesterei-/.test(slug) ? ' ph-list' : '') + '"><p class="crumbs"><a href="#/">Start</a> / <a href="#/ratgeber">Ratgeber</a> / ' + esc(g.cat || 'Ratgeber') + '</p><h1>' + esc(g.title) + '</h1><p>' + esc(g.teaser) + '</p>' +
+      '<p class="byline">Von Wake Up Espressomaschinen, Wien' + (g.date ? ' · ' + esc(g.date) : '') + ' · Lesezeit ' + g.min + ' Minuten</p></div>' + topSellers(slug) +
       '<div class="wrap with-aside"><article class="prose">' + (g.img ? '<img class="lead-img' + (g.fit ? ' fit' : '') + '" src="' + (g.fit ? esc(g.img) : WU.IMG(g.img)) + '" alt="' + esc(g.title) + '" width="1200" height="675">' : '') +
       '<nav class="toc" id="toc" aria-label="Inhalt"></nav>' + (sc || '') + g.sections.map(function (x) { return '<h2>' + esc(x[0]) + '</h2><p>' + esc(x[1]) + '</p>'; }).join('') + (g.more || []).map(function (x) { return '<h2>' + esc(x[0]) + '</h2>' + rich(x[1]); }).join('') +
       (g.faq ? '<h2>Häufige Fragen</h2>' + g.faq.map(function (x) { return faq(x[0], x[1]); }).join('') : '') +
