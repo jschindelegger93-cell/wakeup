@@ -758,3 +758,19 @@ a.rate{margin-top:10px;min-height:32px}a.rate span:last-child{text-decoration:un
 }
 @media (max-width:899px){.hs-pics.n4{grid-template-columns:repeat(2,1fr)!important;gap:10px}.hs-pics.n4 a{aspect-ratio:3/2}.hs-pics.n4 img{padding:0;object-fit:cover}.hs-pics.n2{gap:10px}.hs-pics.n2 a{aspect-ratio:1}}
 @media (max-width:899px){.hs-pics.n4 a{aspect-ratio:1}}
+
+/* Produktkarte: Preis und Kauf in einer Zeile; mobil als Taschen-Button */
+.card-body{display:flex;flex-direction:column}
+.card-buy{margin-top:auto;padding-top:10px;display:grid;gap:10px}
+.card-buy .quick{margin-top:0;width:100%}
+.card-buy .quick svg{display:none}
+@media (max-width:699px){
+  .card-buy{grid-template-columns:minmax(0,1fr) 44px;align-items:center;gap:8px}
+  .card-buy .price{font-size:1.0625rem;line-height:1.2}
+  .card-buy .quick{width:44px;height:44px;min-height:44px;padding:0;background:var(--rosso);border-color:var(--rosso);color:#fff}
+  .card-buy .quick span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .card-buy .quick svg{display:block}
+  .card .tags{flex-wrap:nowrap;overflow:hidden}
+  .card .tags i{white-space:nowrap;flex:none}
+  .card .tags i:nth-child(n+2){display:none}
+}

@@ -149,8 +149,10 @@
     var cheap = p.price < 500;
     return '<article class="card">' + badge + '<a class="card-media' + (p.hov ? ' has-hov' : '') + '" href="' + href(p) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(p.img) + '" alt="" loading="lazy" width="400" height="400">' + (p.hov ? '<img class="hov" src="' + esc(p.hov) + '" alt="" loading="lazy" width="400" height="400">' : '') + '</a>' +
       '<div class="card-body"><span class="vendor">' + esc(p.vendor) + '</span><a class="card-title" href="' + href(p) + '">' + esc(p.title) + '</a>' + rate(p) + meta +
-      '<span class="price">' + price + '</span>' + (p.labels ? '<span class="tags">' + p.labels.map(function (l) { return '<i>' + esc(l) + '</i>'; }).join('') + '</span>' : '') +
-      (cheap ? '<button class="btn sm ghost quick" data-act="add" data-id="' + p.id + '">' + (p.preorder ? 'Vorbestellen' : 'In den Warenkorb') + '</button>' : '<a class="btn sm ghost quick" href="' + href(p) + '">Ansehen</a>') +
+      (p.labels ? '<span class="tags">' + p.labels.map(function (l) { return '<i>' + esc(l) + '</i>'; }).join('') + '</span>' : '') +
+      '<div class="card-buy"><span class="price">' + price + '</span>' +
+      (cheap ? '<button class="btn sm ghost quick" data-act="add" data-id="' + p.id + '" aria-label="' + esc(p.title) + ' ' + (p.preorder ? 'vorbestellen' : 'in den Warenkorb') + '"><span>' + (p.preorder ? 'Vorbestellen' : 'In den Warenkorb') + '</span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" aria-hidden="true"><path d="M5 8h14l-1 13H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/><path d="M12 12v5M9.5 14.5h5"/></svg></button>'
+        : '<a class="btn sm ghost quick" href="' + href(p) + '" aria-label="' + esc(p.title) + ' ansehen"><span>Ansehen</span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></a>') + '</div>' +
       '</div></article>';
   }
   function slotsHtml(picks, interactive) {
