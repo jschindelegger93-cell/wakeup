@@ -723,6 +723,8 @@
     else if (act === 'opt') { pdp.id = d.id; route(); }
     else if (act === 'qty') { pdp.qty = Math.max(1, pdp.qty + Number(d.d)); route(); }
     else if (act === 'line-qty') { var l = cart.filter(function (x) { return x.id === d.id; })[0]; if (l) setQty(d.id, l.qty + Number(d.d)); }
+    else if (act === 'menu-open') { document.body.classList.add('menu-open'); track('menu_open'); }
+    else if (act === 'menu-close') document.body.classList.remove('menu-open');
     else if (act === 'cart-open') openCart();
     else if (act === 'cart-close') closeCart();
     else if (act === 'checkout') track('begin_checkout', totals().count + ' Artikel');
@@ -758,6 +760,42 @@
   });
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeCart(); if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.closest && ev.target.closest('.pin')) { ev.preventDefault(); ev.target.closest('.pin').dispatchEvent(new MouseEvent('click', { bubbles: true })); } });
 
+  /* Mobiles Menü: Vollbild-Drawer wie im Online-Shop (wird beim Start gebaut und mit vorgerendert) */
+  function buildMenu() {
+    if (document.getElementById('mnav')) return;
+    var H = function (r) { return esc(toPath(r)); }, sz = function (u, w) { return u ? String(u).replace(/width=\d+/, 'width=' + w) : ''; };
+    var first = function (k) { return WU.others.filter(function (o) { return o.kind === k; })[0] || {}; };
+    var cof = WU.coffees[0] || {}, mach = first('maschine'), muhl = first('muehle'), pak = first('paket');
+    function sub(list) { return '<div class="msub">' + list.map(function (x) { return '<a href="' + H(x[1]) + '">' + esc(x[0]) + '</a>'; }).join('') + '</div>'; }
+    function row(t, d, im, list, href) {
+      var inner = '<span class="mth">' + (im ? '<img src="' + esc(sz(im, 240)) + '" alt="" width="72" height="72" loading="lazy">' : '') + '</span><span class="mtx"><b>' + esc(t) + '</b><small>' + esc(d) + '</small></span>';
+      return list ? '<details class="mrow"><summary>' + inner + '<span class="mchev" aria-hidden="true"></span></summary>' + sub(list) + '</details>' : '<a class="mrow" href="' + H(href) + '">' + inner + '<span class="mchev go" aria-hidden="true"></span></a>';
+    }
+    var mood = moodOf('Guglielmo') || cof.img;
+    var rows = [
+      row('Kaffee', 'Bohnen, gemahlen und Pads aus Italien', cof.img, [['Alle Kaffees', '#/kaffee'], ['Guglielmo', '#/c/guglielmo'], ['Kremoso', '#/c/kremoso'], ['Escaffe', '#/c/escaffe'], ['Ionia', '#/c/ionia'], ['Trombetta', '#/c/trombetta'], ['La Messicana', '#/c/la-messicana'], ['Espresso, ganze Bohne', '#/c/espresso-kaffee-bohnen'], ['Moka, gemahlen', '#/c/moka-gemahlen'], ['Espresso, gemahlen', '#/c/espresso-gemahlen'], ['Pads und Kapseln', '#/c/cialde-ese-pads'], ['Probierpakete', '#/c/wake-up-probierpakete']]),
+      row('Espressomaschinen', 'Einkreiser, Zweikreiser, Dualboiler, Hebel', mach.img, [['Alle Espressomaschinen', '#/maschinen'], ['Einkreiser', '#/c/einkreiser-espressomaschinen'], ['Zweikreiser', '#/c/zweikreiser-espressomaschinen'], ['Dualboiler', '#/c/dual-boiler'], ['Hebelmaschinen', '#/c/hebelmaschinen'], ['969.coffee', '#/seite/969-coffee'], ['Quickmill', '#/seite/quickmill'], ['La Marzocco', '#/c/lamarzocco'], ['La San Marco', '#/c/lasanmarco'], ['Espressomaschinensets', '#/c/espressomaschinensets']]),
+      row('Mühlen und Zubehör', 'Mahlwerke von Eureka und Mazzer', muhl.img, [['Kaffeemühlen', '#/c/mahlwerke'], ['Eureka', '#/c/eureka'], ['Mazzer', '#/c/mazzer'], ['Zubehör', '#/c/barista-zubehoer-sonstiges'], ['Espressozubereitung', '#/c/espressomaschinen-zubehoer'], ['Reinigung und Service', '#/c/reinigung-service']]),
+      row('Sortiment', 'Alle Produkte auf einen Blick', pak.img, null, '#/sortiment'),
+      row('Finder', 'In drei Fragen zu deinem Kaffee', (WU.coffees[2] || cof).img, [['Kaffee-Finder', '#/finder'], ['Maschinen-Finder', '#/maschinen-finder']]),
+      row('Ratgeber', 'Wissen rund um Kaffee und Maschinen', (WU.coffees[4] || cof).img, [['Alle Ratgeber', '#/ratgeber'], ['Unsere Röstereien', '#/roestereien'], ['Häufige Fragen', '#/faq']]),
+      row('Service', 'Einschulung, Wartung und Beratung', first('set').img, [['Einschulungen', '#/seite/einschulungen'], ['Maschinenservice', '#/seite/maschinenservice'], ['Gastro und Büro', '#/seite/gastro-buero'], ['Kaffee-Abo', '#/seite/kaffee-abo'], ['Versand und Rabatte', '#/seite/versand-rabatte'], ['Angebote und Aktionen', '#/seite/angebote-und-aktionen'], ['Über uns', '#/seite/ueber-uns']])
+    ].join('');
+    var close = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>';
+    var el = document.createElement('div');
+    el.innerHTML = '<div class="mscrim" data-act="menu-close"></div><aside class="mnav" id="mnav" role="dialog" aria-modal="true" aria-label="Menü">' +
+      '<div class="mtop"><a class="logo" href="' + H('#/') + '" aria-label="Wake Up Espressomaschinen, Startseite"><img src="https://cdn.shopify.com/s/files/1/0810/6799/9560/files/WU_LOGO_transparent.png?v=1709016505" alt="Wake Up Espressomaschinen" height="36"></a><button type="button" class="mclose" data-act="menu-close" aria-label="Menü schließen">' + close + '</button></div>' +
+      '<div class="tricolore" aria-hidden="true"></div><nav class="mbody" aria-label="Menü">' +
+      '<a class="mhero" href="' + H('#/kaffee') + '"><img src="' + esc(sz(mood, 800)) + '" alt="" width="800" height="800" loading="lazy"><span><b>Alle Kaffees</b><small>Espresso aus Italien, frisch geröstet</small></span></a>' +
+      '<a class="mpromo" href="' + H('#/5plus1') + '"><span><b>5+1 Karton</b> 5 Kilo kaufen, 1 Kilo gratis</span><i aria-hidden="true"></i></a>' +
+      '<div class="mrows">' + rows + '</div>' +
+      '<div class="mcontact"><h3>Persönlich für dich da</h3><p>Landstraßer Hauptstraße 105<br>1030 Wien</p><a class="btn light" href="tel:+4319089092">+43 1 9089092</a><p class="mh">Mo–Fr 10:00–18:30 Uhr<br>Sa 10:00–17:00 Uhr</p></div></nav></aside>';
+    var sc = document.querySelector('body > script');
+    while (el.firstChild) document.body.insertBefore(el.firstChild, sc);
+  }
+  buildMenu();
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') document.body.classList.remove('menu-open'); });
+  window.addEventListener('resize', function () { if (window.innerWidth >= 900) document.body.classList.remove('menu-open'); });
   /* Links mit '#/…' (nach clientseitigem Neuzeichnen) auf echte Pfade führen */
   document.addEventListener('click', function (ev) {
     var a = ev.target.closest && ev.target.closest('a[href^="#/"]');
