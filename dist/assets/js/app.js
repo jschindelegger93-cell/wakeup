@@ -573,6 +573,15 @@
     return html.replace(/\[\[p:([a-z0-9-]+)\]\]/g, function (m, h) { var p = WU.byHandle(h); if (!p) return '';
       return '<figure class="pfig"><a href="#/p/' + p.handle + '"><img src="' + esc(p.img) + '" alt="' + esc(p.title) + '" loading="lazy" width="900" height="900"></a><figcaption><a href="#/p/' + p.handle + '">' + esc(p.title) + '</a> · ' + eur(p.price) + '</figcaption></figure>'; });
   }
+  /* Röstereiseiten: Moodbild der Rösterei (aus den Produktbildern), mit Eckdaten daneben */
+  function moodOf(v) { var c = WU.coffees.filter(function (x) { return x.vendor === v && /Moodbild/i.test(x.hov || ''); })[0]; return c ? c.hov.replace(/width=\d+/, 'width=1000') : ''; }
+  function vendorOf(slug) { return Object.keys(WU.REGIONS).filter(function (x) { return slug === 'roesterei-' + x.toLowerCase().replace(/\s+/g, '-'); })[0]; }
+  function moodBlock(slug) {
+    var v = vendorOf(slug), img = v && moodOf(v); if (!img) return '';
+    var r = WU.REGIONS[v], cs = WU.coffees.filter(function (c) { return c.vendor === v; }), ins = cs.map(function (c) { return c.intensity; }).filter(Boolean).sort(function (a, b) { return a - b; });
+    return '<section class="mood"><div class="wrap mood-in"><img src="' + esc(img) + '" alt="' + esc(v) + ': Kaffee, Espresso-Tasse und Bohnen auf Holztisch" width="1000" height="1000" loading="lazy"><div class="mood-t"><h2>' + esc(v) + ' im Überblick</h2><ul>' +
+      '<li><b>Heimat</b><span>' + esc(r.place || r.region) + '</span></li><li><b>Röstungen bei uns</b><span>' + cs.length + '</span></li>' + (ins.length ? '<li><b>Intensität</b><span>' + (ins[0] === ins[ins.length - 1] ? ins[0] : ins[0] + ' bis ' + ins[ins.length - 1]) + ' von 10</span></li>' : '') + '</ul><p>' + esc(r.line) + '</p></div></div></section>';
+  }
   /* Röstereiseiten: oben die meistverkauften Kaffees dieser Rösterei */
   function topSellers(slug) {
     var v = Object.keys(WU.REGIONS).filter(function (x) { return slug === 'roesterei-' + x.toLowerCase().replace(/\s+/g, '-'); })[0]; if (!v) return '';
@@ -590,8 +599,8 @@
     var rel = (g.related || []).map(WU.byHandle).filter(Boolean), sc = WU.SC && WU.SC.guides[slug];
     var next = (g.rel || []).map(function (s2) { return WU.GUIDES.filter(function (x) { return x.slug === s2; })[0]; }).filter(Boolean);
     return '<div class="wrap page-head' + (/^roesterei-/.test(slug) ? ' ph-list' : '') + '"><p class="crumbs"><a href="#/">Start</a> / <a href="#/ratgeber">Ratgeber</a> / ' + esc(g.cat || 'Ratgeber') + '</p><h1>' + esc(g.title) + '</h1><p>' + esc(g.teaser) + '</p>' +
-      '<p class="byline">Von Wake Up Espressomaschinen, Wien' + (g.date ? ' · ' + esc(g.date) : '') + ' · Lesezeit ' + g.min + ' Minuten</p></div>' + topSellers(slug) +
-      '<div class="wrap with-aside"><article class="prose">' + (g.img ? '<img class="lead-img' + (g.fit ? ' fit' : '') + '" src="' + (g.fit ? esc(g.img) : WU.IMG(g.img)) + '" alt="' + esc(g.title) + '" width="1200" height="675">' : '') +
+      '<p class="byline">Von Wake Up Espressomaschinen, Wien' + (g.date ? ' · ' + esc(g.date) : '') + ' · Lesezeit ' + g.min + ' Minuten</p></div>' + topSellers(slug) + moodBlock(slug) +
+      '<div class="wrap with-aside"><article class="prose">' + (g.img && !(/^roesterei-/.test(slug) && moodBlock(slug)) ? '<img class="lead-img' + (g.fit ? ' fit' : '') + '" src="' + (g.fit ? esc(g.img) : WU.IMG(g.img)) + '" alt="' + esc(g.title) + '" width="1200" height="675">' : '') +
       '<nav class="toc" id="toc" aria-label="Inhalt"></nav>' + (sc || '') + g.sections.map(function (x) { return '<h2>' + esc(x[0]) + '</h2><p>' + esc(x[1]) + '</p>'; }).join('') + (g.more || []).map(function (x) { return '<h2>' + esc(x[0]) + '</h2>' + rich(x[1]); }).join('') +
       (g.faq ? '<h2>Häufige Fragen</h2>' + g.faq.map(function (x) { return faq(x[0], x[1]); }).join('') : '') +
       (next.length ? '<h2>Weiterlesen</h2><ul class="next">' + next.map(function (n) { return '<li><a href="#/ratgeber/' + n.slug + '">' + esc(n.title) + '</a><span>' + esc(n.teaser) + '</span></li>'; }).join('') + '</ul>' : '') +

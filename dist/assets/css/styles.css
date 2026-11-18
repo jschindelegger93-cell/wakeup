@@ -853,3 +853,14 @@ a.rate{margin-top:10px;min-height:32px}a.rate span:last-child{text-decoration:un
 .top-sell .sec-head{margin-bottom:14px}
 .top-sell h2{font-size:clamp(1.3rem,1.1rem + .9vw,1.75rem)}
 .ph-list .byline{margin-top:8px}
+
+.mood{padding:8px 0 32px}
+.mood-in{display:grid;grid-template-columns:minmax(0,520px) minmax(0,1fr);gap:clamp(20px,4vw,56px);align-items:center}
+.mood-in img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;background:#f6efe4}
+.mood-t h2{font-size:clamp(1.3rem,1.1rem + .9vw,1.75rem);margin-bottom:14px}
+.mood-t ul{list-style:none;margin:0 0 16px;padding:0;border-top:1px solid #e6dccf}
+.mood-t li{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid #e6dccf}
+.mood-t li b{font-weight:600}
+.mood-t li span{color:#4a3a30;text-align:right}
+.mood-t p{color:#4a3a30;max-width:48ch}
+@media (max-width:759px){.mood-in{grid-template-columns:minmax(0,1fr)}}
