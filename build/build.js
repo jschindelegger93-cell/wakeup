@@ -347,4 +347,5 @@ write(path.join(OUT, 'robots.txt'), PREVIEW ? 'User-agent: *\nDisallow: /\n' : '
   write(path.join(OUT, '_redirects'), '# Alle Adressen aus der Shopify-Sitemap, die hier anders heißen\n' + [...new Set(lines)].join('\n') + '\n');
   write(path.join(ROOT, 'docs', 'adressen-shopify-vorschau.csv'), csv.join('\n') + '\n');
   console.log('Shop-Sitemap:', SM.length, 'Adressen |', csv.filter(l => /;gleich$/.test(l)).length, 'gleich |', csv.filter(l => /301$/.test(l)).length, 'weitergeleitet | offen:', open.length, open.join(' ')); }
+if (PREVIEW) write(path.join(OUT, '_headers'), '/*\n  X-Robots-Tag: noindex, nofollow\n  X-Content-Type-Options: nosniff\n/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n');
 console.log('Seiten:', sitemap.length, '| Produkte:', coffees.length + others.length, '| Beschreibungen:', Object.keys(BODY).length, '| Shop-Seiten:', Object.keys(SC.pages).filter(k => SC.pages[k].html).length, '| Shop-Beiträge:', Object.keys(SC.guides).filter(k => SC.guides[k]).length, '| FAQ:', FAQ_SHOP.reduce((n, g) => n + g[1].length, 0));
