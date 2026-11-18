@@ -3,6 +3,9 @@
   'use strict';
   var app = document.getElementById('app');
   var FREE = WU.FREE_SHIPPING;
+  /* Statische Blöcke (SEO-Texte, Rezensionen): beim Build erzeugt, im Browser unverändert übernommen */
+  var KEPT = {}; Array.prototype.forEach.call(document.querySelectorAll('[data-keep]'), function (e) { KEPT[e.id] = e.outerHTML; });
+  function keep(id, fn) { if (WU.SC) { var h = fn(); return h ? '<div id="' + id + '" data-keep>' + h + '</div>' : ''; } return KEPT[id] || ''; }
   var eur = function (n) { return '€ ' + Number(n).toLocaleString('de-AT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var store = {
@@ -17,6 +20,7 @@
     var a = r.split('/');
     if (!a[0]) return '/' + q;
     if (a[0] === 'p') return '/products/' + a[1] + '/' + q;
+    if (a[0] === 'c') return '/collections/' + a[1] + '/' + q;
     if (a[0] === 'seite') return '/pages/' + a[1] + '/' + q;
     if (a[0] === 'ratgeber' && a[1]) return '/blogs/ratgeber/' + a[1] + '/' + q;
     return (FIXED[a[0]] || '/') + q;
@@ -27,6 +31,7 @@
     if ((m = /^\/blogs\/ratgeber\/([^\/]+)/.exec(s))) return '#/ratgeber/' + m[1];
     if (/^\/blogs\/ratgeber/.test(s)) return '#/ratgeber';
     for (var k in FIXED) if (s.indexOf(FIXED[k]) === 0) return '#/' + k;
+    if ((m = /^\/collections\/([^\/]+)/.exec(s))) return '#/c/' + m[1];
     if ((m = /^\/pages\/([^\/]+)/.exec(s))) return '#/seite/' + m[1];
     return '#/';
   }
@@ -135,13 +140,15 @@
   /* ---------- Bausteine ---------- */
   function beans(n) { var h = ''; for (var i = 1; i <= 5; i++) h += '<i' + (i <= n ? ' class="on"' : '') + '></i>'; return '<span class="beans" aria-label="Röstung ' + n + ' von 5">' + h + '</span>'; }
   function href(p) { return '#/p/' + p.handle; }
+  function stars(v) { return '<span class="stars" style="--v:' + v + '" role="img" aria-label="' + String(v).replace('.', ',') + ' von 5 Sternen">★★★★★</span>'; }
+  function rate(p, link) { if (!p.rating) return ''; var s = stars(p.rating[0]) + '<span>' + String(p.rating[0].toFixed(1)).replace('.', ',') + ' (' + p.rating[1] + (link ? ' Bewertungen' : '') + ')</span>'; return link ? '<a class="rate" href="#bewertungen">' + s + '</a>' : '<span class="rate">' + s + '</span>'; }
   function card(p) {
     var badge = p.compare ? '<span class="badge">Spare ' + eur(p.compare - p.price) + '</span>' : (p.preorder ? '<span class="badge dark">Vorbestellen</span>' : '');
     var meta = p.kind === 'kaffee' ? '<span class="roast">Röstung ' + beans(p.roast) + '</span><span class="notes">' + esc(p.aromas.slice(0, 3).join(' · ')) + '</span>' : '';
     var price = (p.compare ? '<del>' + eur(p.compare) + '</del>' : '') + eur(p.price) + (p.kind === 'kaffee' ? ' <small>/ kg</small>' : '');
     var cheap = p.price < 500;
     return '<article class="card">' + badge + '<a class="card-media" href="' + href(p) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(p.img) + '" alt="" loading="lazy" width="400" height="400"></a>' +
-      '<div class="card-body"><span class="vendor">' + esc(p.vendor) + '</span><a class="card-title" href="' + href(p) + '">' + esc(p.title) + '</a>' + meta +
+      '<div class="card-body"><span class="vendor">' + esc(p.vendor) + '</span><a class="card-title" href="' + href(p) + '">' + esc(p.title) + '</a>' + rate(p) + meta +
       '<span class="price">' + price + '</span>' +
       (cheap ? '<button class="btn sm ghost quick" data-act="add" data-id="' + p.id + '">' + (p.preorder ? 'Vorbestellen' : 'In den Warenkorb') + '</button>' : '<a class="btn sm ghost quick" href="' + href(p) + '">Ansehen</a>') +
       '</div></article>';
@@ -178,14 +185,14 @@
       '<a class="karton" href="#/5plus1" aria-label="Zum 5+1 Konfigurator" style="text-decoration:none;color:#fff"><div class="karton-top"><span>Dein Karton</span><em>5 bezahlen, 6 bekommen</em></div>' + slotsHtml(top, false) + '</a>' +
       '</div></section>' +
 
+      '<section class="sec first"><div class="wrap"><div class="sec-head"><div><h2>Die Bestseller</h2><p>Was unsere Kundinnen und Kunden am häufigsten nachbestellen.</p></div><a class="link" href="#/kaffee">Alle ' + WU.coffees.length + ' Kaffees</a></div>' +
+      '<div class="rail">' + WU.coffees.slice(0, 8).map(card).join('') + '</div></div></section>' +
+
       '<section class="trust"><div class="wrap"><ul>' +
       '<li>' + ico('truck') + '<div><b>Gratis Versand ab € 89</b><span>in Österreich, 1–3 Werktage</span></div></li>' +
       '<li>' + ico('tool') + '<div><b>Eigene Werkstatt in Wien</b><span>Jede Maschine vor Versand geprüft</span></div></li>' +
       '<li>' + ico('chat') + '<div><b>Persönliche Einschulung</b><span>Im Store, per Telefon oder Videocall</span></div></li>' +
       '<li>' + ico('cup') + '<div><b>Frisch aus Italien</b><span>Mehrmals im Jahr nachbestellt</span></div></li></ul></div></section>' + brands() +
-
-      '<section class="sec"><div class="wrap"><div class="sec-head"><div><h2>Die Bestseller</h2><p>Was unsere Kundinnen und Kunden am häufigsten nachbestellen.</p></div><a class="link" href="#/kaffee">Alle ' + WU.coffees.length + ' Kaffees</a></div>' +
-      '<div class="rail">' + WU.coffees.slice(0, 8).map(card).join('') + '</div></div></section>' +
 
       '<section class="sec" style="padding-top:0"><div class="wrap"><div class="cats">' +
       '<a class="cat dark" href="#/kaffee"><img src="' + WU.IMG('Kaffee.png') + '" alt=""><h3>Kaffee</h3><span>' + WU.coffees.length + ' Röstungen in der 1-kg-Packung</span></a>' +
@@ -218,6 +225,8 @@
 
       '<section class="sec"><div class="wrap"><div class="sec-head"><div><h2>Ratgeber</h2><p>Damit der Espresso zu Hause so schmeckt wie an der Bar.</p></div><a class="link" href="#/ratgeber">Alle Artikel</a></div><div class="guides">' + WU.GUIDES.slice(0, 3).map(guideCard).join('') + '</div></div></section>' +
 
+      keep('home-seo', function () { return WU.SC.home && WU.SC.home.html ? '<section class="seo"><div class="wrap"><div class="rich seo-text">' + WU.SC.home.html + '</div></div></section>' : ''; }) +
+
       '<section class="strip" aria-label="Eindrücke aus Geschäft und Werkstatt">' + ['ScrollingBoxes3.png', 'ScrollingBoxes1.png', 'duotone_26.png', 'ScrollingBoxes2.png', 'duotone_30.png'].map(function (n) { return '<img src="' + WU.IMG(n) + '" alt="" loading="lazy" width="600" height="600">'; }).join('') + '</section>';
   }
   function faq(q, a) { return '<details><summary>' + esc(q) + '</summary><p>' + esc(a) + '</p></details>'; }
@@ -237,18 +246,26 @@
     if (filt.sort === 'int') list.sort(function (a, b) { return (b.intensity || 0) - (a.intensity || 0); });
     return list;
   }
+  function sel(key, label, opts) { return '<label class="fsel"><span>' + label + '</span><select data-act="f-sel" data-k="' + key + '">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + ((filt[key] || '') === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>'; }
+  var SORTS = [['top', 'Empfohlen'], ['asc', 'Preis aufsteigend'], ['desc', 'Preis absteigend'], ['rate', 'Beste Bewertung']];
+  function sorted(list) { list = list.slice();
+    if (filt.sort === 'asc') list.sort(function (a, b) { return a.price - b.price; });
+    if (filt.sort === 'desc') list.sort(function (a, b) { return b.price - a.price; });
+    if (filt.sort === 'rate') list.sort(function (a, b) { return (b.rating ? b.rating[0] * 100 + b.rating[1] : 0) - (a.rating ? a.rating[0] * 100 + a.rating[1] : 0); });
+    return list; }
+  function vendorsOf(list) { var v = []; list.forEach(function (c) { if (v.indexOf(c.vendor) < 0) v.push(c.vendor); }); return v.sort(); }
+  function listing(list, total, word) { return '<p class="count">' + list.length + (total !== list.length ? ' von ' + total : '') + ' ' + word + '</p>' + (list.length ? '<div class="grid">' + list.map(card).join('') + '</div>' : '<div class="empty">Zu dieser Auswahl gibt es nichts.<br><br><button class="btn sm" data-act="f-reset">Filter zurücksetzen</button></div>'); }
+  function seoText(id, key) { return keep(id, function () { var c = WU.SC.cols && WU.SC.cols[key]; return c && c.html ? '<section class="seo"><div class="wrap"><div class="rich seo-text">' + c.html + '</div></div></section>' : ''; }); }
+  function kollektion(h) {
+    var c = WU.COLS && WU.COLS[h]; if (!c) return head('Nicht gefunden', 'Diese Kategorie gibt es hier nicht') + '<div class="wrap" style="padding-bottom:64px"><a class="btn" href="#/sortiment">Zum Sortiment</a></div>';
+    var all = c.h.map(WU.byHandle).filter(Boolean), vs = vendorsOf(all), list = sorted(all.filter(function (p) { return !filt.vendor || p.vendor === filt.vendor; }));
+    return head(c.t, c.h1, '') + '<div class="wrap" style="padding-bottom:48px"><div class="filters">' + (vs.length > 1 ? sel('vendor', 'Marke', [['', 'Alle Marken']].concat(vs.map(function (v) { return [v, v]; }))) : '') + sel('sort', 'Sortieren', SORTS) + '</div>' + listing(list, all.length, 'Produkte') + '</div>' + seoText('col-seo', h);
+  }
   function kaffee() {
-    var vendors = []; allCoffee().forEach(function (c) { if (vendors.indexOf(c.vendor) < 0) vendors.push(c.vendor); });
-    var list = coffeeList();
-    var tools = '<button class="tool' + (!filt.vendor ? ' on' : '') + '" data-act="f-vendor" data-v="">Alle Röstereien</button>' +
-      vendors.map(function (v) { return '<button class="tool' + (filt.vendor === v ? ' on' : '') + '" data-act="f-vendor" data-v="' + esc(v) + '">' + esc(v) + '</button>'; }).join('');
-    var tastes = Object.keys(TASTES).map(function (k) { return '<button class="tool' + (filt.taste === k ? ' on' : '') + '" data-act="f-taste" data-v="' + k + '">' + TASTES[k][0] + '</button>'; }).join('') +
-      '<select class="tool" data-act="f-sort" aria-label="Sortieren"><option value="top"' + (filt.sort === 'top' ? ' selected' : '') + '>Empfohlen</option><option value="asc"' + (filt.sort === 'asc' ? ' selected' : '') + '>Preis aufsteigend</option><option value="desc"' + (filt.sort === 'desc' ? ' selected' : '') + '>Preis absteigend</option><option value="int"' + (filt.sort === 'int' ? ' selected' : '') + '>Kräftigste zuerst</option></select>';
+    var all = allCoffee(), list = sorted(coffeeList());
     return head('Kaffee', 'Italienische Kaffeebohnen und Espresso', 'Italienischer Kaffee direkt von sechs Röstereien: dunkel geröstet und säurearm. Ganze Bohnen in 1 kg, 500 g und 250 g, gemahlen für Siebträger und Moka, als Pads und im Probierpaket.') +
-      '<div class="wrap" style="padding-bottom:64px"><div class="tools"><button class="tool' + (!filt.format ? ' on' : '') + '" data-act="f-format" data-v="">Alle Formate</button>' + FORMATS.map(function (f) { return '<button class="tool' + (filt.format === f ? ' on' : '') + '" data-act="f-format" data-v="' + f + '">' + f + '</button>'; }).join('') + '</div><div class="tools">' + tools + '</div><div class="tools">' + tastes + '</div>' +
-      '<p class="count">' + list.length + ' von ' + allCoffee().length + ' Kaffees</p>' +
-      (list.length ? '<div class="grid">' + list.map(card).join('') + '</div>' : '<div class="empty">Zu dieser Auswahl gibt es keinen Kaffee.<br><br><button class="btn sm" data-act="f-reset">Filter zurücksetzen</button></div>') +
-      '<p style="margin-top:32px"><a class="btn ghost" href="#/sortiment">500 g, 250 g, gemahlen, Pads und Zubehör ansehen</a></p></div>';
+      '<div class="wrap" style="padding-bottom:48px"><div class="filters">' + sel('format', 'Format', [['', 'Alle Formate']].concat(FORMATS.map(function (f) { return [f, f]; }))) + sel('vendor', 'Rösterei', [['', 'Alle Röstereien']].concat(vendorsOf(all).map(function (v) { return [v, v]; }))) + sel('sort', 'Sortieren', SORTS.concat([['int', 'Kräftigste zuerst']])) + '</div>' +
+      listing(list, all.length, 'Kaffees') + '</div>' + seoText('col-seo', 'kaffee');
   }
 
   /* ---------- Gesamtes Sortiment (live aus dem Shop) ---------- */
@@ -274,13 +291,10 @@
       .catch(function () { WU.catalog = 'fehler';  });
   }
   function sortiment() {
-    var types = []; WU.all.forEach(function (p) { var t = typeOf(p); if (types.indexOf(t) < 0) types.push(t); });
-    var list = WU.all.filter(function (p) { return !filt.type || typeOf(p) === filt.type; });
-    var note = WU.catalog === 'ok' || WU.staticCatalog ? '' : WU.catalog === 'fehler' ? '<p class="hint">Das vollständige Sortiment konnte gerade nicht aus dem Shop geladen werden. Du siehst die Auswahl aus der Vorschau.</p>' : '<p class="count">Das vollständige Sortiment wird aus dem Shop geladen …</p>';
+    var types = []; WU.all.forEach(function (p) { var x = typeOf(p); if (types.indexOf(x) < 0) types.push(x); });
+    var list = sorted(WU.all.filter(function (p) { return (!filt.type || typeOf(p) === filt.type) && (!filt.vendor || p.vendor === filt.vendor); }));
     return head('Sortiment', 'Kaffee, Maschinen und Kaffeezubehör', 'Alle ' + WU.all.length + ' Produkte aus unserem Geschäft in Wien: italienische Kaffeebohnen, Siebträgermaschinen, Mühlen, Kaffeezubehör für Baristas, Reinigung und Ersatzteile.') +
-      '<div class="wrap" style="padding-bottom:64px">' + note + '<div class="tools"><button class="tool' + (!filt.type ? ' on' : '') + '" data-act="f-type" data-v="">Alles</button>' +
-      types.map(function (t) { return '<button class="tool' + (filt.type === t ? ' on' : '') + '" data-act="f-type" data-v="' + esc(t) + '">' + esc(t) + '</button>'; }).join('') + '</div>' +
-      '<p class="count">' + list.length + ' Produkte</p><div class="grid">' + list.map(card).join('') + '</div></div>';
+      '<div class="wrap" style="padding-bottom:64px"><div class="filters">' + sel('type', 'Kategorie', [['', 'Alle Kategorien']].concat(types.map(function (x) { return [x, x]; }))) + sel('vendor', 'Marke', [['', 'Alle Marken']].concat(vendorsOf(WU.all).map(function (v) { return [v, v]; }))) + sel('sort', 'Sortieren', SORTS) + '</div>' + listing(list, WU.all.length, 'Produkte') + '</div>';
   }
 
   /* ---------- Maschinen ---------- */
@@ -292,10 +306,33 @@
     return head('Maschinen & Mühlen', 'Siebträgermaschinen und Espressomaschinen', 'Kaffeemaschinen mit Siebträger für Barista-Espresso zu Hause, dazu die passende Mühle. Jede Espressomaschine prüfen wir vor dem Versand in unserer Wiener Werkstatt. Im Geschäft kannst du alle Maschinen ausprobieren.') +
       '<div class="wrap">' + group('maschine', 'Espressomaschinen', 'Vom kompakten Einkreiser bis zur Hebelmaschine.') +
       group('set', 'Maschine und Mühle im Set', 'Im Set sparst du 7 % beim Checkout.') +
-      group('muehle', 'Kaffeemühlen', 'Die Maschine ist nur so gut wie die Mühle daneben.') + '<p style="padding-bottom:64px"><a class="btn ghost" href="#/maschinen-finder">Unsicher? Zum Maschinen-Finder</a></p></div>';
+      group('muehle', 'Kaffeemühlen', 'Die Maschine ist nur so gut wie die Mühle daneben.') + '<p style="padding-bottom:48px"><a class="btn ghost" href="#/maschinen-finder">Unsicher? Zum Maschinen-Finder</a></p></div>' + seoText('col-seo', 'maschinen');
   }
 
   /* ---------- Produktseite ---------- */
+  var AROMA = [[/schoko|kakao/i, '<rect x="4" y="4" width="16" height="16"/><path d="M12 4v16M4 12h16"/>'], [/nuss|mandel|pistaz|marzipan/i, '<path d="M12 3c5 3 7 7 7 10a7 7 0 0 1-14 0c0-3 2-7 7-10z"/><path d="M12 8v8"/>'], [/vanill|blum|blüte|floral/i, '<circle cx="12" cy="12" r="2.5"/><path d="M12 2.5v5M12 16.5v5M2.5 12h5M16.5 12h5M5.3 5.3l3.5 3.5M15.2 15.2l3.5 3.5M5.3 18.7l3.5-3.5M15.2 8.8l3.5-3.5"/>'], [/karamell|honig|sirup|toffee|süß|zucker/i, '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>'], [/frucht|zitrus|beere|kirsch|orange|apfel|zitron/i, '<path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 14z"/><path d="M5 19l9-9"/>'], [/röst|würz|tabak|pfeffer|rauch|holz|kräftig|brot|toast/i, '<path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>']];
+  function aromaIco(a) { var d = '<ellipse cx="12" cy="12" rx="6" ry="9" transform="rotate(30 12 12)"/><path d="M8.5 17c3-2 .5-6 4-9"/>'; for (var i = 0; i < AROMA.length; i++) if (AROMA[i][0].test(a)) { d = AROMA[i][1]; break; } return '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true">' + d + '</svg>'; }
+  function aromen(p) { var l = (p.aromas && p.aromas.length ? p.aromas : p.aromen || []).map(function (a) { return String(a).trim(); }).filter(Boolean); if (!l.length) return ''; return '<div class="aromen"><b>Aromanoten</b><ul>' + l.map(function (a) { return '<li>' + aromaIco(a) + '<span>' + esc(a) + '</span></li>'; }).join('') + '</ul></div>'; }
+  function bullets(p) { if (!p.bul) return ''; return '<ul class="bul">' + p.bul.map(function (b) { return '<li>' + ico('check') + '<span>' + (b[0] ? '<b>' + esc(b[0]) + ':</b> ' : '') + esc(b[1]) + '</span></li>'; }).join('') + '</ul>'; }
+  function uspBar() { var I = ['truck', 'clock', 'home', 'chat']; if (!WU.USP || !WU.USP.length) return ''; return '<ul class="usp">' + WU.USP.map(function (u, i) { return '<li>' + ico(I[i % 4]) + '<div><b>' + esc(u[0]) + '</b><span>' + esc(u[1]) + '</span></div></li>'; }).join('') + '</ul>'; }
+  var MON = ['Jänner', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  function dateDe(s) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? Number(m[3]) + '. ' + MON[Number(m[2]) - 1] + ' ' + m[1] : ''; }
+  function pdpStatic(p) {
+    return keep('pdp-static', function () {
+      var x = WU.SC.pdp && WU.SC.pdp[p.handle], h = ''; if (!x) return '';
+      if (x.details) h += '<section class="sec band"><div class="wrap kd"><div><h2>' + esc(x.details.title || 'Im Detail') + '</h2><dl class="kd-rows">' + x.details.rows.map(function (r) {
+        var v = r.on != null ? '<span class="kd-bar" role="img" aria-label="' + r.on + ' von ' + r.of + '">' + new Array(r.of + 1).join('x').split('').map(function (_, i) { return '<i' + (i < r.on ? ' class="on"' : '') + '></i>'; }).join('') + '</span>' + esc(r.cap) : esc(r.val || r.items.join(', '));
+        return '<div><dt>' + esc(r.name) + '</dt><dd>' + v + '</dd></div>'; }).join('') + '</dl></div><div class="rich">' + x.details.desc + '</div></div></section>';
+      if (x.roaster) { var slug = 'roesterei-' + x.roaster.name.toLowerCase().replace(/\s+/g, '-'), has = WU.GUIDES.some(function (g) { return g.slug === slug; });
+        h += '<section class="sec"><div class="wrap rs">' + (x.roaster.img ? '<img class="rs-img" src="' + esc(x.roaster.img) + '&width=1000" alt="Die Rösterei ' + esc(x.roaster.name) + '" loading="lazy" width="1000" height="750">' : '') +
+          '<div><div class="rs-head">' + (x.roaster.logo ? '<img src="' + esc(x.roaster.logo) + '&width=240" alt="Logo ' + esc(x.roaster.name) + '" loading="lazy" width="120" height="120">' : '') + '<div><p class="eye">Die Rösterei</p><h2>' + esc(x.roaster.name) + '</h2>' + (x.roaster.claim ? '<p class="rs-claim">' + esc(x.roaster.claim) + '</p>' : '') + '</div></div>' +
+          (x.roaster.facts.length ? '<dl class="rs-facts">' + x.roaster.facts.map(function (f) { return '<div><dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd></div>'; }).join('') + '</dl>' : '') + '<div class="rich">' + x.roaster.story + '</div>' +
+          '<p class="rs-links">' + (has ? '<a class="btn ghost sm" href="#/ratgeber/' + slug + '">Mehr über ' + esc(x.roaster.name) + '</a>' : '') + (WU.COLS && WU.COLS[x.roaster.name.toLowerCase().replace(/\s+/g, '-')] ? '<a class="btn ghost sm" href="#/c/' + x.roaster.name.toLowerCase().replace(/\s+/g, '-') + '">Alle Kaffees von ' + esc(x.roaster.name) + '</a>' : '') + '</p></div></div></section>'; }
+      if (x.reviews.length) h += '<section class="sec band" id="bewertungen"><div class="wrap"><div class="rev-head"><h2>Bewertungen</h2><p>' + stars(x.rating.value) + '<b>' + String(x.rating.value.toFixed(1)).replace('.', ',') + ' von 5</b> aus ' + x.rating.count + ' Bewertungen</p></div><div class="revs">' + x.reviews.map(function (r, ri) {
+        return (ri === 6 ? '</div><details class="rev-more"><summary>Alle ' + x.reviews.length + ' Bewertungen anzeigen</summary><div class="revs">' : '') + '<article class="rev">' + stars(r.rating) + (r.text ? '<p>' + esc(r.text) + '</p>' : '') + (r.img ? '<img src="' + esc(r.img) + '" alt="Kundenfoto von ' + esc(r.name) + '" loading="lazy" width="320" height="320">' : '') + '<footer><b>' + esc(r.name) + '</b>' + (r.verified ? '<span>Verifizierter Kauf</span>' : '') + (r.date ? '<time datetime="' + r.date + '">' + dateDe(r.date) + '</time>' : '') + '</footer></article>'; }).join('') + '</div>' + (x.reviews.length > 6 ? '</details>' : '') + '</div></section>';
+      return h;
+    });
+  }
   var pdp = { id: '', qty: 1 };
   function meter(label, v, max) { return '<div class="meter"><span>' + label + '</span><i><b style="width:' + Math.round(v / max * 100) + '%"></b></i><em>' + v + '/' + max + '</em></div>'; }
   function more(p) {
@@ -353,13 +390,13 @@
       '<button class="opt' + (pdp.id === p.kartonId ? ' on' : '') + '" data-act="opt" data-id="' + p.kartonId + '"><div><b>Karton mit 6 kg</b><span>5+1 kg gratis, ' + eur(p.price * 5 / 6) + ' pro kg</span></div><strong>' + eur(p.price * 5) + '</strong></button></div>' : (p.variants && p.variants.length > 1 ? '<div class="opts">' + p.variants.map(function (x) { return '<button class="opt' + (pdp.id === x.id ? ' on' : '') + '" data-act="opt" data-id="' + x.id + '"' + (x.available ? '' : ' disabled') + '><div><b>' + esc(x.title) + '</b>' + (x.available ? '' : '<span>Ausverkauft</span>') + '</div><strong>' + eur(x.price) + '</strong></button>'; }).join('') + '</div>' : '');
     var profile = isC ? '<div class="profile"><div><div class="blend-l"><span>' + p.arabica + ' % Arabica</span><span>' + (100 - p.arabica) + ' % Robusta</span></div><div class="blend"><b style="width:' + p.arabica + '%"></b></div></div>' +
       meter('Röstung', p.roast, 5) + meter('Intensität', p.intensity, 10) + meter('Körper', p.body, 5) + meter('Bitterkeit', p.bitter, 5) + meter('Säure', p.acid, 5) +
-      '<div class="chips">' + p.aromas.map(function (a) { return '<span class="chip">' + esc(a.trim()) + '</span>'; }).join('') + '</div></div>' : '';
+      '</div>' : '';
     var service = (p.kind === 'maschine' || p.kind === 'set') ? '<div class="service"><h3>Bei jeder Maschine dabei</h3><ul class="facts">' + fact('check', 'Vor dem Versand in unserer Werkstatt geprüft') + fact('chat', 'Persönliche Einschulung per Telefon oder WhatsApp-Videocall') + fact('tool', 'Maschinenservice bei uns in Wien') + fact('truck', 'Lieferung sicher auf Palette per Spedition') + '</ul></div>' : '';
     var label = p.preorder ? 'Vorbestellen' : 'In den Warenkorb';
     var priceHtml = (p.compare ? '<del>' + eur(p.compare) + '</del>' : '') + eur(v.price);
     return '<div class="wrap page-head"><p class="crumbs"><a href="#/">Start</a> / <a href="#/' + crumbOf(p)[1] + '">' + esc(crumbOf(p)[0]) + '</a></p></div>' +
       '<div class="wrap pdp"><div class="pdp-left"><div class="pdp-media"><img id="pdp-img" src="' + esc(p.img) + '" alt="' + esc(p.title) + '" width="800" height="800" fetchpriority="high"></div><div class="thumbs" id="thumbs">' + (p.imgs && p.imgs.length > 1 ? p.imgs.map(function (src, i) { return '<button class="thumb' + (i === 0 ? ' on' : '') + '" data-act="thumb" data-src="' + esc(src) + '" aria-label="Bild ' + (i + 1) + ' von ' + p.imgs.length + '"><img src="' + esc(src) + '" alt="" loading="lazy" width="120" height="120"></button>'; }).join('') : '') + '</div></div><div>' +
-      '<span class="vendor">' + esc(p.vendor) + '</span><h1>' + esc(p.title) + '</h1>' +
+      '<span class="vendor">' + esc(p.vendor) + '</span><h1>' + esc(p.title) + '</h1>' + rate(p, true) + (p.labels ? '<p class="labels">' + p.labels.map(function (l) { return '<span>' + esc(l) + '</span>'; }).join('') + '</p>' : '') + aromen(p) +
       (isC ? '<p class="roast" style="margin-top:10px">Röstung ' + beans(p.roast) + '</p>' + (WU.REGIONS[p.vendor] ? '<p class="origin">Geröstet in ' + esc(WU.REGIONS[p.vendor].place) + '. ' + esc(WU.REGIONS[p.vendor].line) + '</p>' : '') : '') +
       '<div class="pdp-price"><span class="price">' + priceHtml + '</span>' + (p.compare ? '<span class="chip" style="background:var(--rosso);color:#fff">Spare ' + eur(p.compare - p.price) + '</span>' : '') + (p.preorder ? '<span class="chip">Vorbestellung</span>' : '') + '</div>' +
       '<p class="pdp-note">Preis inkl. MwSt., zzgl. Versand. Kostenloser Versand ab € 89 Warenwert.</p>' + opts +
@@ -367,9 +404,9 @@
       '<button class="btn" data-act="add-pdp">' + label + '</button></div>' +
       '<p class="dispatch">' + (p.kind === 'maschine' || p.kind === 'set' ? 'Geprüft in unserer Werkstatt, geliefert per Spedition' : 'Bis 13 Uhr bestellt, meist noch heute verschickt') + '</p>' +
       (isC ? '<button class="btn ghost block" style="margin-top:10px" data-act="to-builder" data-h="' + p.handle + '">In meinen 5+1 Karton legen</button>' : '') +
-      '<ul class="facts">' + fact('truck', 'Lieferung in 1–3 Werktagen in Österreich') + (isC ? fact('box', 'Im 6-kg-Karton zahlst du nur 5 kg') : '') + fact('card', 'Sicher zahlen mit PayPal, Klarna, Karte, Apple Pay oder eps') + '</ul>' +
-      profile + '<div class="pdp-text rich" id="full">' + ((WU.BODY && WU.BODY[p.handle]) || (p.text ? '<h2>Beschreibung</h2><p>' + esc(p.text) + '</p>' : '')) + '</div>' + service +
-      more(p) + '</div></div>' + similar(p) +
+      '<ul class="facts">' + fact('truck', 'Lieferung in 1–3 Werktagen in Österreich') + (isC ? fact('box', 'Im 6-kg-Karton zahlst du nur 5 kg') : '') + fact('card', 'Sicher zahlen mit PayPal, Klarna, Karte, Apple Pay oder eps') + '</ul>' + bullets(p) + uspBar() +
+      profile + (p.kd ? '' : '<div class="pdp-text rich" id="full">' + ((WU.BODY && WU.BODY[p.handle]) || (p.text ? '<h2>Beschreibung</h2><p>' + esc(p.text) + '</p>' : '')) + '</div>') + service +
+      more(p) + '</div></div>' + pdpStatic(p) + similar(p) +
       '<div class="sticky-buy"><span class="price">' + eur(v.price) + '</span><button class="btn" data-act="add-pdp">' + label + '</button></div>';
   }
 
@@ -573,7 +610,7 @@
       var p = WU.byHandle(parts[1]);
       if (p) {
         var url = here.replace(/\/$/, '') + '/products/' + p.handle + '/', avail = 'https://schema.org/' + (p.preorder ? 'PreOrder' : 'InStock');
-        var prod = { '@context': 'https://schema.org', '@type': 'Product', name: p.title, image: p.img, description: p.text, sku: p.id, brand: { '@type': 'Brand', name: p.vendor }, category: p.kind === 'kaffee' ? 'Espresso-Bohnen' : crumbOf(p)[0] === 'Kaffee' ? (p.type || 'Kaffee') : p.kind === 'live' ? (p.type || 'Zubehör') : 'Espressomaschinen und Mühlen' };
+        var prod = { '@context': 'https://schema.org', '@type': 'Product', name: p.title, image: p.img, description: p.text, sku: p.id, brand: { '@type': 'Brand', name: p.vendor }, aggregateRating: p.rating ? { '@type': 'AggregateRating', ratingValue: p.rating[0], reviewCount: p.rating[1] } : undefined, category: p.kind === 'kaffee' ? 'Espresso-Bohnen' : crumbOf(p)[0] === 'Kaffee' ? (p.type || 'Kaffee') : p.kind === 'live' ? (p.type || 'Zubehör') : 'Espressomaschinen und Mühlen' };
         var offs = (p.offers || []).map(function (o) { return { '@type': 'Offer', name: o[1], sku: o[3] || String(o[0]), priceCurrency: 'EUR', price: Number(o[2]).toFixed(2), availability: 'https://schema.org/' + (o[4] ? (p.preorder ? 'PreOrder' : 'InStock') : 'OutOfStock'), itemCondition: 'https://schema.org/NewCondition', url: url, seller: { '@id': WU.SHOP + '/#store' } }; });
         if (p.imgs && p.imgs.length) prod.image = p.imgs;
         prod.url = url; prod['@id'] = url + '#product';
@@ -625,6 +662,7 @@
     else if (view === 'finder') html = finder();
     else if (view === 'maschinen-finder') html = maschinenFinder();
     else if (view === 'sortiment') html = sortiment();
+    else if (view === 'c') html = kollektion(parts[1]);
     else if (view === 'faq') html = faqPage();
     else if (view === 'ratgeber') html = ratgeber(parts[1]);
     else if (view === 'roestereien') html = roestereien();
@@ -637,7 +675,7 @@
     });
     var t = document.querySelector('#app h1'); if (!(first && app.hasAttribute('data-pre'))) document.title = (t ? t.textContent + ' | ' : '') + 'Wake Up Espressomaschinen';
     track('page_view', view + (parts[1] ? ':' + parts[1] : ''));
-    ld(view, parts);
+    if (!(first && app.hasAttribute('data-pre'))) ld(view, parts);
   }
 
   /* ---------- Events ---------- */
@@ -657,7 +695,7 @@
     else if (act === 'f-taste') { filt.taste = filt.taste === d.v ? '' : d.v; route(); track('filter_use', 'Geschmack ' + d.v); }
     else if (act === 'f-type') { filt.type = d.v; route(); }
     else if (act === 'f-format') { filt.format = d.v; route(); }
-    else if (act === 'f-reset') { filt.vendor = ''; filt.taste = ''; filt.format = ''; route(); }
+    else if (act === 'f-reset') { filt.vendor = ''; filt.taste = ''; filt.format = ''; filt.type = ''; route(); }
     else if (act === 'b-vendor') { filt.bv = d.v; route(); }
     else if (act === 'pick') { if (picks.length < 6) { picks.push(WU.byHandle(d.h)); savePicks(); refreshBuilder(); track('bundle_slot_add', d.h); } }
     else if (act === 'unpick') { picks.splice(Number(d.i), 1); savePicks(); refreshBuilder(); }
@@ -679,6 +717,7 @@
   });
   document.addEventListener('change', function (ev) {
     if (ev.target.matches('[data-act="f-sort"]')) { filt.sort = ev.target.value; route(); }
+    if (ev.target.matches('[data-act="f-sel"]')) { var fk = ev.target.getAttribute('data-k'); filt[fk] = ev.target.value; route(); track('filter_use', fk + ' ' + (ev.target.value || 'alle')); var again = document.querySelector('[data-act="f-sel"][data-k="' + fk + '"]'); if (again) again.focus(); }
   });
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeCart(); if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.closest && ev.target.closest('.pin')) { ev.preventDefault(); ev.target.closest('.pin').dispatchEvent(new MouseEvent('click', { bubbles: true })); } });
 

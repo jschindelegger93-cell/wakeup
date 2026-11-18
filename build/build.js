@@ -17,13 +17,14 @@ const BLOG_MAP = { 'einkreiser-zweikreiser-dualboiler-hebelmashinen': 'einkreise
 const MACHINE_COLS = /espressomaschinen|mahlwerke|eureka|mazzer|969|quickmill|lamarzocco|lasanmarco|hebel|kreiser|dual-boiler/;
 const COFFEE_COLS = /kaffee|espresso-gemahlen|moka|cialde|probier|guglielmo|kremoso|escaffe|ionia|trombetta|messicana/;
 let HANDLES = new Set();
+let KNOWN_COLS = new Set();
 function mapUrl(href) {
   if (!href) return href;
   let u = href.replace(/^https?:\/\/(www\.)?wakeup-espresso\.com/, '').replace(/^file:\/\/\/C:/, '');
   if (/^(https?:|mailto:|tel:|#)/.test(u)) return u;
   let m;
   if ((m = /^\/products\/([^\/?#]+)/.exec(u))) return HANDLES.has(m[1]) ? '/products/' + m[1] + '/' : SHOP + u;
-  if ((m = /^\/collections\/([^\/?#]+)/.exec(u))) return MACHINE_COLS.test(m[1]) ? '/collections/maschinen/' : COFFEE_COLS.test(m[1]) ? '/collections/kaffee/' : '/collections/alle/';
+  if ((m = /^\/collections\/([^\/?#]+)/.exec(u))) return m[1] === 'italienischer-kaffee' ? '/collections/kaffee/' : m[1] === 'alle-espressomaschinen' ? '/collections/maschinen/' : KNOWN_COLS.has(m[1]) ? '/collections/' + m[1] + '/' : MACHINE_COLS.test(m[1]) ? '/collections/maschinen/' : COFFEE_COLS.test(m[1]) ? '/collections/kaffee/' : '/collections/alle/';
   if ((m = /^\/pages\/([^\/?#]+)/.exec(u))) return m[1] === 'faq' ? '/pages/faq/' : PAGE_MAP[m[1]] ? '/pages/' + PAGE_MAP[m[1]] + '/' : ROASTER_MAP[m[1]] ? '/blogs/ratgeber/' + ROASTER_MAP[m[1]] + '/' : SHOP + u;
   if ((m = /^\/blogs\/news\/([^\/?#]+)/.exec(u))) return BLOG_MAP[m[1]] ? '/blogs/ratgeber/' + BLOG_MAP[m[1]] + '/' : '/blogs/ratgeber/';
   return u.startsWith('/') ? SHOP + u : u;
@@ -59,18 +60,36 @@ function sanitize(html) {
 // ---------- Produkte ----------
 const shopProducts = JSON.parse(read(path.join(SHOPDATA, 'products.json'))).products;
 shopProducts.forEach(p => HANDLES.add(p.handle));
+{ const cs = JSON.parse(read(path.join(SHOPDATA, 'collections-seo.json'))); Object.keys(cs).forEach(h => { if (h !== 'frontpage' && cs[h].handles.some(x => HANDLES.has(x))) KNOWN_COLS.add(h); }); }
 const sb = {}; sb.window = sb; vm.runInNewContext(read(path.join(__dirname, 'profiles.js')), sb);
 const PROFILE = {}; sb.WU.COFFEE_ROWS.forEach(r => { PROFILE[r[0]] = r; });
 const PAKETE = ['probierpaket-6x1kg-bohnen', 'wake-up-bestseller-4x1kg-bohnen', 'wake-up-finest-selection-4x1kg-bohnen', 'wake-up-coffein-bombs-6x1kg-bohnen'];
 const PREORDER = ['lamarzocco-linea-mini-r', '969-coffee-elba-gentile-kipphebel', '969-coffee-elba-gentile', 'quickmill-carola-evo', 'mazzer-mini-g'];
 const TYPE_FIX = { 'Reinigungsmittel': 'Reinigung', 'Ersatzteil': 'Ersatzteile', 'Vakkumbehälter': 'Vakuumbehälter', 'Espressomaschine': 'Espressomaschinen', 'Kaffeemühle': 'Mühlen' };
 const vendor = v => /wake up/i.test(v) ? 'Wake Up' : v === '969 coffee' ? '969.coffee' : /^joe ?frex$/i.test(v) ? 'Joe Frex' : v;
+const PDP = JSON.parse(read(path.join(SHOPDATA, 'pdp.json'))), COLSEO = JSON.parse(read(path.join(SHOPDATA, 'collections-seo.json'))), HOMESEO = JSON.parse(read(path.join(SHOPDATA, 'home.json')));
+const USP = (Object.values(PDP).find(x => x.usp && x.usp.length) || { usp: [] }).usp;
+function extras(p, base, body) {
+  const x = PDP[p.handle] || {};
+  if (x.rating && x.rating.count) base.rating = [x.rating.value, x.rating.count];
+  if (x.labels && x.labels.length) base.labels = x.labels;
+  if (x.aromen && x.aromen.length) base.aromen = x.aromen;
+  const bul = [], rows = (x.details && x.details.rows) || [], row = n => rows.find(r => r.name === n);
+  if (x.arabica != null) bul.push(['Mischung', x.arabica + ' % Arabica' + (x.robusta ? ', ' + x.robusta + ' % Robusta' : '')]);
+  if (x.roestgrad) bul.push(['Röstgrad', x.roestgrad]);
+  [['Säure', 'Säure'], ['Körper', 'Körper'], ['Zubereitung', 'Zubereitung'], ['Serviervorschlag', 'Ideal für'], ['Koffein', 'Koffein'], ['Form', 'Form']].forEach(([n, l]) => { const r = row(n); if (r) { const v = r.cap || r.val || r.items.join(', '); if (v) bul.push([l, v]); } });
+  if (!bul.length) { const d = new JSDOM('<body>' + body + '</body>').window.document; [...d.querySelectorAll('li')].map(li => li.textContent.replace(/\s+/g, ' ').trim()).filter(s => s.length > 8 && s.length < 140).slice(0, 5).forEach(s => bul.push(['', s])); }
+  if (bul.length) base.bul = bul;
+  if (x.details && x.details.desc && x.details.desc.replace(/<[^>]+>/g, '').trim().length > 40) base.kd = 1;
+  return base;
+}
 const BODY = {}, coffees = [], others = [];
 shopProducts.forEach(p => {
   const vs = p.variants.map(v => ({ id: String(v.id), title: v.title === 'Default Title' ? 'Standard' : v.title, price: Number(v.price), compare: Number(v.compare_at_price) || 0, available: !!v.available, sku: v.sku || '' }));
   const imgs = p.images.slice(0, 6).map(i => i.src.replace(/\?.*$/, '') + '?width=900');
   const body = sanitize(p.body_html); if (text(body)) BODY[p.handle] = '<h2>Beschreibung</h2>' + body;
   const base = { handle: p.handle, vendor: vendor(p.vendor), img: imgs[0] || CDN + 'WU_LOGO_transparent.png', imgs, text: cut(body, 230), offers: vs.map(v => [v.id, v.title, v.price, v.sku, v.available ? 1 : 0]), preorder: PREORDER.includes(p.handle) };
+  extras(p, base, body);
   const r = PROFILE[p.handle], kg = vs.find(v => /^(1000g|1kg)$/.test(v.title.toLowerCase().replace(/\s/g, ''))), karton = vs.find(v => /karton/i.test(v.title));
   if (r && kg) { coffees.push(Object.assign(base, { kind: 'kaffee', title: r[1], id: kg.id, kartonId: karton ? karton.id : '', price: kg.price, roast: r[7], intensity: r[8], acid: r[9], body: r[10], bitter: r[11], arabica: r[12], aromas: r[13].split(',') })); return; }
   const v0 = vs.find(v => v.available) || vs[0], t = p.title;
@@ -108,6 +127,21 @@ read(path.join(SHOPDATA, 'blog.atom')).split('<entry>').slice(1).forEach(e => {
   const link = (e.match(/<link[^>]*href="([^"]+)"/) || [])[1] || '', h = link.split('/').pop(), c = (e.match(/<content[^>]*>([\s\S]*?)<\/content>/) || [])[1] || '';
   if (BLOG_MAP[h]) SC.guides[BLOG_MAP[h]] = sanitize(unent(c));
 });
+// Produktseiten: Details, Rösterei und Rezensionen 1:1 aus dem Shop
+SC.pdp = {};
+Object.keys(PDP).forEach(h => { const x = PDP[h]; SC.pdp[h] = { seoTitle: x.seoTitle, seoDesc: x.seoDesc, reviews: x.reviews || [], rating: x.rating || null,
+  details: x.details ? { title: x.details.title, rows: x.details.rows, desc: sanitize(x.details.desc) } : null,
+  roaster: x.roaster && x.roaster.name ? { name: x.roaster.name, claim: x.roaster.claim, logo: x.roaster.logo, img: x.roaster.img, facts: x.roaster.facts, story: sanitize(x.roaster.story) } : null }; });
+// Kollektionen: SEO-Text, Titel und Produkte
+const COL_FIXED = { 'italienischer-kaffee': 'kaffee', 'alle-espressomaschinen': 'maschinen' };
+const COLS = {}; SC.cols = {};
+Object.keys(COLSEO).forEach(h => { const c = COLSEO[h], hs = c.handles.filter(x => HANDLES.has(x)); if (h === 'frontpage') return;
+  const d = new JSDOM('<body>' + c.body + '</body>').window.document, h1 = d.querySelector('h1,h2'); let head = '';
+  d.querySelectorAll('h1').forEach(e => { const s = e.textContent.replace(/\s+/g, ' ').trim(); if (s && !head) head = s; e.remove(); });
+  const key = COL_FIXED[h] || h;
+  SC.cols[key] = { html: sanitize(d.body.innerHTML), seoTitle: c.seoTitle, seoDesc: c.seoDesc };
+  if (!COL_FIXED[h] && hs.length) COLS[h] = { t: c.title, h1: head || c.title, h: hs }; });
+SC.home = { html: sanitize((HOMESEO.sections.filter(s => s.html).sort((a, b) => b.html.length - a.html.length)[0] || { html: '' }).html) };
 const FAQ_SHOP = []; { let cur = null; const groups = ['Kaffee', 'Espresso Maschinen & Mahlwerke', 'Bestellungen', 'Sonstiges'];
   dom('page-faq').querySelectorAll('h2,h3,details').forEach(el => {
     if (el.tagName !== 'DETAILS') { const t = el.textContent.trim(); if (groups.includes(t)) { cur = [t.replace('Espresso Maschinen & Mahlwerke', 'Maschinen und Mühlen'), []]; FAQ_SHOP.push(cur); } return; }
@@ -117,7 +151,7 @@ const FAQ_SHOP = []; { let cur = null; const groups = ['Kaffee', 'Espresso Masch
 
 // ---------- Client-Daten ----------
 const dataJs = '/* Automatisch erzeugt aus data/shop/products.json (node build/build.js). Nicht von Hand bearbeiten. */\n' +
-  'window.WU=' + JSON.stringify({ CDN, SHOP, SITE, FREE_SHIPPING: 89, LOGO: CDN + 'WU_LOGO_transparent.png?v=1709016505', staticCatalog: true, coffees, others, FAQ_SHOP }) + ';\n' +
+  'window.WU=' + JSON.stringify({ CDN, SHOP, SITE, FREE_SHIPPING: 89, LOGO: CDN + 'WU_LOGO_transparent.png?v=1709016505', staticCatalog: true, coffees, others, FAQ_SHOP, USP, COLS }) + ';\n' +
   'WU.all=WU.coffees.concat(WU.others);WU.byHandle=function(h){for(var i=0;i<WU.all.length;i++)if(WU.all[i].handle===h)return WU.all[i];};\n';
 
 // ---------- Vorrendern ----------
@@ -127,7 +161,7 @@ write(path.join(OUT, 'assets/js/data.js'), dataJs);
 const template = read(path.join(SRC, 'template.html')), contentJs = read(path.join(SRC, 'assets/js/content.js')), appJs = read(path.join(SRC, 'assets/js/app.js'));
 const probe = new JSDOM('', { runScripts: 'outside-only' }).window; probe.eval(dataJs); probe.eval(contentJs);
 const routes = ['/', '/collections/kaffee/', '/collections/maschinen/', '/collections/alle/', '/pages/5plus1/', '/pages/kaffee-finder/', '/pages/maschinen-finder/', '/pages/faq/', '/pages/roestereien/', '/blogs/ratgeber/']
-  .concat(Object.keys(probe.WU.PAGES).map(s => '/pages/' + s + '/'), probe.WU.GUIDES.map(g => '/blogs/ratgeber/' + g.slug + '/'), probe.WU.all.map(p => '/products/' + p.handle + '/'));
+  .concat(Object.keys(COLS).map(h => '/collections/' + h + '/'), Object.keys(probe.WU.PAGES).map(s => '/pages/' + s + '/'), probe.WU.GUIDES.map(g => '/blogs/ratgeber/' + g.slug + '/'), probe.WU.all.map(p => '/products/' + p.handle + '/'));
 const slugify = s => s.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const HOME = { title: 'Italienischer Espresso & Siebträgermaschinen | Wake Up Wien', desc: 'Espresso wie im Italien-Urlaub: säurearme Röstungen aus Süditalien, Siebträgermaschinen mit Einschulung und der 5+1 Karton. Gratis Versand ab € 89.' };
 // Titel und Beschreibungen nach Keyword-Planer (Österreich, Nov. 2025 bis Okt. 2026)
@@ -165,6 +199,8 @@ routes.forEach(route => {
   const lead = doc.querySelector('.page-head > p:not(.crumbs):not(.byline)') || doc.querySelector('.hero-sub');
   let desc = route === '/' ? HOME.desc : prod ? cut((prod.text || h1) + (prod.kind === 'kaffee' ? ' Jetzt im 1-kg-Beutel oder im Karton mit 5+1 Kilo bestellen.' : ' Gratis Versand ab € 89.'), 158) : cut(lead ? lead.textContent : h1, 158);
   if (desc.length < 110) { const fp = [...doc.querySelectorAll('.prose > p, .rich p, .page-body p')].map(p => p.textContent.trim()).find(x => x.length > 60); if (fp) desc = cut(desc + ' ' + fp, 158); }
+  if (prod && SC.pdp[prod.handle]) { const s = SC.pdp[prod.handle]; if (s.seoTitle) title = s.seoTitle; if (s.seoDesc) desc = s.seoDesc; }
+  { const cm = /^\/collections\/([^\/]+)\/$/.exec(route), ck = cm && SC.cols[cm[1]]; if (ck && COLS[cm[1]]) { if (ck.seoTitle) title = ck.seoTitle; if (ck.seoDesc) desc = ck.seoDesc; } }
   if (SEO[route]) { title = SEO[route][0]; if (SEO[route][1]) desc = SEO[route][1]; }
   const img = prod ? prod.img : (doc.querySelector('.lead-img') || {}).src || CDN + 'banner-red-desktop-1.jpg?width=1200';
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -174,6 +210,9 @@ routes.forEach(route => {
   (Array.isArray(ld) ? ld : [ld]).forEach(x => { if (x['@type'] === 'Article' || x['@type'] === 'BlogPosting') { const pr = doc.querySelector('.prose');
     x.author = ORG; x.publisher = ORG; x.dateModified = TODAY; x.wordCount = pr ? pr.textContent.split(/\s+/).length : undefined; x.timeRequired = 'PT' + Math.max(2, Math.round((x.wordCount || 400) / 200)) + 'M';
     x.image = [...new Set([].concat(x.image || [], [...doc.querySelectorAll('.prose img')].map(i => i.src)))].filter(Boolean).slice(0, 6); } });
+  if (prod && SC.pdp[prod.handle] && SC.pdp[prod.handle].reviews.length) (Array.isArray(ld) ? ld : [ld]).forEach(x => { if (x['@type'] === 'Product') { const s = SC.pdp[prod.handle];
+    x.aggregateRating = { '@type': 'AggregateRating', ratingValue: s.rating.value, reviewCount: s.rating.count, bestRating: 5, worstRating: 1 };
+    x.review = s.reviews.map(r => ({ '@type': 'Review', author: { '@type': 'Person', name: r.name }, datePublished: r.date || undefined, reviewBody: r.text || undefined, reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5, worstRating: 1 } })); } });
   doc.getElementById('ld').textContent = JSON.stringify(ld);
   doc.title = title;
   doc.querySelector('meta[name="description"]').setAttribute('content', desc);
