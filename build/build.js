@@ -235,7 +235,8 @@ const dataJs = '/* Automatisch erzeugt aus data/shop/products.json (node build/b
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.cpSync(path.join(SRC, 'assets'), path.join(OUT, 'assets'), { recursive: true });
 write(path.join(OUT, 'assets/js/data.js'), dataJs);
-const template = read(path.join(SRC, 'template.html')), contentJs = read(path.join(SRC, 'assets/js/content.js')), appJs = read(path.join(SRC, 'assets/js/app.js'));
+const VER = require('crypto').createHash('md5').update(read(path.join(SRC, 'assets/css/styles.css')) + read(path.join(SRC, 'assets/js/app.js')) + read(path.join(SRC, 'assets/js/content.js')) + dataJs).digest('hex').slice(0, 10);
+const template = read(path.join(SRC, 'template.html')).replace(/(\/assets\/(?:css|js)\/[a-z.]+\.(?:css|js))(?:\?v=[a-z0-9]+)?/g, '$1?v=' + VER), contentJs = read(path.join(SRC, 'assets/js/content.js')), appJs = read(path.join(SRC, 'assets/js/app.js'));
 const probe = new JSDOM('', { runScripts: 'outside-only' }).window; probe.eval(dataJs); probe.eval(contentJs);
 const routes = ['/', '/collections/kaffee/', '/collections/maschinen/', '/collections/alle/', '/pages/5plus1/', '/pages/kaffee-finder/', '/pages/maschinen-finder/', '/pages/faq/', '/pages/roestereien/', '/blogs/ratgeber/']
   .concat(Object.keys(COLS).map(h => '/collections/' + h + '/'), Object.keys(probe.WU.PAGES).map(s => s.startsWith('policy-') ? '/policies/' + s.slice(7) + '/' : '/pages/' + s + '/'), probe.WU.GUIDES.map(g => '/blogs/ratgeber/' + g.slug + '/'), probe.WU.all.map(p => '/products/' + p.handle + '/'));
