@@ -165,8 +165,8 @@
     }
     return '<div class="slots">' + h + '</div>';
   }
-  function head(crumb, title, text) {
-    return '<div class="wrap page-head"><p class="crumbs"><a href="#/">Start</a> / ' + esc(crumb) + '</p><h1>' + esc(title) + '</h1>' + (text ? '<p>' + esc(text) + '</p>' : '') + '</div>';
+  function head(crumb, title, text, list) {
+    return '<div class="wrap page-head' + (list ? ' ph-list' : '') + '"><p class="crumbs"><a href="#/">Start</a> / ' + esc(crumb) + '</p><h1>' + esc(title) + '</h1>' + (text ? '<p>' + esc(text) + '</p>' : '') + '</div>';
   }
 
   /* ---------- Startseite ---------- */
@@ -246,8 +246,8 @@
   /* ---------- Kaffee-Übersicht ---------- */
   var filt = { vendor: '', taste: '', sort: 'top' };
   var TASTES = { kraeftig: ['Kräftig', function (c) { return c.intensity >= 7; }], ausgewogen: ['Ausgewogen', function (c) { return c.intensity >= 4 && c.intensity <= 6; }], fein: ['Fein und mild', function (c) { return c.intensity <= 3; }] };
-  var FORMATS = ['1 kg Bohnen', 'Kaffee 500 g', 'Kaffee 250 g', 'Moka gemahlen', 'Espresso gemahlen', 'E.S.E. Pads', 'Probierpakete'];
-  function formatOf(p) { return p.kind === 'kaffee' ? '1 kg Bohnen' : p.kind === 'paket' ? 'Probierpakete' : p.type; }
+  var FORMATS = ['1 kg Bohnen', '0,5 kg Bohnen', '0,25 kg Bohnen', 'Moka gemahlen', 'Espresso gemahlen', 'E.S.E. Pads', 'Probierpakete'];
+  function formatOf(p) { return p.kind === 'kaffee' ? '1 kg Bohnen' : p.kind === 'paket' ? 'Probierpakete' : p.type === 'Kaffee 500 g' ? '0,5 kg Bohnen' : p.type === 'Kaffee 250 g' ? '0,25 kg Bohnen' : p.type; }
   function allCoffee() { return WU.all.filter(function (p) { return FORMATS.indexOf(formatOf(p)) >= 0; }); }
   function coffeeList() {
     var list = allCoffee().filter(function (c) {
@@ -271,11 +271,11 @@
   function kollektion(h) {
     var c = WU.COLS && WU.COLS[h]; if (!c) return head('Nicht gefunden', 'Diese Kategorie gibt es hier nicht') + '<div class="wrap" style="padding-bottom:64px"><a class="btn" href="#/sortiment">Zum Sortiment</a></div>';
     var all = c.h.map(WU.byHandle).filter(Boolean), vs = vendorsOf(all), list = sorted(all.filter(function (p) { return !filt.vendor || p.vendor === filt.vendor; }));
-    return head(c.t, c.h1, '') + '<div class="wrap" style="padding-bottom:48px"><div class="filters">' + (vs.length > 1 ? sel('vendor', 'Marke', [['', 'Alle Marken']].concat(vs.map(function (v) { return [v, v]; }))) : '') + sel('sort', 'Sortieren', SORTS) + '</div>' + listing(list, all.length, 'Produkte') + '</div>' + seoText('col-seo', h);
+    return head(c.t, c.h1, '', 1) + '<div class="wrap" style="padding-bottom:48px"><div class="filters">' + (vs.length > 1 ? sel('vendor', 'Marke', [['', 'Alle Marken']].concat(vs.map(function (v) { return [v, v]; }))) : '') + sel('sort', 'Sortieren', SORTS) + '</div>' + listing(list, all.length, 'Produkte') + '</div>' + seoText('col-seo', h);
   }
   function kaffee() {
     var all = allCoffee(), list = sorted(coffeeList());
-    return head('Kaffee', 'Italienische Kaffeebohnen und Espresso', 'Italienischer Kaffee direkt von sechs Röstereien: dunkel geröstet und säurearm. Ganze Bohnen in 1 kg, 500 g und 250 g, gemahlen für Siebträger und Moka, als Pads und im Probierpaket.') +
+    return head('Kaffee', 'Italienische Kaffeebohnen und Espresso', 'Italienischer Kaffee direkt von sechs Röstereien: dunkel geröstet und säurearm. Ganze Bohnen in 1 kg, 500 g und 250 g, gemahlen für Siebträger und Moka, als Pads und im Probierpaket.', 1) +
       '<div class="wrap" style="padding-bottom:48px"><div class="filters">' + sel('format', 'Format', [['', 'Alle Formate']].concat(FORMATS.map(function (f) { return [f, f]; }))) + sel('vendor', 'Rösterei', [['', 'Alle Röstereien']].concat(vendorsOf(all).map(function (v) { return [v, v]; }))) + sel('sort', 'Sortieren', SORTS.concat([['int', 'Kräftigste zuerst']])) + '</div>' +
       listing(list, all.length, 'Kaffees') + '</div>' + seoText('col-seo', 'kaffee');
   }
@@ -305,7 +305,7 @@
   function sortiment() {
     var types = []; WU.all.forEach(function (p) { var x = typeOf(p); if (types.indexOf(x) < 0) types.push(x); });
     var list = sorted(WU.all.filter(function (p) { return (!filt.type || typeOf(p) === filt.type) && (!filt.vendor || p.vendor === filt.vendor); }));
-    return head('Sortiment', 'Kaffee, Maschinen und Kaffeezubehör', 'Alle ' + WU.all.length + ' Produkte aus unserem Geschäft in Wien: italienische Kaffeebohnen, Siebträgermaschinen, Mühlen, Kaffeezubehör für Baristas, Reinigung und Ersatzteile.') +
+    return head('Sortiment', 'Kaffee, Maschinen und Kaffeezubehör', 'Alle ' + WU.all.length + ' Produkte aus unserem Geschäft in Wien: italienische Kaffeebohnen, Siebträgermaschinen, Mühlen, Kaffeezubehör für Baristas, Reinigung und Ersatzteile.', 1) +
       '<div class="wrap" style="padding-bottom:64px"><div class="filters">' + sel('type', 'Kategorie', [['', 'Alle Kategorien']].concat(types.map(function (x) { return [x, x]; }))) + sel('vendor', 'Marke', [['', 'Alle Marken']].concat(vendorsOf(WU.all).map(function (v) { return [v, v]; }))) + sel('sort', 'Sortieren', SORTS) + '</div>' + listing(list, WU.all.length, 'Produkte') + '</div>' + seoText('col-seo', 'sortiment');
   }
 
@@ -315,7 +315,7 @@
       var l = WU.others.filter(function (p) { return p.kind === kind; });
       return '<section style="padding:0 0 48px"><div class="sec-head"><div><h2>' + title + '</h2><p>' + text + '</p></div></div><div class="grid">' + l.map(card).join('') + '</div></section>';
     }
-    return head('Maschinen & Mühlen', 'Siebträgermaschinen und Espressomaschinen', 'Kaffeemaschinen mit Siebträger für Barista-Espresso zu Hause, dazu die passende Mühle. Jede Espressomaschine prüfen wir vor dem Versand in unserer Wiener Werkstatt. Im Geschäft kannst du alle Maschinen ausprobieren.') +
+    return head('Maschinen & Mühlen', 'Siebträgermaschinen und Espressomaschinen', 'Kaffeemaschinen mit Siebträger für Barista-Espresso zu Hause, dazu die passende Mühle. Jede Espressomaschine prüfen wir vor dem Versand in unserer Wiener Werkstatt. Im Geschäft kannst du alle Maschinen ausprobieren.', 1) +
       '<div class="wrap">' + group('maschine', 'Espressomaschinen', 'Vom kompakten Einkreiser bis zur Hebelmaschine.') +
       group('set', 'Maschine und Mühle im Set', 'Im Set sparst du 7 % beim Checkout.') +
       group('muehle', 'Kaffeemühlen', 'Die Maschine ist nur so gut wie die Mühle daneben.') + '<p style="padding-bottom:48px"><a class="btn ghost" href="#/maschinen-finder">Unsicher? Zum Maschinen-Finder</a></p></div>' + seoText('col-seo', 'maschinen');
@@ -749,6 +749,10 @@
     if (!a || ev.defaultPrevented) return;
     ev.preventDefault(); location.href = toPath(a.getAttribute('href'));
   });
+  /* Ankündigungsleiste: wechselt alle 5 Sekunden, hält an bei Maus/Fokus */
+  (function () { var bar = document.getElementById('bar'); if (!bar) return; var ps = bar.querySelectorAll('.bar-in p'), i = 0, hold = false; if (ps.length < 2) return;
+    bar.addEventListener('mouseenter', function () { hold = true; }); bar.addEventListener('mouseleave', function () { hold = false; }); bar.addEventListener('focusin', function () { hold = true; }); bar.addEventListener('focusout', function () { hold = false; });
+    setInterval(function () { if (hold || document.hidden) return; ps[i].classList.remove('on'); i = (i + 1) % ps.length; ps[i].classList.add('on'); }, 5000); })();
   try { var qv = new URLSearchParams(location.search).get('roesterei'); if (qv) filt.vendor = qv; } catch (e) {}
   var preFull = document.getElementById('full'), preHandle = (/^#\/p\/(.+)/.exec(cur()) || [])[1];
   if (preFull && preHandle) { WU.BODY = WU.BODY || {}; if (!WU.BODY[preHandle]) WU.BODY[preHandle] = preFull.innerHTML; }

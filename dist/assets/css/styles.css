@@ -826,3 +826,16 @@ a.rate{margin-top:10px;min-height:32px}a.rate span:last-child{text-decoration:un
   .seo-home.open .seo-text::after{display:none}
   .seo-more{display:inline-flex}
 }
+
+/* Ankündigungsleiste als Slider */
+.bar{padding:0;white-space:normal;overflow:hidden;text-overflow:clip}
+.bar-in{display:grid;min-height:38px}
+.bar-in p{grid-area:1/1;display:flex;align-items:center;justify-content:center;padding:9px var(--pad);margin:0;opacity:0;visibility:hidden;transition:opacity .45s ease,visibility 0s .45s;text-align:center}
+.bar-in p.on{opacity:1;visibility:visible;transition:opacity .45s ease}
+.bar-in a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+@media (prefers-reduced-motion:reduce){.bar-in p,.bar-in p.on{transition:none}}
+/* Listenseiten: Überschrift kompakt, Produkte weiter oben */
+.ph-list{padding-top:clamp(16px,2vw,24px);padding-bottom:8px}
+.ph-list .crumbs{margin-bottom:6px}
+.ph-list h1{max-width:none;font-size:clamp(1.65rem,1.2rem + 1.5vw,2.5rem);line-height:1.12}
+.ph-list > p:not(.crumbs){font-size:1rem;margin-top:8px;max-width:80ch}
