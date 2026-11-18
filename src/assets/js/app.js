@@ -158,7 +158,7 @@
     for (var i = 0; i < 6; i++) {
       var p = picks[i], free = i === 5;
       if (p) h += '<button class="slot filled' + (free ? ' free' : '') + '"' + (interactive ? ' data-act="unpick" data-i="' + i + '" aria-label="Entfernen: ' + esc(p.title) + '"' : ' tabindex="-1"') + '><img src="' + esc(p.img) + '" alt="">' + (interactive ? '<span class="x">×</span>' : '') + (free ? '<span class="tag">Gratis</span>' : '') + '</button>';
-      else h += '<div class="slot empty' + (free ? ' free' : '') + '">' + (free ? '<b>+1 gratis</b>' : (i + 1)) + '</div>';
+      else h += '<div class="slot empty' + (free ? ' free' : '') + '">' + (free ? '<b class="plus"><span>+1</span> gratis</b>' : (i + 1)) + '</div>';
     }
     return '<div class="slots">' + h + '</div>';
   }
@@ -191,7 +191,7 @@
     ].filter(Boolean);
     var NAMES = ['5+1 Karton', 'Probierpakete', 'Maschinen'];
     return '<section class="hero" aria-roledescription="Karussell" aria-label="Aktionen"><div class="hs" id="hs">' + slides.map(function (s, i) { return '<div class="hs-slide" id="hs-' + i + '" role="group" aria-roledescription="Folie" aria-label="' + (i + 1) + ' von ' + slides.length + ': ' + NAMES[i] + '"><div class="wrap hero-in">' + s + '</div></div>'; }).join('') + '</div>' +
-      (slides.length > 1 ? '<div class="wrap hs-nav"><button class="hs-arrow" data-act="hs" data-d="-1" aria-label="Vorherige Aktion">‹</button>' + slides.map(function (s, i) { return '<button class="hs-dot' + (i === 0 ? ' on' : '') + '" data-act="hs" data-i="' + i + '" aria-label="Aktion ' + (i + 1) + ': ' + NAMES[i] + '"><span>' + NAMES[i] + '</span></button>'; }).join('') + '<button class="hs-arrow" data-act="hs" data-d="1" aria-label="Nächste Aktion">›</button></div>' : '') + '</section>' +
+      (slides.length > 1 ? '<div class="wrap hs-nav"><button class="hs-arrow" data-act="hs" data-d="-1" aria-label="Vorherige Aktion">‹</button>' + slides.map(function (s, i) { return '<button class="hs-dot' + (i === 0 ? ' on' : '') + '" data-act="hs" data-i="' + i + '" aria-label="Aktion ' + (i + 1) + ' von ' + slides.length + ': ' + NAMES[i] + '"><i></i></button>'; }).join('') + '<button class="hs-arrow" data-act="hs" data-d="1" aria-label="Nächste Aktion">›</button></div>' : '') + '</section>' +
 
       '<section class="sec first"><div class="wrap"><div class="sec-head"><div><h2>Die Bestseller</h2><p>Was unsere Kundinnen und Kunden am häufigsten nachbestellen.</p></div><a class="link" href="#/kaffee">Alle ' + WU.coffees.length + ' Kaffees</a></div>' +
       '<div class="rail">' + WU.coffees.slice(0, 8).map(card).join('') + '</div></div></section>' +

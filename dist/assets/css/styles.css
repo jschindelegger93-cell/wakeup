@@ -707,3 +707,33 @@ a.rate{margin-top:10px;min-height:32px}a.rate span:last-child{text-decoration:un
 .strip{display:grid;grid-template-columns:repeat(5,1fr)}
 .strip img{width:100%;height:auto;aspect-ratio:1;object-fit:cover;display:block}
 @media (max-width:699px){.strip{grid-template-columns:repeat(5,60%);overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none}.strip::-webkit-scrollbar{display:none}.strip img{scroll-snap-align:start}}
+
+/* ===== Slider-Feinschliff, vor allem mobil ===== */
+.slot .plus{display:grid;justify-items:center;gap:2px;font-family:var(--display);font-weight:800;font-size:clamp(.8125rem,.7rem + .5vw,1.0625rem);line-height:1.05}
+.slot .plus span{font-size:1.5em}
+.hs-nav{justify-content:center;gap:4px;padding-top:4px;padding-bottom:clamp(14px,2vw,24px)}
+.hs-dot{flex:none!important;width:44px;min-height:44px;padding:0;border:0;display:grid;place-items:center}
+.hs-dot i{display:block;width:28px;height:4px;background:rgba(255,255,255,.4);transition:background .2s,width .2s}
+.hs-dot.on i{background:#fff;width:40px}
+.hs-dot.on{width:56px}
+.hs-arrow{display:grid!important;place-items:center;width:44px;height:44px;border:0;font-size:1.75rem;padding-bottom:4px}
+.hs-arrow:first-child{margin-right:8px}.hs-arrow:last-child{margin-left:8px}
+@media (prefers-reduced-motion:reduce){.hs-dot i{transition:none}}
+.hero .hero-cta .btn{white-space:nowrap;text-align:center;justify-content:center}
+@media (max-width:899px){
+  .hero .hs-slide .hero-in{padding-top:28px;padding-bottom:8px;gap:20px}
+  .hero h1,.hero .hs-slide h2{font-size:clamp(1.875rem,1.2rem + 3.4vw,2.5rem);max-width:none}
+  .hero .hero-sub{font-size:1rem;line-height:1.5;margin-top:10px}
+  .hero .hero-cta{display:grid;grid-template-columns:1fr;gap:10px;margin-top:18px}
+  .hero .hero-cta .btn{width:100%;max-width:none;min-height:50px;flex:none;font-size:1rem;padding:0 12px}
+  .hero .karton{padding:14px}
+  .hero .karton-top{margin-bottom:10px}
+  .hero .karton .slots{grid-template-columns:repeat(3,1fr)!important;gap:8px}
+  .hero .karton .slots > *{aspect-ratio:3/2;padding:6px}
+  .hero .karton .slot .plus{font-size:.9375rem}
+  .hs-pics{grid-template-columns:repeat(4,1fr)!important}
+  .hs-pics.n2{max-width:none;grid-template-columns:repeat(2,1fr)!important}
+  .hs-pics.n2 a{aspect-ratio:3/2}
+  .hs-pics img{padding:4%}
+}
+@media (min-width:480px) and (max-width:899px){.hero .hero-cta{grid-template-columns:1fr 1fr}}
