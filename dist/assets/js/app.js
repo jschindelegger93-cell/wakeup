@@ -255,7 +255,7 @@
     if (filt.sort === 'int') list.sort(function (a, b) { return (b.intensity || 0) - (a.intensity || 0); });
     return list;
   }
-  function sel(key, label, opts) { return '<label class="fsel"><span>' + label + '</span><select data-act="f-sel" data-k="' + key + '">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + ((filt[key] || '') === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>'; }
+  function sel(key, label, opts) { if (key !== 'sort') opts = opts.slice(0, 1).concat(opts.slice(1).sort(function (x, y) { return String(x[1]).localeCompare(String(y[1]), 'de', { sensitivity: 'base', numeric: true }); })); return '<label class="fsel"><span>' + label + '</span><select data-act="f-sel" data-k="' + key + '">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + ((filt[key] || '') === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>'; }
   var SORTS = [['top', 'Empfohlen'], ['asc', 'Preis aufsteigend'], ['desc', 'Preis absteigend'], ['rate', 'Beste Bewertung']];
   function sorted(list) { list = list.slice();
     if (filt.sort === 'asc') list.sort(function (a, b) { return a.price - b.price; });
