@@ -70,7 +70,9 @@ function parseProduct(html) {
   const cj = JSON.parse(await get(SHOP + '/collections.json?limit=250', 'collections.json')).collections, cols = {};
   for (const c of cj) { const h = await get(SHOP + '/collections/' + c.handle, 'c-' + c.handle + '.html'); const d = h ? new JSDOM(h).window.document : null;
     cols[c.handle] = { title: c.title, body: c.description || c.body_html || '', count: c.products_count, img: c.image ? c.image.src : '', seoTitle: d ? d.title.replace(/\s+[–-]\s+WAKE UP ESPRESSOMASCHINEN$/i, '').trim() : '', seoDesc: d ? ((d.querySelector('meta[name="description"]') || {}).content || '') : '',
-      handles: d ? [...new Set([...d.querySelectorAll('a[href*="/products/"]')].map(a => a.getAttribute('href').split('/products/')[1].split(/[?#]/)[0]))] : [] }; }
+      handles: d ? [...new Set([...d.querySelectorAll('ul.products.collection > li:not(.promotion-column) a[href*="/products/"]')].map(a => a.getAttribute('href').split('/products/')[1].split(/[?#]/)[0]))] : [] };
+    for (let pg = 2; pg <= 6 && cols[c.handle].handles.length < c.products_count; pg++) { const h2 = await get(SHOP + '/collections/' + c.handle + '?page=' + pg, 'c-' + c.handle + '-' + pg + '.html'); if (!h2) break; const before = cols[c.handle].handles.length;
+      [...new JSDOM(h2).window.document.querySelectorAll('ul.products.collection > li:not(.promotion-column) a[href*="/products/"]')].forEach(a => { const x = a.getAttribute('href').split('/products/')[1].split(/[?#]/)[0]; if (!cols[c.handle].handles.includes(x)) cols[c.handle].handles.push(x); }); if (cols[c.handle].handles.length === before) break; } }
   fs.writeFileSync(path.join(OUT, 'collections-seo.json'), JSON.stringify(cols));
   // Startseite
   const hh = await get(SHOP + '/', 'home.html'), hd = new JSDOM(hh).window.document;
@@ -78,6 +80,18 @@ function parseProduct(html) {
   hd.querySelectorAll('[id^="shopify-section-template"]').forEach(s => { const c = s.cloneNode(true); c.querySelectorAll('script,style,svg,noscript,template,form,product-card,.product-card,[class*="product-card"]').forEach(x => x.remove()); const hs = [...c.querySelectorAll('h1,h2,h3')].map(tx).filter(Boolean), rte = [...c.querySelectorAll('.rte,[class*="rich-text"],[class*="richtext"]')].filter(e => tx(e).length > 150).sort((a, b) => tx(b).length - tx(a).length)[0];
     home.sections.push({ id: s.id.replace(/^shopify-section-template--\d+__/, ''), heads: hs.slice(0, 8), len: tx(c).length, html: rte ? inner(rte) : tx(c).length > 1500 ? inner(c) : '' }); });
   fs.writeFileSync(path.join(OUT, 'home.json'), JSON.stringify(home));
+  // Sitemap und alle Seiten, Richtlinien und Blogbeiträge
+  const sm = await get(SHOP + '/sitemap.xml', 'sitemap.xml'), urls = [];
+  for (const m of sm.matchAll(/<loc>([^<]+)<\/loc>/g)) { const u = m[1].replace(/&amp;/g, '&'); if (/agentic/.test(u)) continue; const x = await get(u, 'sm-' + u.split('/').pop().replace(/[^a-z0-9_]/gi, '_') + '.xml'); for (const k of x.matchAll(/<loc>([^<]+)<\/loc>/g)) { const pth = k[1].replace(SHOP, ''); if (pth && !/^https?:/.test(pth) && pth !== '/') urls.push(pth); } }
+  ['terms-of-service', 'legal-notice', 'privacy-policy', 'refund-policy', 'subscription-policy', 'shipping-policy'].forEach(x => urls.push('/policies/' + x));
+  const uniq = [...new Set(urls)]; fs.writeFileSync(path.join(OUT, 'sitemap.json'), JSON.stringify(uniq));
+  const pagesAll = {};
+  for (const u of uniq.filter(x => /^\/(pages|policies|blogs)\//.test(x))) { const h = await get(SHOP + u, 'x-' + u.replace(/[^a-z0-9_-]/gi, '_') + '.html'); if (!h) continue; const d = new JSDOM(h).window.document;
+    const main = d.querySelector('.shopify-policy__container') || d.querySelector('main') || d.querySelector('#MainContent') || d.querySelector('[role="main"]'); if (!main) continue; const c = main.cloneNode(true);
+    c.querySelectorAll('script,style,svg,noscript,template,form,nav,button,product-card,[class*="product-card"],[class*="product-grid"],.loox-ssr-reviews,[id*="loox"],[class*="breadcrumb"]').forEach(x => x.remove());
+    const h1 = tx(c.querySelector('h1')) || tx(d.querySelector('h1')); pagesAll[u] = { h1, html: inner(c), seoTitle: d.title.replace(/\s+[–-]\s+WAKE UP ESPRESSOMASCHINEN$/i, '').trim(), seoDesc: (d.querySelector('meta[name="description"]') || {}).content || '' }; }
+  fs.writeFileSync(path.join(OUT, 'pages-all.json'), JSON.stringify(pagesAll));
+  console.log('Sitemap-URLs', uniq.length, '| Seiten/Richtlinien/Beiträge', Object.keys(pagesAll).length);
   console.log('Produkte', products.length, '| Seiten', Object.keys(pdp).length, '| Rezensionen', nRev, '| mit Bewertung', Object.values(pdp).filter(x => x.rating).length, '| Rösterei-Block', Object.values(pdp).filter(x => x.roaster).length, '| Details', Object.values(pdp).filter(x => x.details).length, '| Kollektionen', Object.keys(cols).length, 'mit Text', Object.values(cols).filter(c => c.body.length > 300).length);
   if (miss.length) console.log('Unvollständige Rezensionen:', miss.join(', '));
 })();

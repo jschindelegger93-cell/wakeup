@@ -369,3 +369,7 @@ WU.PAGES['mazzer'].links = [['#/ratgeber/kaffeemuehlen-im-vergleich', 'Kaffeemü
       '<p>Die Werte stammen aus dem Röstprofil jeder Sorte. Was Arabica-Anteil und Röstgrad für den Geschmack bedeuten, erklärt der Beitrag <a href="#/ratgeber/arabica-robusta">Arabica und Robusta</a>. Alle sechs Häuser findest du auf der Seite <a href="#/roestereien">Unsere Röstereien</a>.</p>' + cs.slice(0, 2).map(function (c) { return '[[p:' + c.handle + ']]'; }).join('')]];
   });
 })();
+
+/* ===== Aus dem Shop übernommene Zusatzseiten, Richtlinien und Beiträge (kommen aus dem Build) ===== */
+Object.keys(WU.XP || {}).forEach(function (k) { if (!WU.PAGES[k]) WU.PAGES[k] = { title: WU.XP[k].title, shop: WU.XP[k].shop, intro: '', blocks: [], policy: WU.XP[k].policy }; });
+(WU.XG || []).forEach(function (g) { if (!WU.GUIDES.some(function (x) { return x.slug === g.slug; })) WU.GUIDES.push({ slug: g.slug, cat: 'Aus dem Geschäft', title: g.title, teaser: g.teaser, min: 3, img: 'ScrollingBoxes1.png', sections: [], related: [], rel: ['bestellen-wie-in-italien', 'erste-siebtraegermaschine'], faq: [], iso: '2024-03-16', date: '16. März 2024' }); });

@@ -18,15 +18,32 @@ const MACHINE_COLS = /espressomaschinen|mahlwerke|eureka|mazzer|969|quickmill|la
 const COFFEE_COLS = /kaffee|espresso-gemahlen|moka|cialde|probier|guglielmo|kremoso|escaffe|ionia|trombetta|messicana/;
 let HANDLES = new Set();
 let KNOWN_COLS = new Set();
+const PAGES_ALL = JSON.parse(read(path.join(SHOPDATA, 'pages-all.json')));
+const SMALL_MAP = { 'herkunft_gug': '/blogs/ratgeber/roesterei-guglielmo/', 'herkunft_kre': '/blogs/ratgeber/roesterei-kremoso/', 'herkunft_lamess': '/blogs/ratgeber/roesterei-la-messicana/', 'herkunft_ionia': '/blogs/ratgeber/roesterei-ionia/', 'herkunft_trombetta': '/blogs/ratgeber/roesterei-trombetta/', 'herkunft-esc': '/blogs/ratgeber/roesterei-escaffe/', 'die-rosterei-escaffe': '/blogs/ratgeber/roesterei-escaffe/', 'info_qm': '/collections/maschinen/', 'maschinensets': '/collections/espressomaschinensets/', 'info-lamarzocco': '/collections/lamarzocco/' };
+const textLen = h => String(h || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().length;
+// Seiten aus dem Shop, die es hier noch nicht gibt, werden unter derselben Adresse übernommen
+const XPAGES = {};
+Object.keys(PAGES_ALL).forEach(u => { let m;
+  if ((m = /^\/pages\/([^\/]+)$/.exec(u)) && m[1] !== 'faq' && !PAGE_MAP[m[1]] && !ROASTER_MAP[m[1]] && !SMALL_MAP[m[1]] && textLen(PAGES_ALL[u].html) > 150) XPAGES[m[1]] = PAGES_ALL[u];
+  if ((m = /^\/policies\/([^\/]+)$/.exec(u))) XPAGES['policy-' + m[1]] = PAGES_ALL[u]; });
+BLOG_MAP['wakeupespresso-com-in-neuem-gewand'] = 'wakeupespresso-com-in-neuem-gewand';
+function target(u) {
+  let m;
+  if ((m = /^\/products\/([^\/?#]+)/.exec(u))) return HANDLES.has(m[1]) ? '/products/' + m[1] + '/' : null;
+  if ((m = /^\/collections\/([^\/?#]+)/.exec(u))) return m[1] === 'italienischer-kaffee' ? '/collections/kaffee/' : m[1] === 'alle-espressomaschinen' ? '/collections/maschinen/' : m[1] === 'all' ? '/collections/alle/' : KNOWN_COLS.has(m[1]) ? '/collections/' + m[1] + '/' : MACHINE_COLS.test(m[1]) ? '/collections/maschinen/' : COFFEE_COLS.test(m[1]) ? '/collections/kaffee/' : '/collections/alle/';
+  if ((m = /^\/pages\/([^\/?#]+)/.exec(u))) return m[1] === 'faq' ? '/pages/faq/' : PAGE_MAP[m[1]] ? '/pages/' + PAGE_MAP[m[1]] + '/' : ROASTER_MAP[m[1]] ? '/blogs/ratgeber/' + ROASTER_MAP[m[1]] + '/' : SMALL_MAP[m[1]] ? SMALL_MAP[m[1]] : XPAGES[m[1]] ? '/pages/' + m[1] + '/' : null;
+  if ((m = /^\/blogs\/news\/([^\/?#]+)/.exec(u))) return BLOG_MAP[m[1]] ? '/blogs/ratgeber/' + BLOG_MAP[m[1]] + '/' : '/blogs/ratgeber/';
+  if (/^\/blogs\/news\/?$/.test(u)) return '/blogs/ratgeber/';
+  if ((m = /^\/policies\/([^\/?#]+)/.exec(u))) return XPAGES['policy-' + m[1]] ? '/policies/' + m[1] + '/' : null;
+  if (/^\/(search|cart|account)/.test(u)) return null;
+  return null;
+}
 function mapUrl(href) {
   if (!href) return href;
   let u = href.replace(/^https?:\/\/(www\.)?wakeup-espresso\.com/, '').replace(/^file:\/\/\/C:/, '');
   if (/^(https?:|mailto:|tel:|#)/.test(u)) return u;
-  let m;
-  if ((m = /^\/products\/([^\/?#]+)/.exec(u))) return HANDLES.has(m[1]) ? '/products/' + m[1] + '/' : SHOP + u;
-  if ((m = /^\/collections\/([^\/?#]+)/.exec(u))) return m[1] === 'italienischer-kaffee' ? '/collections/kaffee/' : m[1] === 'alle-espressomaschinen' ? '/collections/maschinen/' : KNOWN_COLS.has(m[1]) ? '/collections/' + m[1] + '/' : MACHINE_COLS.test(m[1]) ? '/collections/maschinen/' : COFFEE_COLS.test(m[1]) ? '/collections/kaffee/' : '/collections/alle/';
-  if ((m = /^\/pages\/([^\/?#]+)/.exec(u))) return m[1] === 'faq' ? '/pages/faq/' : PAGE_MAP[m[1]] ? '/pages/' + PAGE_MAP[m[1]] + '/' : ROASTER_MAP[m[1]] ? '/blogs/ratgeber/' + ROASTER_MAP[m[1]] + '/' : SHOP + u;
-  if ((m = /^\/blogs\/news\/([^\/?#]+)/.exec(u))) return BLOG_MAP[m[1]] ? '/blogs/ratgeber/' + BLOG_MAP[m[1]] + '/' : '/blogs/ratgeber/';
+  if (u === '/' || u === '') return '/';
+  const tg = target(u); if (tg) return tg;
   return u.startsWith('/') ? SHOP + u : u;
 }
 
@@ -145,7 +162,63 @@ Object.keys(COLSEO).forEach(h => { const c = COLSEO[h], hs = c.handles.filter(x 
   const key = COL_FIXED[h] || h;
   SC.cols[key] = { html: sanitize(d.body.innerHTML), seoTitle: c.seoTitle, seoDesc: c.seoDesc };
   if (!COL_FIXED[h] && hs.length) COLS[h] = { t: c.title, h1: head || c.title, h: hs }; });
+Object.keys(XPAGES).forEach(k => { const d = new JSDOM('<body>' + XPAGES[k].html + '</body>').window.document; d.querySelectorAll('h1').forEach(e => e.remove()); SC.pages[k] = { html: sanitize(d.body.innerHTML), imgs: [] }; });
+const XP = {}; Object.keys(XPAGES).forEach(k => { XP[k] = { title: XPAGES[k].h1 || XPAGES[k].seoTitle, shop: k.startsWith('policy-') ? '' : k, policy: k.startsWith('policy-') }; });
+{ const e = PAGES_ALL['/pages/die-rosterei-escaffe']; if (e) { const d = dom2(e.html); SC.guides['roesterei-escaffe'] = sanitize(d); }
+  const a = PAGES_ALL['/blogs/news/wakeupespresso-com-in-neuem-gewand']; if (a) SC.guides['wakeupespresso-com-in-neuem-gewand'] = sanitize(dom2(a.html)); }
+function dom2(html) { const d = new JSDOM('<body>' + html + '</body>').window.document; d.querySelectorAll('h1,time,[class*="meta"],[class*="share"],[class*="article-nav"],[class*="tags"]').forEach(e => e.remove()); const r = [...d.querySelectorAll('.rte')].sort((a, b) => b.textContent.length - a.textContent.length)[0]; return r ? r.innerHTML : d.body.innerHTML; }
+const XG = PAGES_ALL['/blogs/news/wakeupespresso-com-in-neuem-gewand'] ? [{ slug: 'wakeupespresso-com-in-neuem-gewand', title: PAGES_ALL['/blogs/news/wakeupespresso-com-in-neuem-gewand'].h1, teaser: PAGES_ALL['/blogs/news/wakeupespresso-com-in-neuem-gewand'].seoDesc || 'Neuigkeiten aus dem Geschäft.' }] : [];
 SC.home = { html: sanitize((HOMESEO.sections.filter(s => s.html).sort((a, b) => b.html.length - a.html.length)[0] || { html: '' }).html) };
+// ---------- Zusätzliche SEO-Texte: aus den Shop-Daten erzeugt, mit internen Links ----------
+const ALLP = coffees.concat(others), byH = {}; ALLP.forEach(p => { byH[p.handle] = p; });
+const eur = n => '€ ' + n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const E = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const colUrl = h => h === 'italienischer-kaffee' ? '/collections/kaffee/' : h === 'alle-espressomaschinen' ? '/collections/maschinen/' : '/collections/' + h + '/';
+const G = (slug, label) => '<a href="/blogs/ratgeber/' + slug + '/">' + label + '</a>';
+const TYPE_TEXT = {
+  'einkreiser-espressomaschinen': ['Einkreiser: ein Kessel für Espresso und Dampf', 'Ein Einkreiser hat einen einzigen Kessel, der sowohl das Brühwasser als auch den Dampf liefert. Für Espresso arbeitet er bei rund 93 °C, für Milchschaum heizt er auf Dampftemperatur hoch. Zwischen Bezug und Schäumen wartest du deshalb kurz. Dafür sind Einkreiser kompakt, schnell aufgeheizt und günstiger als Maschinen mit zwei Kreisläufen. Sie passen, wenn du vor allem Espresso trinkst und nur gelegentlich Milch schäumst.'],
+  'zweikreiser-espressomaschinen': ['Zweikreiser: Espresso und Milchschaum gleichzeitig', 'Ein Zweikreiser hat einen Dampfkessel, durch den ein Wärmetauscher führt. Das Brühwasser fließt frisch durch diesen Wärmetauscher und wird auf dem Weg zur Brühgruppe erhitzt. So kannst du Espresso beziehen und gleichzeitig Milch schäumen. Vor dem ersten Bezug lässt man kurz Wasser durch die Brühgruppe laufen, damit die Temperatur passt. Zweikreiser sind die klassische Wahl für alle, die täglich Cappuccino trinken.'],
+  'dual-boiler': ['Dualboiler: zwei Kessel, genaue Temperatur', 'Ein Dualboiler hat einen eigenen Kessel für das Brühwasser und einen zweiten für den Dampf. Beide werden getrennt geregelt. Die Brühtemperatur bleibt dadurch auch bei vielen Bezügen hintereinander stabil, und der Dampf ist jederzeit bereit. Dualboiler sind größer und teurer, lohnen sich aber, wenn du viel und genau arbeiten willst.'],
+  'hebelmaschinen': ['Hebelmaschinen: Espresso von Hand', 'Bei einer Hebelmaschine erzeugt keine Pumpe den Druck, sondern eine Feder oder deine Hand. Du ziehst den Hebel, das Wasser benetzt den Kaffee, und beim Loslassen drückt die Feder das Wasser durch den Puck. Der Druck fällt dabei sanft ab, was dem Espresso einen runden, weichen Charakter gibt. Hebelmaschinen arbeiten fast lautlos und haben wenige Verschleißteile. Sie brauchen etwas Übung und werden nicht rückgespült.'],
+  'mahlwerke': ['Kaffeemühlen: wichtiger als die Maschine', 'Für Espresso muss der Kaffee sehr fein und gleichmäßig gemahlen sein. Schon kleine Schritte am Mahlgrad verändern die Bezugszeit deutlich. Eine Espressomühle lässt sich deshalb stufenlos oder in sehr feinen Schritten verstellen und mahlt direkt in den Siebträger. Größere Mahlscheiben arbeiten schneller und erwärmen den Kaffee weniger.'],
+  'espressomaschinensets': ['Maschine und Mühle im Set', 'Ein Siebträger ist nur so gut wie die Mühle daneben. In den Sets haben wir Maschinen und Mühlen kombiniert, die zusammenpassen. Du bekommst beide Geräte aufeinander abgestimmt und sparst gegenüber dem Einzelkauf.'],
+  'probiersets': ['Probiersets: mehrere Röstungen vergleichen', 'Welcher Espresso dir schmeckt, findest du am schnellsten im direkten Vergleich heraus. In einem Probierset bekommst du mehrere Röstungen auf einmal und kannst mild, ausgewogen und kräftig nebeneinander probieren. Beim Wechsel der Sorte stellst du den Mahlgrad neu ein.'],
+  'wake-up-probierpakete': ['Wake Up Probierpakete', 'Die Probierpakete haben wir selbst zusammengestellt: Bestseller, feine Mischungen und besonders kräftige Röstungen, jeweils in der 1-kg-Packung. So lernst du mehrere Röstereien kennen, bevor du dich festlegst.']
+};
+function guidesFor(list) { const k = new Set(list.map(p => p.kind)), ty = new Set(list.map(p => p.type || '')), out = [];
+  if (k.has('maschine') || k.has('set')) out.push(G('einkreiser-zweikreiser-dualboiler-hebelmaschinen', 'Einkreiser, Zweikreiser, Dualboiler und Hebelmaschinen im Vergleich'), G('erste-siebtraegermaschine', 'Die erste Siebträgermaschine: Kaufberatung'), G('wasser', 'Das richtige Wasser für deine Espressomaschine'));
+  if (k.has('muehle') || k.has('set')) out.push(G('kaffeemuehlen-im-vergleich', 'Kaffeemühlen im Vergleich'), G('mahlgrad-einstellen', 'Mahlgrad einstellen'));
+  if (k.has('kaffee') || [...ty].some(x => /Kaffee|Moka|Espresso|Pads|Probier/.test(x))) out.push(G('arabica-robusta', 'Arabica und Robusta: der Unterschied'), G('bohnen-lagern', 'Kaffeebohnen richtig lagern'), G('espresso-fehler', 'Espresso zu sauer oder zu bitter?'));
+  if ([...ty].some(x => /Moka/.test(x))) out.push(G('moka-kanne', 'Die Moka-Kanne richtig verwenden'));
+  if ([...ty].some(x => /Reinig|Ersatz|Wasserfilter/.test(x))) out.push(G('reinigung-wartung', 'Reinigung und Wartung'), G('wasser', 'Das richtige Wasser für deine Espressomaschine'));
+  if ([...ty].some(x => /Milch|Tamper|Knock|Sieb/.test(x))) out.push(G('milchschaum', 'Der perfekte Milchschaum'), G('mahlgrad-einstellen', 'Mahlgrad einstellen'));
+  return [...new Set(out)].slice(0, 5); }
+function colExtra(key, title, handles) { const list = handles.map(h => byH[h]).filter(Boolean); if (!list.length) return '';
+  const prices = list.map(p => p.price).sort((a, b) => a - b), vend = [...new Set(list.map(p => p.vendor))], machines = list.some(p => p.kind === 'maschine' || p.kind === 'set');
+  let h = ''; const tt = TYPE_TEXT[key]; if (tt) h += '<h2>' + tt[0] + '</h2><p>' + tt[1] + '</p>';
+  h += '<h3>' + E(title) + ' im Überblick</h3><p>In dieser Kategorie findest du ' + (list.length === 1 ? 'ein Produkt' : list.length + ' Produkte') + (vend.length > 1 ? ' von ' + vend.slice(0, 6).map(E).join(', ') : ' von ' + E(vend[0])) + (prices.length > 1 && prices[0] !== prices[prices.length - 1] ? ', von ' + eur(prices[0]) + ' bis ' + eur(prices[prices.length - 1]) : ' um ' + eur(prices[0])) + '.</p><ul>' +
+    list.slice(0, 14).map(p => '<li><a href="/products/' + p.handle + '/">' + E(p.title) + '</a>, ' + (p.offers && p.offers.length > 1 ? 'ab ' : '') + eur(Math.min.apply(null, (p.offers || [[0, 0, p.price]]).map(o => o[2]))) + (p.rating ? ', ' + String(p.rating[0].toFixed(1)).replace('.', ',') + ' von 5 Sternen bei ' + p.rating[1] + ' Bewertungen' : '') + '</li>').join('') + '</ul>';
+  const gs = guidesFor(list); if (gs.length) h += '<h3>Passende Ratgeber</h3><ul>' + gs.map(g => '<li>' + g + '</li>').join('') + '</ul>';
+  h += '<h3>Versand und Service</h3><p>' + (machines ? 'Espressomaschinen verschicken wir sicher auf Palette per Spedition. Jede Maschine prüfen wir vorher in unserer Werkstatt in Wien, und du bekommst eine persönliche <a href="/pages/einschulungen/">Einschulung</a>. Für Wartung und Reparatur gibt es unseren <a href="/pages/maschinenservice/">Maschinenservice</a>. ' : 'Wir verschicken in der Regel am gleichen Tag, von Montag bis Samstag. Je nach Adresse ist dein Paket in 1 bis 3 Werktagen bei dir. In Österreich ist der Versand ab € 89 Warenwert kostenlos, nach Deutschland ab € 150. ') + 'Alle Details stehen unter <a href="/pages/versand-rabatte/">Versand und Rabatte</a>. Fragen beantworten wir im Geschäft in Wien, am Telefon oder in den <a href="/pages/faq/">FAQ</a>.</p>';
+  const sib = Object.keys(COLSEO).filter(o => o !== key && o !== 'frontpage' && COLSEO[o].handles.some(x => HANDLES.has(x)) && COLSEO[o].handles.filter(x => handles.includes(x)).length >= Math.min(2, handles.length)).slice(0, 6);
+  if (sib.length) h += '<h3>Verwandte Kategorien</h3><ul>' + sib.map(o => '<li><a href="' + colUrl(o) + '">' + E(COLSEO[o].title) + '</a></li>').join('') + '</ul>';
+  return h; }
+Object.keys(COLSEO).forEach(h => { if (h === 'frontpage') return; const key = COL_FIXED[h] || h, hs = COLSEO[h].handles.filter(x => HANDLES.has(x)); if (!SC.cols[key] || !hs.length) return; SC.cols[key].html += colExtra(h, COLSEO[h].title, hs); });
+// Markenseiten aus dem Shop: Produkte der Marke verlinken
+Object.keys(XPAGES).forEach(k => { if (k.startsWith('policy-')) return; const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, ''), vend = [...new Set(ALLP.map(p => p.vendor))].find(v => norm(v).length > 3 && norm(k).includes(norm(v))); if (!vend) return;
+  const list = ALLP.filter(p => p.vendor === vend); if (!list.length) return;
+  SC.pages[k].html += '<h2>' + E(vend) + ' bei Wake Up</h2><ul>' + list.map(p => '<li><a href="/products/' + p.handle + '/">' + E(p.title) + '</a>, ' + eur(p.price) + '</li>').join('') + '</ul>' + (guidesFor(list).length ? '<h2>Passende Ratgeber</h2><ul>' + guidesFor(list).map(g => '<li>' + g + '</li>').join('') + '</ul>' : ''); });
+SC.cols.sortiment = { html: colExtra('alle', 'Das ganze Sortiment', ALLP.filter(p => p.rating).sort((a, b) => b.rating[1] - a.rating[1]).slice(0, 12).map(p => p.handle)).replace('In dieser Kategorie findest du', 'Die am häufigsten bewerteten Produkte:') };
+// Röstereien-Beiträge: Geschichte aus dem Shop, alle Produkte, Links
+Object.keys(probeRegions()).forEach(v => { const slug = 'roesterei-' + v.toLowerCase().replace(/\s+/g, '-'), list = ALLP.filter(p => p.vendor === v); if (!list.length) return;
+  const x = Object.keys(PDP).map(k => PDP[k]).find(q => q.roaster && q.roaster.name === v && textLen(q.roaster.story) > 200), ch = v.toLowerCase().replace(/\s+/g, '-');
+  let h = SC.guides[slug] || '';
+  if (x && textLen(h) < 200 + textLen(x.roaster.story)) h += '<h2>Die Geschichte von ' + E(v) + '</h2>' + sanitize(x.roaster.story);
+  const groups = {}; list.forEach(p => { const g = p.kind === 'kaffee' ? 'Ganze Bohne 1 kg' : (p.type || 'Weitere'); (groups[g] = groups[g] || []).push(p); });
+  h += '<h2>Alle Produkte von ' + E(v) + ' bei Wake Up</h2>' + Object.keys(groups).map(g => '<h3>' + E(g) + '</h3><ul>' + groups[g].map(p => '<li><a href="/products/' + p.handle + '/">' + E(p.title) + '</a>, ' + eur(p.price) + '</li>').join('') + '</ul>').join('') +
+    '<p>' + (KNOWN_COLS.has(ch) ? 'Alle Sorten mit Filter findest du in der Kategorie <a href="/collections/' + ch + '/">' + E(v) + '</a>. ' : '') + 'Im <a href="/pages/5plus1/">5+1 Karton</a> kannst du ' + E(v) + ' mit anderen Röstereien mischen. Wenn du unsicher bist, hilft der <a href="/pages/kaffee-finder/">Kaffee-Finder</a>.</p>';
+  SC.guides[slug] = h; });
+function probeRegions() { const w = new JSDOM('', { runScripts: 'outside-only' }).window; w.eval('window.WU={coffees:[],others:[],all:[],FAQ_SHOP:[]};'); try { w.eval(read(path.join(SRC, 'assets/js/content.js'))); } catch (e) {} return w.WU.REGIONS || {}; }
 const FAQ_SHOP = []; { let cur = null; const groups = ['Kaffee', 'Espresso Maschinen & Mahlwerke', 'Bestellungen', 'Sonstiges'];
   dom('page-faq').querySelectorAll('h2,h3,details').forEach(el => {
     if (el.tagName !== 'DETAILS') { const t = el.textContent.trim(); if (groups.includes(t)) { cur = [t.replace('Espresso Maschinen & Mahlwerke', 'Maschinen und Mühlen'), []]; FAQ_SHOP.push(cur); } return; }
@@ -155,7 +228,7 @@ const FAQ_SHOP = []; { let cur = null; const groups = ['Kaffee', 'Espresso Masch
 
 // ---------- Client-Daten ----------
 const dataJs = '/* Automatisch erzeugt aus data/shop/products.json (node build/build.js). Nicht von Hand bearbeiten. */\n' +
-  'window.WU=' + JSON.stringify({ CDN, SHOP, SITE, FREE_SHIPPING: 89, LOGO: CDN + 'WU_LOGO_transparent.png?v=1709016505', staticCatalog: true, coffees, others, FAQ_SHOP, USP, COLS }) + ';\n' +
+  'window.WU=' + JSON.stringify({ CDN, SHOP, SITE, FREE_SHIPPING: 89, LOGO: CDN + 'WU_LOGO_transparent.png?v=1709016505', staticCatalog: true, coffees, others, FAQ_SHOP, USP, COLS, XP, XG }) + ';\n' +
   'WU.all=WU.coffees.concat(WU.others);WU.byHandle=function(h){for(var i=0;i<WU.all.length;i++)if(WU.all[i].handle===h)return WU.all[i];};\n';
 
 // ---------- Vorrendern ----------
@@ -165,7 +238,7 @@ write(path.join(OUT, 'assets/js/data.js'), dataJs);
 const template = read(path.join(SRC, 'template.html')), contentJs = read(path.join(SRC, 'assets/js/content.js')), appJs = read(path.join(SRC, 'assets/js/app.js'));
 const probe = new JSDOM('', { runScripts: 'outside-only' }).window; probe.eval(dataJs); probe.eval(contentJs);
 const routes = ['/', '/collections/kaffee/', '/collections/maschinen/', '/collections/alle/', '/pages/5plus1/', '/pages/kaffee-finder/', '/pages/maschinen-finder/', '/pages/faq/', '/pages/roestereien/', '/blogs/ratgeber/']
-  .concat(Object.keys(COLS).map(h => '/collections/' + h + '/'), Object.keys(probe.WU.PAGES).map(s => '/pages/' + s + '/'), probe.WU.GUIDES.map(g => '/blogs/ratgeber/' + g.slug + '/'), probe.WU.all.map(p => '/products/' + p.handle + '/'));
+  .concat(Object.keys(COLS).map(h => '/collections/' + h + '/'), Object.keys(probe.WU.PAGES).map(s => s.startsWith('policy-') ? '/policies/' + s.slice(7) + '/' : '/pages/' + s + '/'), probe.WU.GUIDES.map(g => '/blogs/ratgeber/' + g.slug + '/'), probe.WU.all.map(p => '/products/' + p.handle + '/'));
 const slugify = s => s.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const HOME = { title: 'Italienischer Espresso & Siebträgermaschinen | Wake Up Wien', desc: 'Espresso wie im Italien-Urlaub: säurearme Röstungen aus Süditalien, Siebträgermaschinen mit Einschulung und der 5+1 Karton. Gratis Versand ab € 89.' };
 // Titel und Beschreibungen nach Keyword-Planer (Österreich, Nov. 2025 bis Okt. 2026)
@@ -205,15 +278,42 @@ routes.forEach(route => {
   if (desc.length < 110) { const fp = [...doc.querySelectorAll('.prose > p, .rich p, .page-body p')].map(p => p.textContent.trim()).find(x => x.length > 60); if (fp) desc = cut(desc + ' ' + fp, 158); }
   if (prod && SC.pdp[prod.handle]) { const s = SC.pdp[prod.handle]; if (s.seoTitle) title = s.seoTitle; if (s.seoDesc) desc = s.seoDesc; }
   { const cm = /^\/collections\/([^\/]+)\/$/.exec(route), ck = cm && SC.cols[cm[1]]; if (ck && COLS[cm[1]]) { if (ck.seoTitle) title = ck.seoTitle; if (ck.seoDesc) desc = ck.seoDesc; } }
+  { const xm = /^\/(pages|policies)\/([^\/]+)\/$/.exec(route), xk = xm && XPAGES[(xm[1] === 'policies' ? 'policy-' : '') + xm[2]]; if (xk) { if (xk.seoTitle) title = xk.seoTitle + (/^info/.test(xm[2]) ? ': Infos zur Marke' : '') + ' | Wake Up'; if (xk.seoDesc) desc = xk.seoDesc; } }
   if (SEO[route]) { title = SEO[route][0]; if (SEO[route][1]) desc = SEO[route][1]; }
   const img = prod ? prod.img : (doc.querySelector('.lead-img') || {}).src || CDN + 'banner-red-desktop-1.jpg?width=1200';
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
   const fixUrls = v => typeof v === 'string' ? (v.includes('/#/') ? (m => SITE + w.WU.toPath('#/' + m[1]) + (m[2] || ''))(/\/#\/([^#]*)(#.*)?$/.exec(v)) : v) : Array.isArray(v) ? v.map(fixUrls) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, fixUrls(x)])) : v;
-  const ld = fixUrls(JSON.parse(doc.getElementById('ld').textContent || '[]'));
+  let ld = fixUrls(JSON.parse(doc.getElementById('ld').textContent || '[]'));
   const TODAY = new Date().toISOString().slice(0, 10), ORG = { '@type': 'Organization', name: 'Wake Up Espressomaschinen', url: SITE + '/', logo: { '@type': 'ImageObject', url: CDN + 'WU_LOGO_transparent.png' } };
   (Array.isArray(ld) ? ld : [ld]).forEach(x => { if (x['@type'] === 'Article' || x['@type'] === 'BlogPosting') { const pr = doc.querySelector('.prose');
     x.author = ORG; x.publisher = ORG; x.dateModified = TODAY; x.wordCount = pr ? pr.textContent.split(/\s+/).length : undefined; x.timeRequired = 'PT' + Math.max(2, Math.round((x.wordCount || 400) / 200)) + 'M';
     x.image = [...new Set([].concat(x.image || [], [...doc.querySelectorAll('.prose img')].map(i => i.src)))].filter(Boolean).slice(0, 6); } });
+  // ---------- Schema anreichern ----------
+  { const arr = Array.isArray(ld) ? ld : [ld], url = SITE + route, YEAR_END = (new Date().getFullYear() + 1) + '-12-31';
+    const RETURN = { '@type': 'MerchantReturnPolicy', applicableCountry: ['AT', 'DE'], returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow', merchantReturnDays: 14, returnMethod: 'https://schema.org/ReturnByMail', merchantReturnLink: SITE + '/policies/refund-policy/' };
+    const ship = (price, pallet) => [['AT', pallet ? 99 : price >= 89 ? 0 : 4.99], ['DE', pallet ? 159 : price >= 150 ? 0 : 9.99]].map(([c, v]) => ({ '@type': 'OfferShippingDetails', shippingRate: { '@type': 'MonetaryAmount', value: v.toFixed(2), currency: 'EUR' }, shippingDestination: { '@type': 'DefinedRegion', addressCountry: c }, deliveryTime: { '@type': 'ShippingDeliveryTime', handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' }, transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: pallet ? 5 : 3, unitCode: 'DAY' } } }));
+    arr.forEach(x => {
+      if (x['@type'] === 'Store') { x.url = SITE + '/'; x.hasMerchantReturnPolicy = RETURN; x.contactPoint = { '@type': 'ContactPoint', telephone: x.telephone, email: x.email, contactType: 'customer service', areaServed: ['AT', 'DE'], availableLanguage: ['de', 'en'] }; x.knowsAbout = ['Espresso', 'Siebträgermaschinen', 'Kaffeemühlen', 'italienischer Kaffee']; }
+      if (x['@type'] === 'Product' && prod) { const pallet = prod.kind === 'maschine' || prod.kind === 'set';
+        (Array.isArray(x.offers) ? x.offers : [x.offers]).forEach(o => { if (!o) return; o.priceValidUntil = YEAR_END; o.shippingDetails = ship(Number(o.price), pallet); o.hasMerchantReturnPolicy = RETURN; o.url = url; });
+        x.inLanguage = 'de-AT'; x.mainEntityOfPage = url;
+        if (!x.additionalProperty && prod.bul) x.additionalProperty = prod.bul.filter(b => b[0]).map(b => ({ '@type': 'PropertyValue', name: b[0], value: b[1] }));
+        if (!x.countryOfOrigin && /Kaffee|Moka|Espresso|Pads/.test(prod.type || '')) x.countryOfOrigin = { '@type': 'Country', name: 'Italien' };
+        const s = SC.pdp[prod.handle]; if (s && s.seoDesc) x.description = s.seoDesc + (x.description ? ' ' + x.description : ''); }
+      if (x['@type'] === 'Article' || x['@type'] === 'BlogPosting') { x.inLanguage = 'de-AT'; x.mainEntityOfPage = url; x.url = url; x.isPartOf = { '@type': 'Blog', name: 'Wake Up Ratgeber', url: SITE + '/blogs/ratgeber/' }; }
+      if (x['@type'] === 'WebSite') { x.url = SITE + '/'; x.inLanguage = 'de-AT'; x.publisher = { '@id': SHOP + '/#store' }; } });
+    // Kollektionen: CollectionPage, ItemList und FAQ aus dem SEO-Text
+    if (/^\/collections\//.test(route)) { const cards = [...doc.querySelectorAll('#app .card')].slice(0, 60), h1t = (doc.querySelector('#app h1') || {}).textContent || '';
+      for (let k = arr.length - 1; k >= 0; k--) if (arr[k]['@type'] === 'ItemList') arr.splice(k, 1);
+      arr.push({ '@context': 'https://schema.org', '@type': 'CollectionPage', name: h1t, url, inLanguage: 'de-AT', description: desc, isPartOf: { '@type': 'WebSite', url: SITE + '/' },
+        mainEntity: { '@type': 'ItemList', numberOfItems: cards.length, itemListElement: cards.map((c, i) => { const a = c.querySelector('a.card-title'); return { '@type': 'ListItem', position: i + 1, name: a.textContent.trim(), url: SITE + a.getAttribute('href') }; }) } });
+      const qa = []; doc.querySelectorAll('.seo-text p').forEach(pp => { const st = pp.querySelector('strong,b'); if (!st || pp.firstElementChild !== st && pp.textContent.trim().indexOf(st.textContent.trim()) !== 0) return; const q = st.textContent.trim(); if (!/\?$/.test(q)) return; const ans = pp.textContent.replace(q, '').trim(); if (ans.length > 15) qa.push({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: ans } }); });
+      if (qa.length >= 2) arr.push({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: qa });
+      if (!arr.some(x => x['@type'] === 'BreadcrumbList') || /^\/collections\/(?!kaffee|maschinen|alle)/.test(route)) { for (let k = arr.length - 1; k >= 0; k--) if (arr[k]['@type'] === 'BreadcrumbList') arr.splice(k, 1);
+        arr.push({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [['Start', SITE + '/'], ['Sortiment', SITE + '/collections/alle/'], [h1t, url]].filter((c, i, a2) => !(i === 1 && url === c[1])).map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c[0], item: c[1] })) }); } }
+    // Service-Seiten und Richtlinien
+    if (/^\/(pages|policies)\//.test(route) && !arr.some(x => /FAQPage|WebPage|ContactPage|AboutPage/.test(x['@type']))) arr.push({ '@context': 'https://schema.org', '@type': /kontakt/.test(route) ? 'ContactPage' : /ueber-uns/.test(route) ? 'AboutPage' : 'WebPage', name: h1, url, inLanguage: 'de-AT', description: desc, isPartOf: { '@type': 'WebSite', url: SITE + '/' }, about: { '@id': SHOP + '/#store' } });
+    ld = arr; }
   if (prod && SC.pdp[prod.handle] && SC.pdp[prod.handle].reviews.length) (Array.isArray(ld) ? ld : [ld]).forEach(x => { if (x['@type'] === 'Product') { const s = SC.pdp[prod.handle];
     x.aggregateRating = { '@type': 'AggregateRating', ratingValue: s.rating.value, reviewCount: s.rating.count, bestRating: 5, worstRating: 1 };
     x.review = s.reviews.map(r => ({ '@type': 'Review', author: { '@type': 'Person', name: r.name }, datePublished: r.date || undefined, reviewBody: r.text || undefined, reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5, worstRating: 1 } })); } });
@@ -237,4 +337,13 @@ nf.getElementById('app').innerHTML = '<div class="wrap page-head"><h1>Diese Seit
 write(path.join(OUT, '404.html'), '<!doctype html>\n' + nf.documentElement.outerHTML);
 write(path.join(OUT, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + sitemap.map(r => '  <url><loc>' + SITE + r + '</loc></url>').join('\n') + '\n</urlset>\n');
 write(path.join(OUT, 'robots.txt'), PREVIEW ? 'User-agent: *\nDisallow: /\n' : 'User-agent: *\nAllow: /\n\nUser-agent: GPTBot\nAllow: /\nUser-agent: OAI-SearchBot\nAllow: /\nUser-agent: ClaudeBot\nAllow: /\nUser-agent: PerplexityBot\nAllow: /\n\nSitemap: ' + SITE + '/sitemap.xml\n');
+{ const SM = JSON.parse(read(path.join(SHOPDATA, 'sitemap.json'))), have = new Set(sitemap), lines = [], csv = ['alte Adresse (Shopify);Adresse in der Vorschau;Art'], open = [];
+  SM.forEach(u => { const clean = u.replace(/[?#].*$/, '').replace(/\/$/, ''), tg = target(clean);
+    if (!tg || !have.has(tg)) { open.push(clean); return; }
+    if (tg === clean + '/') { csv.push(clean + ';' + tg + ';gleich'); return; }
+    lines.push(clean + '  ' + tg + '  301'); lines.push(clean + '/  ' + tg + '  301'); csv.push(clean + ';' + tg + ';Weiterleitung 301'); });
+  lines.push('/collections/all  /collections/alle/  301', '/collections/all/  /collections/alle/  301', '/collections  /collections/alle/  301', '/collections/  /collections/alle/  301', '/blogs/news/*  /blogs/ratgeber/  301', '/pages/5-1  /pages/5plus1/  301');
+  write(path.join(OUT, '_redirects'), '# Alle Adressen aus der Shopify-Sitemap, die hier anders heißen\n' + [...new Set(lines)].join('\n') + '\n');
+  write(path.join(ROOT, 'docs', 'adressen-shopify-vorschau.csv'), csv.join('\n') + '\n');
+  console.log('Shop-Sitemap:', SM.length, 'Adressen |', csv.filter(l => /;gleich$/.test(l)).length, 'gleich |', csv.filter(l => /301$/.test(l)).length, 'weitergeleitet | offen:', open.length, open.join(' ')); }
 console.log('Seiten:', sitemap.length, '| Produkte:', coffees.length + others.length, '| Beschreibungen:', Object.keys(BODY).length, '| Shop-Seiten:', Object.keys(SC.pages).filter(k => SC.pages[k].html).length, '| Shop-Beiträge:', Object.keys(SC.guides).filter(k => SC.guides[k]).length, '| FAQ:', FAQ_SHOP.reduce((n, g) => n + g[1].length, 0));

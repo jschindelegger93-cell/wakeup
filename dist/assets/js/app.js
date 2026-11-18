@@ -21,7 +21,7 @@
     if (!a[0]) return '/' + q;
     if (a[0] === 'p') return '/products/' + a[1] + '/' + q;
     if (a[0] === 'c') return '/collections/' + a[1] + '/' + q;
-    if (a[0] === 'seite') return '/pages/' + a[1] + '/' + q;
+    if (a[0] === 'seite') return (String(a[1] || '').indexOf('policy-') === 0 ? '/policies/' + a[1].slice(7) : '/pages/' + a[1]) + '/' + q;
     if (a[0] === 'ratgeber' && a[1]) return '/blogs/ratgeber/' + a[1] + '/' + q;
     return (FIXED[a[0]] || '/') + q;
   }
@@ -32,6 +32,7 @@
     if (/^\/blogs\/ratgeber/.test(s)) return '#/ratgeber';
     for (var k in FIXED) if (s.indexOf(FIXED[k]) === 0) return '#/' + k;
     if ((m = /^\/collections\/([^\/]+)/.exec(s))) return '#/c/' + m[1];
+    if ((m = /^\/policies\/([^\/]+)/.exec(s))) return '#/seite/policy-' + m[1];
     if ((m = /^\/pages\/([^\/]+)/.exec(s))) return '#/seite/' + m[1];
     return '#/';
   }
@@ -160,7 +161,7 @@
     for (var i = 0; i < 6; i++) {
       var p = picks[i], free = i === 5;
       if (p) h += '<button class="slot filled' + (free ? ' free' : '') + '"' + (interactive ? ' data-act="unpick" data-i="' + i + '" aria-label="Entfernen: ' + esc(p.title) + '"' : ' tabindex="-1"') + '><img src="' + esc(p.img) + '" alt="">' + (interactive ? '<span class="x">×</span>' : '') + (free ? '<span class="tag">Gratis</span>' : '') + '</button>';
-      else h += '<div class="slot empty' + (free ? ' free' : '') + '">' + (free ? '<b class="plus"><span>+1</span> gratis</b>' : (i + 1)) + '</div>';
+      else h += '<div class="slot empty' + (free ? ' free' : '') + '">' + (free ? '<span class="plus"><b>+1</b><em>gratis</em></span>' : (i + 1)) + '</div>';
     }
     return '<div class="slots">' + h + '</div>';
   }
@@ -305,7 +306,7 @@
     var types = []; WU.all.forEach(function (p) { var x = typeOf(p); if (types.indexOf(x) < 0) types.push(x); });
     var list = sorted(WU.all.filter(function (p) { return (!filt.type || typeOf(p) === filt.type) && (!filt.vendor || p.vendor === filt.vendor); }));
     return head('Sortiment', 'Kaffee, Maschinen und Kaffeezubehör', 'Alle ' + WU.all.length + ' Produkte aus unserem Geschäft in Wien: italienische Kaffeebohnen, Siebträgermaschinen, Mühlen, Kaffeezubehör für Baristas, Reinigung und Ersatzteile.') +
-      '<div class="wrap" style="padding-bottom:64px"><div class="filters">' + sel('type', 'Kategorie', [['', 'Alle Kategorien']].concat(types.map(function (x) { return [x, x]; }))) + sel('vendor', 'Marke', [['', 'Alle Marken']].concat(vendorsOf(WU.all).map(function (v) { return [v, v]; }))) + sel('sort', 'Sortieren', SORTS) + '</div>' + listing(list, WU.all.length, 'Produkte') + '</div>';
+      '<div class="wrap" style="padding-bottom:64px"><div class="filters">' + sel('type', 'Kategorie', [['', 'Alle Kategorien']].concat(types.map(function (x) { return [x, x]; }))) + sel('vendor', 'Marke', [['', 'Alle Marken']].concat(vendorsOf(WU.all).map(function (v) { return [v, v]; }))) + sel('sort', 'Sortieren', SORTS) + '</div>' + listing(list, WU.all.length, 'Produkte') + '</div>' + seoText('col-seo', 'sortiment');
   }
 
   /* ---------- Maschinen ---------- */
@@ -751,5 +752,10 @@
   var preFull = document.getElementById('full'), preHandle = (/^#\/p\/(.+)/.exec(cur()) || [])[1];
   if (preFull && preHandle) { WU.BODY = WU.BODY || {}; if (!WU.BODY[preHandle]) WU.BODY[preHandle] = preFull.innerHTML; }
   document.addEventListener('scroll', function (ev) { var hs = ev.target; if (!hs || hs.id !== 'hs') return; var i = Math.round(hs.scrollLeft / hs.clientWidth); Array.prototype.forEach.call(document.querySelectorAll('.hs-dot'), function (b, k) { b.classList.toggle('on', k === i); }); }, true);
+  document.addEventListener('submit', function (ev) { var f = ev.target; if (!f.matches || !f.matches('[data-form="newsletter"]')) return; ev.preventDefault();
+    var mail = f.querySelector('input[type="email"]'), ok = f.querySelector('input[type="checkbox"]'), msg = f.querySelector('.news-msg'); msg.className = 'news-msg';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(mail.value.trim())) { msg.textContent = 'Gib eine gültige E-Mail-Adresse ein.'; msg.className = 'news-msg err'; mail.focus(); return; }
+    if (!ok.checked) { msg.textContent = 'Setz das Häkchen, damit wir dir schreiben dürfen.'; msg.className = 'news-msg err'; ok.focus(); return; }
+    msg.textContent = 'In dieser Vorschau ist die Anmeldung nicht aktiv. Im Shop läuft sie über Klaviyo.'; track('newsletter_submit', 'footer'); });
   renderCart(); route(true);
 })();
