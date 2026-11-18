@@ -147,9 +147,9 @@
     var meta = p.kind === 'kaffee' ? '<span class="roast">Röstung ' + beans(p.roast) + '</span><span class="notes">' + esc(p.aromas.slice(0, 3).join(' · ')) + '</span>' : '';
     var price = (p.compare ? '<del>' + eur(p.compare) + '</del>' : '') + eur(p.price) + (p.kind === 'kaffee' ? ' <small>/ kg</small>' : '');
     var cheap = p.price < 500;
-    return '<article class="card">' + badge + '<a class="card-media" href="' + href(p) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(p.img) + '" alt="" loading="lazy" width="400" height="400"></a>' +
+    return '<article class="card">' + badge + '<a class="card-media' + (p.hov ? ' has-hov' : '') + '" href="' + href(p) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(p.img) + '" alt="" loading="lazy" width="400" height="400">' + (p.hov ? '<img class="hov" src="' + esc(p.hov) + '" alt="" loading="lazy" width="400" height="400">' : '') + '</a>' +
       '<div class="card-body"><span class="vendor">' + esc(p.vendor) + '</span><a class="card-title" href="' + href(p) + '">' + esc(p.title) + '</a>' + rate(p) + meta +
-      '<span class="price">' + price + '</span>' +
+      '<span class="price">' + price + '</span>' + (p.labels ? '<span class="tags">' + p.labels.map(function (l) { return '<i>' + esc(l) + '</i>'; }).join('') + '</span>' : '') +
       (cheap ? '<button class="btn sm ghost quick" data-act="add" data-id="' + p.id + '">' + (p.preorder ? 'Vorbestellen' : 'In den Warenkorb') + '</button>' : '<a class="btn sm ghost quick" href="' + href(p) + '">Ansehen</a>') +
       '</div></article>';
   }
@@ -320,9 +320,9 @@
   function pdpStatic(p) {
     return keep('pdp-static', function () {
       var x = WU.SC.pdp && WU.SC.pdp[p.handle], h = ''; if (!x) return '';
-      if (x.details) h += '<section class="sec band"><div class="wrap kd"><div><h2>' + esc(x.details.title || 'Im Detail') + '</h2><dl class="kd-rows">' + x.details.rows.map(function (r) {
-        var v = r.on != null ? '<span class="kd-bar" role="img" aria-label="' + r.on + ' von ' + r.of + '">' + new Array(r.of + 1).join('x').split('').map(function (_, i) { return '<i' + (i < r.on ? ' class="on"' : '') + '></i>'; }).join('') + '</span>' + esc(r.cap) : esc(r.val || r.items.join(', '));
-        return '<div><dt>' + esc(r.name) + '</dt><dd>' + v + '</dd></div>'; }).join('') + '</dl></div><div class="rich">' + x.details.desc + '</div></div></section>';
+      if (x.details) h += '<section class="sec"><div class="wrap kd"><div><p class="eye">Im Detail</p><h2>' + esc(x.details.title || 'Im Detail') + '</h2><dl class="kd-rows">' + x.details.rows.map(function (r) {
+        var v = r.on != null ? '<span class="kd-bar" role="img" aria-label="' + r.on + ' von ' + r.of + '">' + new Array(r.of + 1).join('x').split('').map(function (_, i) { return '<i' + (i < r.on ? ' class="on"' : '') + '></i>'; }).join('') + '</span>' + '<em>' + esc(r.cap) + '</em>' : (r.items.length ? r.items : [r.val]).map(function (it) { return '<span class="kd-it">' + ico(/Siebträger|Mokka|Moka|Filter|Vollautomat|Pad/i.test(it) ? 'tool' : /Italien|Herkunft/i.test(r.name + it) ? 'pin' : /Koffein/i.test(r.name) ? 'clock' : 'cup') + esc(it) + '</span>'; }).join('');
+        return '<div><dt>' + esc(r.name) + '</dt><dd>' + v + '</dd></div>'; }).join('') + '</dl><div class="rich kd-desc">' + x.details.desc + '</div></div>' + (p.kdimg ? '<figure class="kd-img"><img src="' + esc(p.kdimg) + '&width=900" alt="' + esc(p.title) + '" loading="lazy" width="900" height="900"></figure>' : '') + '</div></section>';
       if (x.roaster) { var slug = 'roesterei-' + x.roaster.name.toLowerCase().replace(/\s+/g, '-'), has = WU.GUIDES.some(function (g) { return g.slug === slug; });
         h += '<section class="sec"><div class="wrap rs">' + (x.roaster.img ? '<img class="rs-img" src="' + esc(x.roaster.img) + '&width=1000" alt="Die Rösterei ' + esc(x.roaster.name) + '" loading="lazy" width="1000" height="750">' : '') +
           '<div><div class="rs-head">' + (x.roaster.logo ? '<img src="' + esc(x.roaster.logo) + '&width=240" alt="Logo ' + esc(x.roaster.name) + '" loading="lazy" width="120" height="120">' : '') + '<div><p class="eye">Die Rösterei</p><h2>' + esc(x.roaster.name) + '</h2>' + (x.roaster.claim ? '<p class="rs-claim">' + esc(x.roaster.claim) + '</p>' : '') + '</div></div>' +
@@ -352,7 +352,7 @@
       : KT.indexOf(p.type) >= 0 ? WU.others.filter(function (o) { return o.handle !== p.handle && KT.indexOf(o.type) >= 0; }).sort(function (a, b) { return (b.vendor === p.vendor) - (a.vendor === p.vendor) || (b.type === p.type) - (a.type === p.type); }).slice(0, 4)
       : WU.others.filter(function (o) { return o.handle !== p.handle && (p.kind === 'maschine' ? o.kind === 'muehle' || o.kind === 'set' : o.kind === p.kind || o.kind === 'maschine'); }).slice(0, 4);
     if (!list.length) return '';
-    return '<div class="wrap" style="padding-bottom:64px"><h2 style="margin-bottom:20px">' + (p.kind === 'kaffee' ? 'Schmeckt ähnlich' : 'Passt dazu') + '</h2><div class="grid">' + list.map(card).join('') + '</div></div>';
+    return '<div class="wrap" style="padding-bottom:64px"><h2>Empfehlungen für dich</h2><p style="margin:6px 0 20px;color:var(--mut)">Das Beste aus Italien. <b style="color:var(--ink)">Immer frisch!</b></p><div class="grid">' + list.map(card).join('') + '</div></div>';
   }
   /* Vollständige Beschreibung und alle Bilder live aus dem Shop (Netlify Function) */
   var fullCache = {};
@@ -388,25 +388,33 @@
     var opts = isC ? '<div class="opts">' +
       '<button class="opt' + (pdp.id === p.id ? ' on' : '') + '" data-act="opt" data-id="' + p.id + '"><div><b>1 kg Bohnen</b><span>' + eur(p.price) + ' pro kg</span></div><strong>' + eur(p.price) + '</strong></button>' +
       '<button class="opt' + (pdp.id === p.kartonId ? ' on' : '') + '" data-act="opt" data-id="' + p.kartonId + '"><div><b>Karton mit 6 kg</b><span>5+1 kg gratis, ' + eur(p.price * 5 / 6) + ' pro kg</span></div><strong>' + eur(p.price * 5) + '</strong></button></div>' : (p.variants && p.variants.length > 1 ? '<div class="opts">' + p.variants.map(function (x) { return '<button class="opt' + (pdp.id === x.id ? ' on' : '') + '" data-act="opt" data-id="' + x.id + '"' + (x.available ? '' : ' disabled') + '><div><b>' + esc(x.title) + '</b>' + (x.available ? '' : '<span>Ausverkauft</span>') + '</div><strong>' + eur(x.price) + '</strong></button>'; }).join('') + '</div>' : '');
-    var profile = isC ? '<div class="profile"><div><div class="blend-l"><span>' + p.arabica + ' % Arabica</span><span>' + (100 - p.arabica) + ' % Robusta</span></div><div class="blend"><b style="width:' + p.arabica + '%"></b></div></div>' +
-      meter('Röstung', p.roast, 5) + meter('Intensität', p.intensity, 10) + meter('Körper', p.body, 5) + meter('Bitterkeit', p.bitter, 5) + meter('Säure', p.acid, 5) +
-      '</div>' : '';
-    var service = (p.kind === 'maschine' || p.kind === 'set') ? '<div class="service"><h3>Bei jeder Maschine dabei</h3><ul class="facts">' + fact('check', 'Vor dem Versand in unserer Werkstatt geprüft') + fact('chat', 'Persönliche Einschulung per Telefon oder WhatsApp-Videocall') + fact('tool', 'Maschinenservice bei uns in Wien') + fact('truck', 'Lieferung sicher auf Palette per Spedition') + '</ul></div>' : '';
+    function seg(n, max) { var h = ''; for (var s = 0; s < max; s++) h += '<i' + (s < n ? ' class="on"' : '') + '></i>'; return '<span class="seg" role="img" aria-label="' + n + ' von ' + max + '">' + h + '</span>'; }
+    function srow(name, n, max, cap) { return '<div class="srow"><b>' + name + '</b>' + seg(n, max) + '<em>' + esc(cap) + '</em></div>'; }
+    var ar = isC ? p.arabica : p.ar, rg = p.rg || (isC ? [p.roast, ''] : null), bi = p.bi || (isC ? [p.bitter, ''] : null), it = isC ? p.intensity : p.it;
+    var profile = (ar != null || rg || it) ? '<div class="profile">' + (ar != null ? '<div><div class="blend-l"><span><b>' + ar + ' %</b> Arabica</span>' + (ar < 100 ? '<span><b>' + (100 - ar) + ' %</b> Robusta</span>' : '') + '</div><div class="blend"><b style="width:' + ar + '%"></b></div></div>' : '') +
+      (rg ? srow('Röstgrad', rg[0], 5, rg[1]) : '') + (bi ? srow('Bitterstoffe', bi[0], 5, bi[1]) : '') + (it ? srow('Intensität', it, 10, it + ' / 10') : '') + '</div>' : '';
+    var staffel = isC && p.kartonId ? '<table class="staffel"><thead><tr><th>Anzahl</th><th>Stückpreis</th></tr></thead><tbody><tr><td>1 – 5 Packungen</td><td>' + eur(p.price) + '</td></tr><tr><td>ab 6 Packungen</td><td>' + eur(p.price * 5 / 6) + '</td></tr></tbody></table>' : '';
+    var isCoffeeType = isC || crumbOf(p)[0] === 'Kaffee';
+    var acc = '<div class="acc">' +
+      '<details><summary>Versand &amp; Lieferung</summary><p>Wir verschicken in der Regel am gleichen Tag, von Montag bis Samstag. Je nach Adresse ist dein Paket in 1 bis 3 Werktagen bei dir. In Österreich ist der Versand ab € 89 Warenwert kostenlos, darunter kostet er € 4,99.</p><p><a href="#/seite/versand-rabatte">Alle Versandkosten und Länder</a></p></details>' +
+      (isCoffeeType ? '<details><summary>Verpackungseinheiten &amp; Rabatte</summary><p>In Italien ist die Standardverpackung für Bohnenkaffee meistens das Kilo. Einige Sorten führen wir auch in 500 g oder 250 g.</p><ul><li><b>Karton (5+1 kg gratis):</b> Der Preis ist bereits reduziert, du zahlst 5 kg und bekommst 6.</li><li><b>Karton (12 × 500 g):</b> 10 Packungen zahlen, 2 Packungen gratis.</li><li><b>Steige (20 Stück):</b> 10 % Rabatt auf die Steige.</li><li><b>Abo:</b> 1 bis 3 % zusätzlicher Rabatt, jederzeit pausieren oder kündigen.</li></ul><p><a href="#/seite/kaffee-abo">So funktioniert das Kaffee-Abo</a></p></details>' : '') +
+      ((p.kind === 'maschine' || p.kind === 'set') ? '<details open><summary>Bei jeder Maschine dabei</summary><ul><li>Vor dem Versand in unserer Werkstatt geprüft</li><li>Persönliche Einschulung im Geschäft, per Telefon oder Videocall</li><li>Maschinenservice bei uns in Wien</li><li>Lieferung sicher auf Palette per Spedition</li></ul></details>' : '') + '</div>';
     var label = p.preorder ? 'Vorbestellen' : 'In den Warenkorb';
     var priceHtml = (p.compare ? '<del>' + eur(p.compare) + '</del>' : '') + eur(v.price);
-    return '<div class="wrap page-head"><p class="crumbs"><a href="#/">Start</a> / <a href="#/' + crumbOf(p)[1] + '">' + esc(crumbOf(p)[0]) + '</a></p></div>' +
-      '<div class="wrap pdp"><div class="pdp-left"><div class="pdp-media"><img id="pdp-img" src="' + esc(p.img) + '" alt="' + esc(p.title) + '" width="800" height="800" fetchpriority="high"></div><div class="thumbs" id="thumbs">' + (p.imgs && p.imgs.length > 1 ? p.imgs.map(function (src, i) { return '<button class="thumb' + (i === 0 ? ' on' : '') + '" data-act="thumb" data-src="' + esc(src) + '" aria-label="Bild ' + (i + 1) + ' von ' + p.imgs.length + '"><img src="' + esc(src) + '" alt="" loading="lazy" width="120" height="120"></button>'; }).join('') : '') + '</div></div><div>' +
-      '<span class="vendor">' + esc(p.vendor) + '</span><h1>' + esc(p.title) + '</h1>' + rate(p, true) + (p.labels ? '<p class="labels">' + p.labels.map(function (l) { return '<span>' + esc(l) + '</span>'; }).join('') + '</p>' : '') + aromen(p) +
-      (isC ? '<p class="roast" style="margin-top:10px">Röstung ' + beans(p.roast) + '</p>' + (WU.REGIONS[p.vendor] ? '<p class="origin">Geröstet in ' + esc(WU.REGIONS[p.vendor].place) + '. ' + esc(WU.REGIONS[p.vendor].line) + '</p>' : '') : '') +
-      '<div class="pdp-price"><span class="price">' + priceHtml + '</span>' + (p.compare ? '<span class="chip" style="background:var(--rosso);color:#fff">Spare ' + eur(p.compare - p.price) + '</span>' : '') + (p.preorder ? '<span class="chip">Vorbestellung</span>' : '') + '</div>' +
-      '<p class="pdp-note">Preis inkl. MwSt., zzgl. Versand. Kostenloser Versand ab € 89 Warenwert.</p>' + opts +
+    return '<div class="wrap page-head pdp-crumb"><p class="crumbs"><a href="#/">Start</a> / <a href="#/' + crumbOf(p)[1] + '">' + esc(crumbOf(p)[0]) + '</a></p></div>' +
+      '<div class="wrap pdp"><div class="pdp-left"><div class="pdp-media"><img id="pdp-img" src="' + esc(p.img) + '" alt="' + esc(p.title) + '" width="800" height="800" fetchpriority="high"></div><div class="thumbs" id="thumbs">' + (p.imgs && p.imgs.length > 1 ? p.imgs.map(function (src, i) { return '<button class="thumb' + (i === 0 ? ' on' : '') + '" data-act="thumb" data-src="' + esc(src) + '" aria-label="Bild ' + (i + 1) + ' von ' + p.imgs.length + '"><img src="' + esc(src) + '" alt="" loading="lazy" width="120" height="120"></button>'; }).join('') : '') + '</div></div><div class="pdp-buy">' +
+      '<span class="vendor">' + esc(p.vendor) + '</span><h1>' + esc(p.title) + '</h1>' +
+      '<div class="pdp-price"><span class="price">' + priceHtml + '</span>' + (p.compare ? '<span class="chip" style="background:var(--rosso);color:#fff">Spare ' + eur(p.compare - p.price) + '</span>' : '') + (p.preorder ? '<span class="chip">Vorbestellung</span>' : '') + (p.labels ? '<span class="labels">' + p.labels.map(function (l) { return '<span>' + esc(l) + '</span>'; }).join('') + '</span>' : '') + '</div>' +
+      '<p class="pdp-note">inkl. MwSt., zzgl. <a href="#/seite/versand-rabatte">Versand</a>. Kostenloser Versand ab € 89 Warenwert.</p>' + rate(p, true) +
+      aromen(p) + profile + staffel + (opts ? '<p class="opt-l">' + (isC ? 'Größe' : 'Variante') + '</p>' + opts : '') +
       '<div class="buy"><div class="qty"><button data-act="qty" data-d="-1" aria-label="Weniger">−</button><output>' + pdp.qty + '</output><button data-act="qty" data-d="1" aria-label="Mehr">+</button></div>' +
       '<button class="btn" data-act="add-pdp">' + label + '</button></div>' +
-      '<p class="dispatch">' + (p.kind === 'maschine' || p.kind === 'set' ? 'Geprüft in unserer Werkstatt, geliefert per Spedition' : 'Bis 13 Uhr bestellt, meist noch heute verschickt') + '</p>' +
       (isC ? '<button class="btn ghost block" style="margin-top:10px" data-act="to-builder" data-h="' + p.handle + '">In meinen 5+1 Karton legen</button>' : '') +
-      '<ul class="facts">' + fact('truck', 'Lieferung in 1–3 Werktagen in Österreich') + (isC ? fact('box', 'Im 6-kg-Karton zahlst du nur 5 kg') : '') + fact('card', 'Sicher zahlen mit PayPal, Klarna, Karte, Apple Pay oder eps') + '</ul>' + bullets(p) + uspBar() +
-      profile + (p.kd ? '' : '<div class="pdp-text rich" id="full">' + ((WU.BODY && WU.BODY[p.handle]) || (p.text ? '<h2>Beschreibung</h2><p>' + esc(p.text) + '</p>' : '')) + '</div>') + service +
-      more(p) + '</div></div>' + pdpStatic(p) + similar(p) +
+      '<p class="dispatch">' + (p.kind === 'maschine' || p.kind === 'set' ? 'Geprüft in unserer Werkstatt, geliefert per Spedition' : 'Lieferung 1 bis 3 Werktage in Österreich. Bis 13 Uhr bestellt, meist noch heute verschickt.') + '</p>' +
+      bullets(p) + acc +
+      (p.kd ? '' : '<div class="pdp-text rich" id="full">' + ((WU.BODY && WU.BODY[p.handle]) || (p.text ? '<h2>Beschreibung</h2><p>' + esc(p.text) + '</p>' : '')) + '</div>') +
+      more(p) + '</div></div>' +
+      '<section class="usp-band"><div class="wrap">' + uspBar() + '</div></section>' + pdpStatic(p) + similar(p) +
       '<div class="sticky-buy"><span class="price">' + eur(v.price) + '</span><button class="btn" data-act="add-pdp">' + label + '</button></div>';
   }
 

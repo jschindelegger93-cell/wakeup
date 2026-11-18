@@ -72,7 +72,11 @@ const USP = (Object.values(PDP).find(x => x.usp && x.usp.length) || { usp: [] })
 function extras(p, base, body) {
   const x = PDP[p.handle] || {};
   if (x.rating && x.rating.count) base.rating = [x.rating.value, x.rating.count];
-  if (x.labels && x.labels.length) base.labels = x.labels;
+  { const ls = (x.labels || []).filter(l => !/^\d+\s*(g|kg|ml|l|stk\.?|x)\b/i.test(l) && !/^(Standard|Default|Vorbestell|Ausverkauft)/i.test(l)); if (ls.length) base.labels = ls; }
+  { const RG = { Hell: 2, Mittel: 3, Mitteldunkel: 4, Dunkel: 5 }, BI = { Mild: 2, Mittel: 3, 'Kräftig': 4, Hoch: 5 };
+    if (x.roestgrad) base.rg = [RG[x.roestgrad] || 3, x.roestgrad]; if (x.bitter) base.bi = [BI[x.bitter] || 3, x.bitter]; if (x.intensitaet) base.it = x.intensitaet; if (x.arabica != null) base.ar = x.arabica; }
+  { const mood = p.images.find(i => /mood/i.test(i.src)) || p.images[1]; if (mood) base.hov = mood.src.replace(/\?.*$/, '') + '?width=600'; }
+  if (x.details && x.details.img) base.kdimg = x.details.img;
   if (x.aromen && x.aromen.length) base.aromen = x.aromen;
   const bul = [], rows = (x.details && x.details.rows) || [], row = n => rows.find(r => r.name === n);
   if (x.arabica != null) bul.push(['Mischung', x.arabica + ' % Arabica' + (x.robusta ? ', ' + x.robusta + ' % Robusta' : '')]);
