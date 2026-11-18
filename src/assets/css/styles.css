@@ -741,3 +741,20 @@ a.rate{margin-top:10px;min-height:32px}a.rate span:last-child{text-decoration:un
 .slot{min-height:0}
 .slot img{position:absolute;inset:8%;width:84%;height:84%;object-fit:contain}
 @media (max-width:899px){.hero .karton .slots > *{aspect-ratio:1;padding:0}}
+/* Mobil: mehr Luft im Hero und zum ersten Produktblock */
+@media (max-width:899px){
+  .hero .hs-slide .hero-in{padding-top:44px;padding-bottom:12px;gap:36px}
+  .hero h1,.hero .hs-slide h2{line-height:1.08}
+  .hero .hero-sub{margin-top:18px;line-height:1.6}
+  .hero .hero-cta{margin-top:28px;gap:12px}
+  .hero .hero-cta .btn{min-height:54px}
+  .hero .karton{padding:20px}
+  .hero .karton-top{margin-bottom:16px}
+  .hero .karton .slots{gap:10px}
+  .hs-nav{padding-top:20px;padding-bottom:28px}
+  .sec.first{padding-top:44px}
+  .sec.first .sec-head{margin-bottom:22px}
+  .rail{gap:14px}
+}
+@media (max-width:899px){.hs-pics.n4{grid-template-columns:repeat(2,1fr)!important;gap:10px}.hs-pics.n4 a{aspect-ratio:3/2}.hs-pics.n4 img{padding:0;object-fit:cover}.hs-pics.n2{gap:10px}.hs-pics.n2 a{aspect-ratio:1}}
+@media (max-width:899px){.hs-pics.n4 a{aspect-ratio:1}}
