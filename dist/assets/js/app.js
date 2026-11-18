@@ -749,10 +749,15 @@
     if (!a || ev.defaultPrevented) return;
     ev.preventDefault(); location.href = toPath(a.getAttribute('href'));
   });
-  /* Ankündigungsleiste: wechselt alle 5 Sekunden, hält an bei Maus/Fokus */
-  (function () { var bar = document.getElementById('bar'); if (!bar) return; var ps = bar.querySelectorAll('.bar-in p'), i = 0, hold = false; if (ps.length < 2) return;
+  /* Ankündigungsleiste: wechselt alle 5 Sekunden, Pfeile und Wischen gehen auch, hält an bei Maus/Fokus */
+  (function () { var bar = document.getElementById('bar'); if (!bar) return; var ps = bar.querySelectorAll('.bar-in p'), i = 0, hold = false, timer, x0 = null; if (ps.length < 2) return;
+    function go(n) { ps[i].classList.remove('on'); i = (n + ps.length) % ps.length; ps[i].classList.add('on'); }
+    function run() { clearInterval(timer); timer = setInterval(function () { if (!hold && !document.hidden) go(i + 1); }, 5000); }
+    bar.addEventListener('click', function (ev) { var b = ev.target.closest && ev.target.closest('[data-bar]'); if (!b) return; go(i + (b.getAttribute('data-bar') === 'next' ? 1 : -1)); run(); });
     bar.addEventListener('mouseenter', function () { hold = true; }); bar.addEventListener('mouseleave', function () { hold = false; }); bar.addEventListener('focusin', function () { hold = true; }); bar.addEventListener('focusout', function () { hold = false; });
-    setInterval(function () { if (hold || document.hidden) return; ps[i].classList.remove('on'); i = (i + 1) % ps.length; ps[i].classList.add('on'); }, 5000); })();
+    bar.addEventListener('touchstart', function (ev) { x0 = ev.touches[0].clientX; }, { passive: true });
+    bar.addEventListener('touchend', function (ev) { if (x0 === null) return; var dx = ev.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 40) { go(i + (dx < 0 ? 1 : -1)); run(); } }, { passive: true });
+    run(); })();
   try { var qv = new URLSearchParams(location.search).get('roesterei'); if (qv) filt.vendor = qv; } catch (e) {}
   var preFull = document.getElementById('full'), preHandle = (/^#\/p\/(.+)/.exec(cur()) || [])[1];
   if (preFull && preHandle) { WU.BODY = WU.BODY || {}; if (!WU.BODY[preHandle]) WU.BODY[preHandle] = preFull.innerHTML; }

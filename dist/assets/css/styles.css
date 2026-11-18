@@ -839,3 +839,12 @@ a.rate{margin-top:10px;min-height:32px}a.rate span:last-child{text-decoration:un
 .ph-list .crumbs{margin-bottom:6px}
 .ph-list h1{max-width:none;font-size:clamp(1.65rem,1.2rem + 1.5vw,2.5rem);line-height:1.12}
 .ph-list > p:not(.crumbs){font-size:1rem;margin-top:8px;max-width:80ch}
+
+.bar{position:relative}
+.bar-in p{gap:8px;padding:9px 52px}
+.bar-in .ico{width:16px;height:16px;flex:none}
+.bar-btn{position:absolute;top:0;bottom:0;width:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;color:#fff;cursor:pointer;z-index:2;padding:0;opacity:.85}
+.bar-btn:hover,.bar-btn:focus-visible{opacity:1;background:rgba(0,0,0,.14)}
+.bar-btn svg{width:18px;height:18px}
+.bar-prev{left:max(0px,calc(50% - 640px))}
+.bar-next{right:max(0px,calc(50% - 640px))}
