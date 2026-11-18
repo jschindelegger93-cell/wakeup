@@ -177,13 +177,21 @@
     var top = WU.coffees.slice(0, 5), pakete = WU.others.filter(function (p) { return p.kind === 'paket'; });
     var machines = WU.others.filter(function (p) { return p.kind === 'maschine' || p.kind === 'set'; });
     var m = WU.byHandle('elba-quattro'), z = WU.byHandle('eureka-mignon-kupfer'), k = WU.coffees[1];
-    return '<section class="hero"><div class="wrap hero-in"><div>' +
-      '<p class="hero-kicker">Dal 2010 a Vienna</p><h1>Espresso wie im Italien-Urlaub.</h1>' +
-      '<p class="hero-sub">Der Caffè an der Bar in Neapel, der Cappuccino am Hafen in Kalabrien: genau diese Röstungen holen wir direkt aus Italien nach Wien. Such dir fünf Kilo aus, das sechste schenken wir dir.</p>' +
-      '<div class="hero-cta"><a class="btn light" href="#/5plus1" data-track="hero_5plus1">Karton zusammenstellen</a><a class="btn line-light" href="#/kaffee" data-track="hero_kaffee">Alle Kaffees ansehen</a></div>' +
-      '<ul class="hero-facts">' + fact('truck', 'Gratis Versand ab € 89') + fact('clock', 'Lieferung in 1–3 Werktagen') + fact('home', 'Wiener Familienbetrieb seit 2010') + '</ul></div>' +
-      '<a class="karton" href="#/5plus1" aria-label="Zum 5+1 Konfigurator" style="text-decoration:none;color:#fff"><div class="karton-top"><span>Dein Karton</span><em>5 bezahlen, 6 bekommen</em></div>' + slotsHtml(top, false) + '</a>' +
-      '</div></section>' +
+    var set = WU.others.filter(function (p) { return p.kind === 'set'; })[0] || machines[0];
+    function pics(list, n) { return '<div class="hs-pics n' + n + '">' + list.slice(0, n).map(function (p) { return '<a href="' + href(p) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(p.img) + '" alt="" loading="lazy" width="400" height="400"></a>'; }).join('') + '</div>'; }
+    var slides = [
+      '<div><h1>Espresso wie im Italien-Urlaub.</h1><p class="hero-sub">Der Caffè an der Bar in Neapel, der Cappuccino am Hafen in Kalabrien: genau diese Röstungen holen wir direkt aus Italien nach Wien. Such dir fünf Kilo aus, das sechste schenken wir dir.</p>' +
+        '<div class="hero-cta"><a class="btn light" href="#/5plus1" data-track="hero_5plus1">Karton zusammenstellen</a><a class="btn line-light" href="#/kaffee" data-track="hero_kaffee">Alle Kaffees ansehen</a></div>' +
+        '<ul class="hero-facts">' + fact('truck', 'Gratis Versand ab € 89') + fact('clock', 'Lieferung in 1–3 Werktagen') + fact('home', 'Wiener Familienbetrieb seit 2010') + '</ul></div>' +
+        '<a class="karton" href="#/5plus1" aria-label="Zum 5+1 Konfigurator" style="text-decoration:none;color:#fff"><div class="karton-top"><span>Dein Karton</span><em>5 bezahlen, 6 bekommen</em></div>' + slotsHtml(top, false) + '</a>',
+      pakete.length ? '<div><h2>Probierpakete: mehrere Röstungen auf einmal.</h2><p class="hero-sub">Du weißt noch nicht, welcher Espresso deiner ist? In den Probierpaketen bekommst du mehrere Sorten zu je einem Kilo und findest deinen Favoriten in Ruhe.</p>' +
+        '<div class="hero-cta"><a class="btn light" href="' + (WU.COLS && WU.COLS['wake-up-probierpakete'] ? '#/c/wake-up-probierpakete' : '#/kaffee') + '" data-track="hero_pakete">Probierpakete ansehen</a><a class="btn line-light" href="#/finder" data-track="hero_finder">Kaffee-Finder starten</a></div></div>' + pics(pakete, 4) : '',
+      set ? '<div><h2>Siebträger mit Einschulung und Werkstatt in Wien.</h2><p class="hero-sub">Jede Maschine prüfen wir vor dem Versand in unserer Werkstatt. Dazu gibt es eine persönliche Einschulung, im Geschäft, per Telefon oder per Videocall. Im Set mit Mühle sparst du 7 %.</p>' +
+        '<div class="hero-cta"><a class="btn light" href="#/maschinen" data-track="hero_maschinen">Maschinen ansehen</a><a class="btn line-light" href="#/maschinen-finder" data-track="hero_mfinder">Maschinen-Finder</a></div></div>' + pics(machines, 2) : ''
+    ].filter(Boolean);
+    var NAMES = ['5+1 Karton', 'Probierpakete', 'Maschinen'];
+    return '<section class="hero" aria-roledescription="Karussell" aria-label="Aktionen"><div class="hs" id="hs">' + slides.map(function (s, i) { return '<div class="hs-slide" id="hs-' + i + '" role="group" aria-roledescription="Folie" aria-label="' + (i + 1) + ' von ' + slides.length + ': ' + NAMES[i] + '"><div class="wrap hero-in">' + s + '</div></div>'; }).join('') + '</div>' +
+      (slides.length > 1 ? '<div class="wrap hs-nav"><button class="hs-arrow" data-act="hs" data-d="-1" aria-label="Vorherige Aktion">‹</button>' + slides.map(function (s, i) { return '<button class="hs-dot' + (i === 0 ? ' on' : '') + '" data-act="hs" data-i="' + i + '" aria-label="Aktion ' + (i + 1) + ': ' + NAMES[i] + '"><span>' + NAMES[i] + '</span></button>'; }).join('') + '<button class="hs-arrow" data-act="hs" data-d="1" aria-label="Nächste Aktion">›</button></div>' : '') + '</section>' +
 
       '<section class="sec first"><div class="wrap"><div class="sec-head"><div><h2>Die Bestseller</h2><p>Was unsere Kundinnen und Kunden am häufigsten nachbestellen.</p></div><a class="link" href="#/kaffee">Alle ' + WU.coffees.length + ' Kaffees</a></div>' +
       '<div class="rail">' + WU.coffees.slice(0, 8).map(card).join('') + '</div></div></section>' +
@@ -227,8 +235,9 @@
 
       keep('home-seo', function () { return WU.SC.home && WU.SC.home.html ? '<section class="seo"><div class="wrap"><div class="rich seo-text">' + WU.SC.home.html + '</div></div></section>' : ''; }) +
 
-      '<section class="strip" aria-label="Eindrücke aus Geschäft und Werkstatt">' + ['ScrollingBoxes3.png', 'ScrollingBoxes1.png', 'duotone_26.png', 'ScrollingBoxes2.png', 'duotone_30.png'].map(function (n) { return '<img src="' + WU.IMG(n) + '" alt="" loading="lazy" width="600" height="600">'; }).join('') + '</section>';
+      strip();
   }
+  function strip() { return '<section class="strip" aria-label="Eindrücke aus Geschäft und Werkstatt">' + ['ScrollingBoxes3.png', 'ScrollingBoxes1.png', 'duotone_26.png', 'ScrollingBoxes2.png', 'duotone_30.png'].map(function (n) { return '<img src="' + WU.IMG(n) + '" alt="" loading="lazy" width="600" height="600">'; }).join('') + '</section>'; }
   function faq(q, a) { return '<details><summary>' + esc(q) + '</summary><p>' + esc(a) + '</p></details>'; }
 
   /* ---------- Kaffee-Übersicht ---------- */
@@ -414,7 +423,7 @@
       bullets(p) + acc +
       (p.kd ? '' : '<div class="pdp-text rich" id="full">' + ((WU.BODY && WU.BODY[p.handle]) || (p.text ? '<h2>Beschreibung</h2><p>' + esc(p.text) + '</p>' : '')) + '</div>') +
       more(p) + '</div></div>' +
-      '<section class="usp-band"><div class="wrap">' + uspBar() + '</div></section>' + pdpStatic(p) + similar(p) +
+      '<section class="usp-band"><div class="wrap">' + uspBar() + '</div></section>' + pdpStatic(p) + similar(p) + strip() +
       '<div class="sticky-buy"><span class="price">' + eur(v.price) + '</span><button class="btn" data-act="add-pdp">' + label + '</button></div>';
   }
 
@@ -699,6 +708,7 @@
     else if (act === 'cart-open') openCart();
     else if (act === 'cart-close') closeCart();
     else if (act === 'checkout') track('begin_checkout', totals().count + ' Artikel');
+    else if (act === 'hs') { var hs = document.getElementById('hs'); if (hs) { var n = hs.children.length, curI = Math.round(hs.scrollLeft / hs.clientWidth), to = d.i != null ? Number(d.i) : (curI + Number(d.d) + n) % n; hs.scrollTo({ left: to * hs.clientWidth, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); track('hero_slide', String(to + 1)); } }
     else if (act === 'f-vendor') { filt.vendor = d.v; route(); track('filter_use', 'Rösterei ' + (d.v || 'alle')); }
     else if (act === 'f-taste') { filt.taste = filt.taste === d.v ? '' : d.v; route(); track('filter_use', 'Geschmack ' + d.v); }
     else if (act === 'f-type') { filt.type = d.v; route(); }
@@ -738,5 +748,6 @@
   try { var qv = new URLSearchParams(location.search).get('roesterei'); if (qv) filt.vendor = qv; } catch (e) {}
   var preFull = document.getElementById('full'), preHandle = (/^#\/p\/(.+)/.exec(cur()) || [])[1];
   if (preFull && preHandle) { WU.BODY = WU.BODY || {}; if (!WU.BODY[preHandle]) WU.BODY[preHandle] = preFull.innerHTML; }
+  document.addEventListener('scroll', function (ev) { var hs = ev.target; if (!hs || hs.id !== 'hs') return; var i = Math.round(hs.scrollLeft / hs.clientWidth); Array.prototype.forEach.call(document.querySelectorAll('.hs-dot'), function (b, k) { b.classList.toggle('on', k === i); }); }, true);
   renderCart(); route(true);
 })();
