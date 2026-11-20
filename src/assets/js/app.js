@@ -205,7 +205,7 @@
       '<li>' + ico('chat') + '<div><b>Persönliche Einschulung</b><span>Im Store, per Telefon oder Videocall</span></div></li>' +
       '<li>' + ico('cup') + '<div><b>Frisch aus Italien</b><span>Mehrmals im Jahr nachbestellt</span></div></li></ul></div></section>' + brands() +
 
-      '<section class="sec" style="padding-top:0"><div class="wrap"><div class="cats">' +
+      '<section class="sec cats-sec"><div class="wrap"><div class="cats">' +
       '<a class="cat dark" href="#/kaffee"><img src="' + WU.IMG('Kaffee.png') + '" alt=""><h3>Kaffee</h3><span>' + WU.coffees.length + ' Röstungen in der 1-kg-Packung</span></a>' +
       '<a class="cat" href="#/maschinen"><img src="' + WU.IMG('Kaffeemaschinen.png') + '" alt=""><h3>Espressomaschinen</h3><span>Einkreiser bis Hebelmaschine</span></a>' +
       '<a class="cat" href="#/maschinen"><img src="' + WU.IMG('Zubehoer.png') + '" alt=""><h3>Mühlen &amp; Sets</h3><span>Im Set 7 % sparen</span></a>' +
@@ -364,7 +364,7 @@
       : KT.indexOf(p.type) >= 0 ? WU.others.filter(function (o) { return o.handle !== p.handle && KT.indexOf(o.type) >= 0; }).sort(function (a, b) { return (b.vendor === p.vendor) - (a.vendor === p.vendor) || (b.type === p.type) - (a.type === p.type); }).slice(0, 4)
       : WU.others.filter(function (o) { return o.handle !== p.handle && (p.kind === 'maschine' ? o.kind === 'muehle' || o.kind === 'set' : o.kind === p.kind || o.kind === 'maschine'); }).slice(0, 4);
     if (!list.length) return '';
-    return '<div class="wrap" style="padding-bottom:64px"><h2>Empfehlungen für dich</h2><p style="margin:6px 0 20px;color:var(--mut)">Das Beste aus Italien. <b style="color:var(--ink)">Immer frisch!</b></p><div class="grid">' + list.map(card).join('') + '</div></div>';
+    return '<div class="wrap recs"><h2>Empfehlungen für dich</h2><p style="margin:8px 0 24px;color:var(--mut)">Das Beste aus Italien. <b style="color:var(--ink)">Immer frisch!</b></p><div class="grid">' + list.map(card).join('') + '</div></div>';
   }
   /* Vollständige Beschreibung und alle Bilder live aus dem Shop (Netlify Function) */
   var fullCache = {};

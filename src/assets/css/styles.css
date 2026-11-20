@@ -915,3 +915,10 @@ a.rate{margin-top:10px;min-height:32px}a.rate span:last-child{text-decoration:un
   .mcontact .mh{margin:0;font-size:.875rem}
 }
 .mrow > summary::after,.mrow > summary::before{content:none!important;display:none}
+
+/* Abstände: Überschriften nicht an die Vorsektion kleben lassen */
+.recs{padding-top:clamp(40px,6vw,72px);padding-bottom:clamp(48px,6vw,72px)}
+.cats-sec{padding-top:clamp(32px,5vw,56px)}
+#pdp-static .rev-more{margin-top:20px}
+#pdp-static .sec:last-child{padding-bottom:clamp(40px,6vw,72px)}
+.ph-list + .wrap{padding-top:12px}
